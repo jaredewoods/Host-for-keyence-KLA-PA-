@@ -43,10 +43,10 @@ class MainWindow(tk.Tk):
 
     def initialize_status_flags(self):
         self.flags = {
-            'serial_port': False,
             'serial_connection': False,
-            'tcp_socket': False,
             'tcp_connection': False,
+            'status_3': False,
+            'status_4': False,
             'system_busy': False
         }
 
@@ -64,7 +64,7 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('prevCamera', self.tcp_service.prev_camera)
         self.dispatcher.register_event('nextCamera', self.tcp_service.next_camera)
         self.dispatcher.register_event('sendCustomTCP', self.tcp_service.send_custom_tcp)
-        self.dispatcher.register_event('connectTCP', self.tcp_service.connect)
+        self.dispatcher.register_event('connectTCP', self.tcp_service.connect_tcp_socket)
         self.dispatcher.register_event('disconnectTCP', self.tcp_service.close_tcp_socket)
 
         self.dispatcher.register_event('stopSequence', self.macro_service.stop_sequence)
@@ -86,6 +86,10 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('updateDisplayWindow', self.display_window.update_display_window)
 
         self.dispatcher.register_event('updateStatus', self.status_service.check_status)
+        self.dispatcher.register_event('serialConnectionTrue', self.status_service.set_serial_connection_true)
+        self.dispatcher.register_event('serialConnectionFalse', self.status_service.set_serial_connection_false)
+        self.dispatcher.register_event('tcpConnectionTrue', self.status_service.set_tcp_connection_true)
+        self.dispatcher.register_event('tcpConnectionFalse', self.status_service.set_tcp_connection_false)
 
         self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
         self.dispatcher.register_event('quitApplication', self.quit_application)

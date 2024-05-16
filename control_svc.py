@@ -1,7 +1,6 @@
-import serial
-import socket
 import datetime
-import tkinter as tk
+import socket
+import serial
 
 
 class SerialService:
@@ -64,7 +63,7 @@ class TCPService:
         self.dispatcher = dispatcher
         self.socket = None
 
-    def connect(self, ip_address, port, timeout=5.0):
+    def connect_tcp_socket(self, ip_address, port, timeout=5.0):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
@@ -115,7 +114,8 @@ class TCPService:
     def get_custom_serial_command(self):
         pass
 
-    def send_custom_tcp(self, command):
+    @staticmethod
+    def send_custom_tcp(command):
         print(f"Sending tcp command: {command}")
 
 
@@ -196,6 +196,22 @@ class StatusService:
     def __init__(self, main_window):
         self.main_window = main_window
         self.check_status()
+
+    @staticmethod
+    def set_serial_connection_true():
+        print("Setting serial connection true")
+
+    @staticmethod
+    def set_serial_connection_false():
+        print("Setting serial connection false")
+
+    @staticmethod
+    def set_tcp_connection_true():
+        print("Setting TCP connection true")
+
+    @staticmethod
+    def set_tcp_connection_false():
+        print("Setting TCP connection false")
 
     def check_status(self):
         self.main_window.flags['serial_port'] = self.check_serial_port()
