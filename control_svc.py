@@ -25,6 +25,7 @@ class SerialService:
     def connect_serial_port(self, serial_port):
         self.serial_port = serial.Serial(serial_port, self.baud_rate)
         print(f"Connected to {self.serial_port} at {self.baud_rate} baud.")
+        self.dispatcher.emit('serialConnectionTrue')
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
