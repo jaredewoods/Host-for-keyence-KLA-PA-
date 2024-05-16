@@ -168,11 +168,11 @@ class ConnectionStatusFrame(ttk.Frame):
         self.var = tk.StringVar()
 
         self.var_serial_connection = tk.BooleanVar(value=False)
-        self.chk_serial_connection = ttk.Checkbutton(self, text="  serial connection", variable=self.var_serial_connection, command=None, state='disabled')
+        self.chk_serial_connection = ttk.Checkbutton(self, text="  serial connection", variable=self.var_serial_connection, command=None)
         self.chk_serial_connection.grid(row=0, column=0, sticky="w", padx=10)
 
         self.var_tcp_connection = tk.BooleanVar(value=False)
-        self.chk_tcp_connection = ttk.Checkbutton(self, text="  tcp connection", variable=self.var_tcp_connection, command=None, state='disabled')
+        self.chk_tcp_connection = ttk.Checkbutton(self, text="  tcp connection", variable=self.var_tcp_connection, command=None)
         self.chk_tcp_connection.grid(row=1, column=0, sticky="w", padx=10)
 
         self.var_status_3 = tk.BooleanVar(value=False)
@@ -184,7 +184,7 @@ class ConnectionStatusFrame(ttk.Frame):
         self.chk_status_4.grid(row=3, column=0, sticky="w", padx=10)
 
         self.var_system_busy = tk.BooleanVar(value=False)
-        self.chk_system_busy = ttk.Checkbutton(self, text="  system busy", variable=self.var_system_busy, command=None, state='disabled')
+        self.chk_system_busy = ttk.Checkbutton(self, text="  system busy", variable=self.var_system_busy, command=None)
         self.chk_system_busy.grid(row=4, column=0, sticky="w", padx=10)
 
 
