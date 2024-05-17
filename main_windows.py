@@ -4,10 +4,8 @@ import sys
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk, scrolledtext
-
 import serial
 import serial.tools.list_ports
-
 from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame
 from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
@@ -29,6 +27,7 @@ class MainWindow(tk.Tk):
         self.create_control_frames()
         self.create_log_frame()
         self.register_events()
+        self.configure_grid()
         print("MainWindow initialized")
 
     def register_events(self):
@@ -69,6 +68,12 @@ class MainWindow(tk.Tk):
         print(f"Available Ports: {ports}")
         self.available_ports = ports
         return ports
+
+    def configure_grid(self):
+        # Configuring the grid to resize
+        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(1, weight=1)  # Makes column 1 resizable
+        self.grid_rowconfigure(0, weight=1)     # Makes row 0 resizable
 
     def create_control_frames(self):
         print("Creating Control Frames")
