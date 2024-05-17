@@ -121,8 +121,8 @@ class TCPService:
 
 
 class MacroService:
-    def __init__(self):
-        self.data = []
+    def __init__(self, dispatcher=None):
+        self.dispatcher = dispatcher
 
     @staticmethod
     def start_sequence():
@@ -147,13 +147,3 @@ class MacroService:
     @staticmethod
     def reset_sequence():
         print("Resetting sequence")
-
-
-class DisplayService:
-    def __init__(self, dispatcher=None):
-        self.dispatcher = dispatcher
-
-
-class ConnectionStatusService:
-    def __init__(self, dispatcher=None):
-        self.dispatcher = dispatcher

@@ -1,18 +1,13 @@
 import sys
 import tkinter as tk
-from tkinter import ttk, StringVar
+from tkinter import ttk
 
 import serial
 import serial.tools.list_ports
 
 from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame
-from control_services import SerialService, TCPService, MacroService, DisplayService, ConnectionStatusService
-from utils.event_dispatcher import EventDispatcher
-
-# TODO: make the display frame work
-# TODO: organize macro and individual commands
-# TODO: add functionality to status_frame
-# TODO: add functionality to display control
+from control_services import SerialService, TCPService, MacroService
+from event_dispatcher import EventDispatcher
 
 
 class MainWindow(tk.Tk):
@@ -20,20 +15,12 @@ class MainWindow(tk.Tk):
         super().__init__()
         print("Initializing MainWindow")
         self.title("Prealigner Vision Repeatability Test")
-        self.log_frame = None
-        self.lbl_title = None
-        self.ntb_log_control = None
-        self.ntb_log = None
-        self.ntb_status = None
         self.ntb_control = None
         self.available_ports = []
         self.dispatcher = EventDispatcher()
-        self.serial_connection = StringVar()
         self.serial_service = SerialService(dispatcher=self.dispatcher)
         self.tcp_service = TCPService(dispatcher=self.dispatcher)
-        self.macro_service = MacroService()
-        self.log_service = DisplayService(dispatcher=self.dispatcher)
-        self.connection_status_service = ConnectionStatusService(dispatcher=self.dispatcher)
+        self.macro_service = MacroService(dispatcher=self.dispatcher)
         self.scan_com_ports()
         self.create_control_frames()
         self.register_events()
