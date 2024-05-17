@@ -1,3 +1,8 @@
+# event_dispatcher.py
+
+import logging
+
+
 class EventDispatcher:
     def __init__(self):
         self.handlers = {}
@@ -10,5 +15,6 @@ class EventDispatcher:
 
     def emit(self, event_name, *args, **kwargs):
         print(f'Emitting event: {event_name}')
+
         for handler in self.handlers.get(event_name, []):
             handler(*args, **kwargs)

@@ -1,6 +1,9 @@
+# main_window.py
+
 import sys
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, scrolledtext
+from datetime import datetime
 
 import serial
 import serial.tools.list_ports
@@ -13,6 +16,7 @@ from event_dispatcher import EventDispatcher
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.log_display = None
         print("Initializing MainWindow")
         self.title("Prealigner Vision Repeatability Test")
         self.ntb_control = None
@@ -22,7 +26,9 @@ class MainWindow(tk.Tk):
         self.tcp_service = TCPService(dispatcher=self.dispatcher)
         self.macro_service = MacroService(dispatcher=self.dispatcher)
         self.scan_com_ports()
+        # logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.create_control_frames()
+        self.create_log_frame()
         self.register_events()
         print("MainWindow initialized")
 
@@ -50,6 +56,8 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
         self.dispatcher.register_event('pauseSequence', self.macro_service.pause_sequence)
         self.dispatcher.register_event('continueSequence', self.macro_service.run_sequence)
+
+        self.dispatcher.register_event('logData', self.log_to_display)
 
         self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
         self.dispatcher.register_event('quitApplication', self.quit_application)
@@ -82,6 +90,19 @@ class MainWindow(tk.Tk):
         tcp_control.pack(fill=tk.BOTH, expand=True)
         self.ntb_control.add(tcp_control_tab, text="   TCP   ")
         print("Control Frames created.")
+
+    def create_log_frame(self):
+
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60, height=10)
+        self.log_display.grid(row=0, column=1, sticky="nsew", padx=10, pady=5)
+
+    def log_to_display(self, message, source, direction):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"[{timestamp}] ({direction}) {source}: {message}"
+        self.log_display.insert(tk.END, f"{log_message}\n")
+        self.log_display.see(tk.END)
+
+
 
     @staticmethod
     def quit_application():

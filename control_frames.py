@@ -1,7 +1,7 @@
+# control_frame.py
+
 import tkinter as tk
 from tkinter import ttk
-
-# TODO: change Quit to Pause
 
 
 class SerialControlFrame(ttk.Frame):
@@ -62,7 +62,7 @@ class TCPControlFrame(ttk.Frame):
         self.lbl_ip_address = ttk.Label(self, text="IP Address")
         self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=5)
 
-        self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
+        self.txt_ip_address_default = tk.StringVar(value="192.168.80.1")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
         self.ent_ip_address.grid(row=1, column=0, padx=5)
 

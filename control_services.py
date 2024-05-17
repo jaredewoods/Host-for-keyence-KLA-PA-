@@ -1,5 +1,6 @@
-import socket
+# control_services.py
 
+import socket
 import serial
 
 
@@ -16,19 +17,23 @@ class SerialService:
         }
 
     def send_serial_command(self, command):
+
         if self.serial_port.is_open:
-            self.dispatcher.emit('logData', command, 'Serial', 'Sent')
+            self.dispatcher.emit('logData', command, "serial port", 'sent')
             self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         else:
+            self.dispatcher.emit('logData', "Serial port not open", self.serial_port, 'error')
             print("Serial port is not open")
 
     def connect_serial_port(self, serial_port):
         self.serial_port = serial.Serial(serial_port, self.baud_rate)
-        print(f"Connected to {self.serial_port} at {self.baud_rate} baud.")
+        self.dispatcher.emit('logData', f"Opened {serial_port} at {self.baud_rate} baud.", "serial port", 'opened')
+        print(f"Connected to {self.serial_port}.")
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
+            self.dispatcher.emit('logData', f"Closed {serial_port} at {self.baud_rate} baud.", "serial port", 'closed')
             print(f"Disconnected from {serial_port}")
 
 # COMMANDS
@@ -68,9 +73,11 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
+            self.dispatcher.emit('logData', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
             print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
+            self.dispatcher.emit('logData', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
 
@@ -78,16 +85,20 @@ class TCPService:
         if self.socket:
             self.socket.close()
             self.socket = None
+            self.dispatcher.emit('logData', f"Close {ip_address}:{port}", 'tcp', 'closed')
             print(f"Disconnected from {ip_address}:{port}")
 
     def send_data(self, data):
         if self.socket:
             try:
                 self.socket.sendall(data.encode('utf-8'))
+                self.dispatcher.emit('logData', f"Data sent {data}", 'tcp', 'sent')
                 print(f"Data sent: {data}")
             except socket.error as e:
+                self.dispatcher.emit('logData', f"Data send failed", 'tcp', 'error')
                 print(f"Failed to send data: {e}")
         else:
+            self.dispatcher.emit('logData', f"TCP not connected", 'tcp', 'error')
             print("No active connection to send data.")
 
 # COMMANDS
