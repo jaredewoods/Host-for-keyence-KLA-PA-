@@ -71,7 +71,7 @@ class MainWindow(tk.Tk):
 
     def configure_grid(self):
         # Configuring the grid to resize
-        self.grid_columnconfigure(0, weight=0)
+        self.grid_columnconfigure(0, weight=0)  # Makes column 0 resizable
         self.grid_columnconfigure(1, weight=1)  # Makes column 1 resizable
         self.grid_rowconfigure(0, weight=1)     # Makes row 0 resizable
 
