@@ -26,13 +26,11 @@ class SerialService:
     def connect_serial_port(self, serial_port):
         self.serial_port = serial.Serial(serial_port, self.baud_rate)
         print(f"Connected to {self.serial_port} at {self.baud_rate} baud.")
-        self.dispatcher.emit('serialConnectionTrue')
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
             print(f"Disconnected from {serial_port}")
-        self.dispatcher.emit('serialConnectionFalse')
 
 # COMMANDS
     def move_to_ready_station(self):
@@ -154,108 +152,8 @@ class MacroService:
 class DisplayService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
-        self.log_file_path = "application.log"
-        self.data_to_log = None
-
-    @staticmethod
-    def get_timestamp():
-        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    def log_data(self, command, communication_protocol, direction):
-        self.data_to_log = f"{DisplayService.get_timestamp()} {communication_protocol} {direction} {command}"
-        print(f"emitting updateLogDisplay: {self.data_to_log}")
-        self.dispatcher.emit('updateLogDisplay', self.data_to_log)
-
-    @staticmethod
-    def export_log():
-        print("Exporting log file...")
-
-    @staticmethod
-    def display_sent():
-        print("Sent messages toggled")
-
-    @staticmethod
-    def display_received():
-        print("Received messages toggled")
-
-    @staticmethod
-    def display_timestamp():
-        print("Timestamp toggled")
-
-    @staticmethod
-    def display_tcp_communication():
-        print("TCP communication toggled")
-
-    @staticmethod
-    def display_serial_communication():
-        print("Serial communication toggled")
-
-    @staticmethod
-    def display_auto_scroll():
-        print("Auto scroll toggled")
 
 
 class ConnectionStatusService:
-    def __init__(self, main_window, dispatcher=None):
-        self.main_window = main_window
+    def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
-
-    def update_connection_status_label(self, str_var, connection):
-        print("updating connection status label")
-        if connection:
-            str_var.set("Connected")
-        else:
-            str_var.set("Disconnected")
-        print(str_var.get())
-
-    def set_serial_connection_true(self):
-        self.main_window.serial_connection.set("True")
-        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, True)
-        self.main_window.flags['serial_connection'] = True
-        print("Setting serial connection true")
-
-    def set_serial_connection_false(self):
-        self.main_window.serial_connection.set("False")
-        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, False)
-        self.main_window.flags['serial_connection'] = False
-        print("Setting serial connection false")
-
-    def set_tcp_connection_true(self):
-        self.main_window.tcp_connection.set("True")
-        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, True)
-        self.main_window.flags['tcp_connection'] = True
-        print("Setting TCP connection true")
-
-    def set_tcp_connection_false(self):
-        self.main_window.tcp_connection.set("False")
-        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, False)
-        self.main_window.flags['tcp_connection'] = False
-        print("Setting TCP connection false")
-
-    def check_status(self):
-        print("Serial Connection check result: ", self.main_window.flags['serial_connection'])
-        print("TCP Connection check result: ", self.main_window.flags['tcp_connection'])
-        self.main_window.flags['system_busy'] = self.check_system_busy()
-        print("System Busy check result: ", self.main_window.flags['system_busy'])
-
-
-
-    @staticmethod
-    def check_serial_port():
-        return True
-
-    @staticmethod
-    def check_serial_connection():
-        return True
-
-    @staticmethod
-    def check_tcp_socket():
-        return True
-
-    @staticmethod
-    def check_tcp_connection():
-        return False
-
-    @staticmethod
-    def check_system_busy():
-        return False
