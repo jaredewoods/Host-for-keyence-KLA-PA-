@@ -211,21 +211,25 @@ class ConnectionStatusService:
     def set_serial_connection_true(self):
         self.main_window.serial_connection.set("True")
         self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, True)
+        self.main_window.flags['serial_connection'] = True
         print("Setting serial connection true")
 
     def set_serial_connection_false(self):
         self.main_window.serial_connection.set("False")
         self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, False)
+        self.main_window.flags['serial_connection'] = False
         print("Setting serial connection false")
 
     def set_tcp_connection_true(self):
         self.main_window.tcp_connection.set("True")
         self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, True)
+        self.main_window.flags['tcp_connection'] = True
         print("Setting TCP connection true")
 
     def set_tcp_connection_false(self):
         self.main_window.tcp_connection.set("False")
         self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, False)
+        self.main_window.flags['tcp_connection'] = False
         print("Setting TCP connection false")
 
     def check_status(self):
@@ -233,6 +237,8 @@ class ConnectionStatusService:
         print("TCP Connection check result: ", self.main_window.flags['tcp_connection'])
         self.main_window.flags['system_busy'] = self.check_system_busy()
         print("System Busy check result: ", self.main_window.flags['system_busy'])
+
+
 
     @staticmethod
     def check_serial_port():

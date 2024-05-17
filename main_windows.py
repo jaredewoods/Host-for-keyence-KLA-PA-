@@ -1,6 +1,6 @@
 import sys
 import tkinter as tk
-from tkinter import ttk,StringVar
+from tkinter import ttk, StringVar
 
 import serial
 import serial.tools.list_ports
@@ -134,9 +134,6 @@ class MainWindow(tk.Tk):
         self.ntb_log.add(log_tab, text="Log")
 
     def create_connection_status_window(self):
-        #  self.lbl_title = ttk.Label(self, text="Vision Repeatability Host", foreground='dark gray')
-        #  self.lbl_title.grid(row=2, column=0, sticky="", padx=5, pady=10)
-
         self.ntb_status = ttk.Notebook(self)
         self.ntb_status.grid(row=1, column=0, sticky='', padx=10, pady=0)
 
@@ -156,7 +153,7 @@ class MainWindow(tk.Tk):
 
 
 class DisplayWindow(ttk.Frame):
-    def __init__(self, master=None,dispatcher=None):
+    def __init__(self, master=None, dispatcher=None):
         super().__init__(master)
 
         self.dispatcher = dispatcher
@@ -181,7 +178,6 @@ class ConnectionStatusWindow(ttk.Frame):
 
         self.serial_connection = tk.StringVar()
         self.serial_connection.set('Not Connected')
-        print("am I repeating")
         self.lbl_serial_connection = ttk.Label(self, textvariable=self.serial_connection)
         self.lbl_serial_connection.grid(row=0, column=0, sticky="", padx=10)
 
@@ -196,11 +192,11 @@ class ConnectionStatusWindow(ttk.Frame):
         self.lbl_status_4 = ttk.Label(self, text="status 4", state='disabled')
         self.lbl_status_4.grid(row=3, column=0, sticky="", padx=10)
 
-        self.lbl_system_busy = ttk.Label(self, text="  system busy", state='disabled')
+        self.lbl_system_busy = ttk.Label(self, text="system busy", state='disabled')
         self.lbl_system_busy.grid(row=4, column=0, sticky="", padx=10)
+
 
 
 if __name__ == "__main__":
     main_window = MainWindow()
     main_window.mainloop()
-
