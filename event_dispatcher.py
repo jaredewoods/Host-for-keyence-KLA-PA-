@@ -1,7 +1,5 @@
 # event_dispatcher.py
 
-import logging
-
 
 class EventDispatcher:
     def __init__(self):

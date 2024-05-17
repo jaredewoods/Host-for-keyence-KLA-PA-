@@ -1,13 +1,19 @@
 # control_services.py
 
 import socket
+import threading
+from datetime import datetime
+from tkinter import messagebox
+
 import serial
 
 
 class SerialService:
     def __init__(self, dispatcher=None):
+        self.read_thread = None
         self.dispatcher = dispatcher
         self.serial_port = None
+        self.serial_port_name = None
         self.baud_rate = 9600
         self.commands = {
             'MTRS': '$2MTRSG100ALDD',
@@ -16,24 +22,65 @@ class SerialService:
             'HRST': '$1HRST72',
         }
 
-    def send_serial_command(self, command):
+    @staticmethod
+    def get_timestamp():
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        if self.serial_port.is_open:
-            self.dispatcher.emit('logData', command, "serial port", 'sent')
-            self.serial_port.write(f"{command}\r\n".encode('utf-8'))
-        else:
-            self.dispatcher.emit('logData', "Serial port not open", self.serial_port, 'error')
-            print("Serial port is not open")
+    def read_from_port(self, serial_port):
+        self.serial_port = serial_port
+        print(f"Reading from {self.serial_port}.")
+        print(f"[{self.get_timestamp()}] Started thread for reading from port.")
+        while self.serial_port and self.serial_port.is_open:
+            message = self.serial_port.readline().decode('utf-8').strip()
+            if message:
+
+                self.dispatcher.emit('logData', f"Received: {message}", self.serial_port_name,
+                                     'received')
+
+    def stop_reading(self):
+        if self.read_thread.is_alive():
+            self.read_thread.join()
+
+    def send_serial_command(self, command):
+        self.dispatcher.emit('logData', f"Sent: {command}", self.serial_port_name, 'sent')
+        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
 
     def connect_serial_port(self, serial_port):
-        self.serial_port = serial.Serial(serial_port, self.baud_rate)
-        self.dispatcher.emit('logData', f"Opened {serial_port} at {self.baud_rate} baud.", "serial port", 'opened')
-        print(f"Connected to {self.serial_port}.")
+        self.serial_port_name = serial_port
+        # Close the previous connection if it exists
+        if self.serial_port and self.serial_port.is_open:
+            self.close_serial_port(self.serial_port_name)  # Call the close method
+
+        try:
+            # Create a new serial connection with error handling
+            self.serial_port = serial.Serial(
+                self.serial_port_name,
+                self.baud_rate,
+                timeout=1,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS
+            )
+
+            # Emit log and start read thread
+            self.dispatcher.emit('logData', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
+            threading.Thread(
+                target=self.read_from_port, args=(self.serial_port,), daemon=True
+            ).start()
+            print(f"Serial port {self.serial_port_name} opened and read thread started.")
+
+        except serial.SerialException as e:
+            messagebox.showerror(
+                "Serial Port Error",
+                f"Failed to open serial port {self.serial_port_name}: {e}"
+            )
+            print(f"Failed to open serial port {self.serial_port_name}: {e}")
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
-            self.dispatcher.emit('logData', f"Closed {serial_port} at {self.baud_rate} baud.", "serial port", 'closed')
+            self.stop_reading()
+            self.dispatcher.emit('logData', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
             print(f"Disconnected from {serial_port}")
 
 # COMMANDS

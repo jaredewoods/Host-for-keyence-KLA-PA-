@@ -2,8 +2,8 @@
 
 import sys
 import tkinter as tk
-from tkinter import ttk, scrolledtext
 from datetime import datetime
+from tkinter import ttk, scrolledtext
 
 import serial
 import serial.tools.list_ports
@@ -26,7 +26,6 @@ class MainWindow(tk.Tk):
         self.tcp_service = TCPService(dispatcher=self.dispatcher)
         self.macro_service = MacroService(dispatcher=self.dispatcher)
         self.scan_com_ports()
-        # logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.create_control_frames()
         self.create_log_frame()
         self.register_events()
@@ -58,6 +57,7 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('continueSequence', self.macro_service.run_sequence)
 
         self.dispatcher.register_event('logData', self.log_to_display)
+        self.dispatcher.register_event('receivedData', self.log_to_display)
 
         self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
         self.dispatcher.register_event('quitApplication', self.quit_application)
@@ -92,17 +92,14 @@ class MainWindow(tk.Tk):
         print("Control Frames created.")
 
     def create_log_frame(self):
-
         self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60, height=10)
         self.log_display.grid(row=0, column=1, sticky="nsew", padx=10, pady=5)
 
     def log_to_display(self, message, source, direction):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log_message = f"[{timestamp}] ({direction}) {source}: {message}"
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_message = f"[{timestamp}] {source} {message}"
         self.log_display.insert(tk.END, f"{log_message}\n")
         self.log_display.see(tk.END)
-
-
 
     @staticmethod
     def quit_application():
