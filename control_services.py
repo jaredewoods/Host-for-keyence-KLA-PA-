@@ -1,6 +1,5 @@
-
-import datetime
 import socket
+
 import serial
 
 
