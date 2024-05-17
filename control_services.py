@@ -32,6 +32,7 @@ class SerialService:
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
             print(f"Disconnected from {serial_port}")
+        self.dispatcher.emit('serialConnectionFalse')
 
 # COMMANDS
     def move_to_ready_station(self):
@@ -194,40 +195,42 @@ class DisplayService:
         print("Auto scroll toggled")
 
 
-class StatusService:
-    def __init__(self, main_window):
+class ConnectionStatusService:
+    def __init__(self, main_window, dispatcher=None):
         self.main_window = main_window
-        self.check_status()
+        self.dispatcher = dispatcher
 
-    @staticmethod
-    def set_serial_connection_true():
+    def update_connection_status_label(self, str_var, connection):
+        print("updating connection status label")
+        if connection:
+            str_var.set("Connected")
+        else:
+            str_var.set("Disconnected")
+        print(str_var.get())
+
+    def set_serial_connection_true(self):
+        self.main_window.serial_connection.set("True")
+        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, True)
         print("Setting serial connection true")
 
-    @staticmethod
-    def set_serial_connection_false():
+    def set_serial_connection_false(self):
+        self.main_window.serial_connection.set("False")
+        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.serial_connection, False)
         print("Setting serial connection false")
 
-    @staticmethod
-    def set_tcp_connection_true():
+    def set_tcp_connection_true(self):
+        self.main_window.tcp_connection.set("True")
+        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, True)
         print("Setting TCP connection true")
 
-    @staticmethod
-    def set_tcp_connection_false():
+    def set_tcp_connection_false(self):
+        self.main_window.tcp_connection.set("False")
+        self.dispatcher.emit('updateConnectionStatusLabel', self.main_window.tcp_connection, False)
         print("Setting TCP connection false")
 
     def check_status(self):
-        self.main_window.flags['serial_port'] = self.check_serial_port()
-        print("Serial Port check result: ", self.main_window.flags['serial_port'])
-
-        self.main_window.flags['serial_connection'] = self.check_serial_connection()
         print("Serial Connection check result: ", self.main_window.flags['serial_connection'])
-
-        self.main_window.flags['tcp_socket'] = self.check_tcp_socket()
-        print("TCP Socket check result: ", self.main_window.flags['tcp_socket'])
-
-        self.main_window.flags['tcp_connection'] = self.check_tcp_connection()
         print("TCP Connection check result: ", self.main_window.flags['tcp_connection'])
-
         self.main_window.flags['system_busy'] = self.check_system_busy()
         print("System Busy check result: ", self.main_window.flags['system_busy'])
 

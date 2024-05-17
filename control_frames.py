@@ -160,28 +160,6 @@ class MacroControlFrame(ttk.Frame):
         self.btn_e_stop.grid(row=9, column=0, columnspan=2, padx=5, sticky='ew')
 
 
-class ConnectionStatusFrame(ttk.Frame):
-    def __init__(self, master=None, dispatcher=None):
-        super().__init__(master)
-
-        self.dispatcher = dispatcher
-
-        self.lbl_serial_connection = ttk.Label(self, text="serial connection", state='disabled')
-        self.lbl_serial_connection.grid(row=0, column=0, sticky="", padx=10)
-
-        self.lbl_tcp_connection = ttk.Label(self, text="tcp connection", state='disabled')
-        self.lbl_tcp_connection.grid(row=1, column=0, sticky="", padx=10)
-
-        self.lbl_status_3 = ttk.Label(self, text="status 3", state='disabled')
-        self.lbl_status_3.grid(row=2, column=0, sticky="", padx=10)
-
-        self.lbl_status_4 = ttk.Label(self, text="status 4", state='disabled')
-        self.lbl_status_4.grid(row=3, column=0, sticky="", padx=10)
-
-        self.lbl_system_busy = ttk.Label(self, text="  system busy", state='disabled')
-        self.lbl_system_busy.grid(row=4, column=0, sticky="", padx=10)
-
-
 class DisplayControlFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None):
         super().__init__(master)
