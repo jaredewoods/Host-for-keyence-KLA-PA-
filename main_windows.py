@@ -6,7 +6,7 @@ from datetime import datetime
 from tkinter import ttk, scrolledtext
 import serial
 import serial.tools.list_ports
-from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame
+from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
 from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
 
@@ -15,6 +15,12 @@ class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.log_display = None
+        self.serial_connected = False
+        self.tcp_connected = False
+        self.macro_running = False
+        self.total_cycles = 0
+        self.completed_cycles = 0
+
         print("Initializing MainWindow")
         self.title("Prealigner Vision Repeatability Test")
         self.ntb_control = None
@@ -26,6 +32,7 @@ class MainWindow(tk.Tk):
         self.scan_com_ports()
         self.create_control_frames()
         self.create_log_frame()
+        self.create_status_frame()
         self.register_events()
         self.configure_grid()
         print("MainWindow initialized")
@@ -62,6 +69,11 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('quitApplication', self.quit_application)
         self.dispatcher.register_event('emergencyStop', self.emergency_stop)
 
+        self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
+        self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
+        self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_running_status)
+        self.dispatcher.register_event('updateCycleCount', self.update_cycle_count)
+
     def scan_com_ports(self):
         print("Scanning Ports")
         ports = [port.device for port in serial.tools.list_ports.comports()]
@@ -70,15 +82,14 @@ class MainWindow(tk.Tk):
         return ports
 
     def configure_grid(self):
-        # Configuring the grid to resize
-        self.grid_columnconfigure(0, weight=0)  # Makes column 0 resizable
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)  # Makes column 1 resizable
         self.grid_rowconfigure(0, weight=1)     # Makes row 0 resizable
 
     def create_control_frames(self):
         print("Creating Control Frames")
         self.ntb_control = ttk.Notebook(self)
-        self.ntb_control.grid(row=0, column=0, sticky="n", padx=10, pady=5)
+        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=5)
 
         macro_control_tab = ttk.Frame(self.ntb_control)
         macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
@@ -98,13 +109,32 @@ class MainWindow(tk.Tk):
 
     def create_log_frame(self):
         self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60, height=10)
-        self.log_display.grid(row=0, column=1, sticky="nsew", padx=10, pady=5)
+        self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=10, pady=5)
+
+    def create_status_frame(self):
+        self.status_frame = StatusFrame(self, dispatcher=self.dispatcher)
+        self.status_frame.grid(row=1, column=0, sticky="", padx=10, pady=5)
 
     def log_to_display(self, message, source, direction):
         timestamp = datetime.now().strftime("%H:%M:%S")
         log_message = f"[{timestamp}] {source} {message}"
         self.log_display.insert(tk.END, f"{log_message}\n")
         self.log_display.see(tk.END)
+
+    def update_serial_connection_status(self, status):
+        self.serial_connected = status
+        self.dispatcher.emit('updateButtonStates')
+
+    def update_tcp_connection_status(self, status):
+        self.tcp_connected = status
+        self.dispatcher.emit('updateButtonStates')
+
+    def update_macro_running_status(self, status):
+        self.macro_running = status
+
+    def update_cycle_count(self, total, completed):
+        self.total_cycles = total
+        self.completed_cycles = completed
 
     @staticmethod
     def quit_application():

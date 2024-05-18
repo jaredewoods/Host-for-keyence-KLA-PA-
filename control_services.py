@@ -33,9 +33,7 @@ class SerialService:
         while self.serial_port and self.serial_port.is_open:
             message = self.serial_port.readline().decode('utf-8').strip()
             if message:
-
-                self.dispatcher.emit('logData', f"Received: {message}", self.serial_port_name,
-                                     'received')
+                self.dispatcher.emit('logData', f"Received: {message}", self.serial_port_name, 'received')
 
     def stop_reading(self):
         if self.read_thread.is_alive():
@@ -67,6 +65,7 @@ class SerialService:
             threading.Thread(
                 target=self.read_from_port, args=(self.serial_port,), daemon=True
             ).start()
+            self.dispatcher.emit('updateSerialConnectionStatus', True)
             print(f"Serial port {self.serial_port_name} opened and read thread started.")
 
         except serial.SerialException as e:
@@ -75,12 +74,14 @@ class SerialService:
                 f"Failed to open serial port {self.serial_port_name}: {e}"
             )
             print(f"Failed to open serial port {self.serial_port_name}: {e}")
+            self.dispatcher.emit('updateSerialConnectionStatus', False)
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
             self.stop_reading()
             self.dispatcher.emit('logData', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
+            self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
 # COMMANDS
@@ -121,10 +122,12 @@ class TCPService:
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
             self.dispatcher.emit('logData', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
+            self.dispatcher.emit('updateTCPConnectionStatus', True)
             print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
             self.dispatcher.emit('logData', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
+            self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
 
@@ -133,6 +136,7 @@ class TCPService:
             self.socket.close()
             self.socket = None
             self.dispatcher.emit('logData', f"Close {ip_address}:{port}", 'tcp', 'closed')
+            self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {ip_address}:{port}")
 
     def send_data(self, data):
@@ -180,18 +184,54 @@ class TCPService:
 class MacroService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
+        self.total_cycles = 0
+        self.completed_cycles = 0
+        self.current_step = 0
+        self.macro_running = False
 
-    @staticmethod
-    def start_sequence():
+    def start_sequence(self):
         print("Starting sequence")
+        if not (self.dispatcher.get('serial_connected') and self.dispatcher.get('tcp_connected')):
+            self.dispatcher.emit('logData', 'Cannot start sequence: Ensure Serial and TCP connections are active', 'macro', 'error')
+            return
+        self.total_cycles = int(self.dispatcher.get('total_cycles'))
+        self.completed_cycles = 0
+        self.current_step = 0
+        self.macro_running = True
+        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
+        self.next_step()
 
-    @staticmethod
-    def stop_sequence():
-        print("Stopping Sequence")
-
-    @staticmethod
-    def step_sequence():
+    def next_step(self):
+        if self.current_step == 0:
+            self.dispatcher.emit('moveToReadyStation')
+            self.dispatcher.register_event('responseReceived', self.handle_response_mtrs)
+        elif self.current_step == 1:
+            self.dispatcher.emit('alignWafer')
+            self.dispatcher.register_event('responseReceived', self.handle_response_maln)
         print("Stepping through sequence")
+
+    def handle_response_mtrs(self, message):
+        if message.startswith('@'):
+            self.current_step += 1
+            self.next_step()
+
+    def handle_response_maln(self, message):
+        if message.startswith('@'):
+            self.current_step += 1
+            self.dispatcher.after(3000, self.next_step)
+
+    def stop_sequence(self):
+        print("Stopping Sequence")
+        self.macro_running = False
+        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
+
+    def reset_sequence(self):
+        print("Resetting sequence")
+        self.stop_sequence()
+        self.total_cycles = 0
+        self.completed_cycles = 0
+        self.current_step = 0
+        self.dispatcher.emit('updateCycleCount', self.total_cycles, self.completed_cycles)
 
     @staticmethod
     def pause_sequence():
@@ -202,5 +242,5 @@ class MacroService:
         print("Running sequence")
 
     @staticmethod
-    def reset_sequence():
-        print("Resetting sequence")
+    def step_sequence():
+        print("not really stepping through sequence")

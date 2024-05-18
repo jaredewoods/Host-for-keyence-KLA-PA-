@@ -62,7 +62,7 @@ class TCPControlFrame(ttk.Frame):
         self.lbl_ip_address = ttk.Label(self, text="IP Address")
         self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=5)
 
-        self.txt_ip_address_default = tk.StringVar(value="192.168.80.1")
+        self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
         self.ent_ip_address.grid(row=1, column=0, padx=5)
 
@@ -109,6 +109,8 @@ class MacroControlFrame(ttk.Frame):
         super().__init__(master)
 
         self.dispatcher = dispatcher
+        self.serial_connected = False
+        self.tcp_connected = False
 
         self.lbl_total_cycles = ttk.Label(self, text="Total Cycles")
         self.lbl_total_cycles.grid(row=0, column=0, padx=5, pady=5)
@@ -126,13 +128,13 @@ class MacroControlFrame(ttk.Frame):
         self.macro_separator0 = ttk.Separator(self, orient='horizontal')
         self.macro_separator0.grid(row=2, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.btn_start = ttk.Button(self, text="Start", command=lambda: dispatcher.emit('startSequence'))
+        self.btn_start = ttk.Button(self, text="Start", state='disabled', command=lambda: dispatcher.emit('startSequence'))
         self.btn_start.grid(row=3, column=0, padx=5)
 
-        self.btn_stop = ttk.Button(self, text="Stop", command=lambda: dispatcher.emit('stopSequence'))
+        self.btn_stop = ttk.Button(self, text="Stop", state='normal', command=lambda: dispatcher.emit('stopSequence'))
         self.btn_stop.grid(row=3, column=1, padx=5)
 
-        self.btn_step = ttk.Button(self, text="Step", state='normal', command=lambda: dispatcher.emit('stepSequence'))
+        self.btn_step = ttk.Button(self, text="Step", state='disabled', command=lambda: dispatcher.emit('stepSequence'))
         self.btn_step.grid(row=4, column=0, padx=5)
 
         self.btn_reset = ttk.Button(self, text="Reset", state='normal', command=lambda: dispatcher.emit('resetSequence'))
@@ -158,3 +160,64 @@ class MacroControlFrame(ttk.Frame):
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
         self.btn_e_stop.grid(row=9, column=0, columnspan=2, padx=5, sticky='ew')
+
+        self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
+        self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
+
+    def update_serial_connection_status(self, status):
+        self.serial_connected = status
+        self.update_button_states()
+
+    def update_tcp_connection_status(self, status):
+        self.tcp_connected = status
+        self.update_button_states()
+
+    def update_button_states(self):
+        if self.serial_connected and self.tcp_connected:
+            self.btn_start.config(state='normal')
+            self.btn_step.config(state='normal')
+        else:
+            self.btn_start.config(state='disabled')
+            self.btn_step.config(state='disabled')
+
+
+class StatusFrame(ttk.Frame):
+    def __init__(self, master=None, dispatcher=None):
+        super().__init__(master)
+        self.dispatcher = dispatcher
+
+        # Create a LabelFrame to hold the status labels
+        self.status_label_frame = ttk.LabelFrame(self, text="")
+        self.status_label_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="new")
+
+        self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark red")
+        self.lbl_serial_status.grid(row=0, column=0, padx=20, pady=(10, 5))
+
+        self.lbl_tcp_status = ttk.Label(self.status_label_frame, text="TCP: Disconnected", foreground="dark red")
+        self.lbl_tcp_status.grid(row=1, column=0, padx=20, pady=(0, 5))
+
+        self.lbl_macro_status = ttk.Label(self.status_label_frame, text="Macro: Stopped", foreground="dark red")
+        self.lbl_macro_status.grid(row=2, column=0, padx=20, pady=(0, 10))
+
+        self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_status)
+        self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_status)
+        self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_status)
+
+    def update_serial_status(self, status):
+        if status:
+            self.lbl_serial_status.config(text="Serial: Connected", foreground="green")
+        else:
+            self.lbl_serial_status.config(text="Serial: Disconnected", foreground="red")
+
+    def update_tcp_status(self, status):
+        if status:
+            self.lbl_tcp_status.config(text="TCP: Connected", foreground="green")
+        else:
+            self.lbl_tcp_status.config(text="TCP: Disconnected", foreground="red")
+
+    def update_macro_status(self, status):
+        if status:
+            self.lbl_macro_status.config(text="Macro: Running", foreground="green")
+        else:
+            self.lbl_macro_status.config(text="Macro: Stopped", foreground="red")
+

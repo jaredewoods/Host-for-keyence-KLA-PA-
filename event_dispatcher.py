@@ -4,6 +4,7 @@
 class EventDispatcher:
     def __init__(self):
         self.handlers = {}
+        self.values = {}
 
     def register_event(self, event_name, handler):
         print(f'Registered event: {event_name}')
@@ -13,6 +14,11 @@ class EventDispatcher:
 
     def emit(self, event_name, *args, **kwargs):
         print(f'Emitting event: {event_name}')
-
         for handler in self.handlers.get(event_name, []):
             handler(*args, **kwargs)
+
+    def set(self, key, value):
+        self.values[key] = value
+
+    def get(self, key, default=None):
+        return self.values.get(key, default)
