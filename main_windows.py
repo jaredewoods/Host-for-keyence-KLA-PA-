@@ -89,7 +89,7 @@ class MainWindow(tk.Tk):
     def create_control_frames(self):
         print("Creating Control Frames")
         self.ntb_control = ttk.Notebook(self)
-        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 5))
+        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 0))
 
         macro_control_tab = ttk.Frame(self.ntb_control)
         macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
@@ -108,7 +108,7 @@ class MainWindow(tk.Tk):
         print("Control Frames created.")
 
     def create_log_frame(self):
-        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60, height=8)
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
         self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=10)
 
     def create_status_frame(self):
