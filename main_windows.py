@@ -94,17 +94,18 @@ class MainWindow(tk.Tk):
         macro_control_tab = ttk.Frame(self.ntb_control)
         macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
         macro_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(macro_control_tab, text="  Macro  ")
+        self.ntb_control.add(macro_control_tab, text="Macro")
 
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
         serial_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(serial_control_tab, text="  Serial  ")
+        self.ntb_control.add(serial_control_tab, text="Serial")
 
         tcp_control_tab = ttk.Frame(self.ntb_control)
         tcp_control = TCPControlFrame(tcp_control_tab, dispatcher=self.dispatcher)
         tcp_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(tcp_control_tab, text="   TCP   ")
+        self.ntb_control.add(tcp_control_tab, text="TCP")
+        self.ntb_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
         print("Control Frames created.")
 
     def create_log_frame(self):
@@ -144,6 +145,9 @@ class MainWindow(tk.Tk):
     @staticmethod
     def emergency_stop():
         print("Emergency Stop!")
+
+    def on_tab_change(self, event):
+        self.ntb_control.update_idletasks()
 
 
 if __name__ == "__main__":
