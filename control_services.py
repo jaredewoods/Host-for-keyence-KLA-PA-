@@ -191,10 +191,6 @@ class MacroService:
 
     def start_sequence(self):
         print("Starting sequence")
-        if not (self.dispatcher.get('serial_connected') and self.dispatcher.get('tcp_connected')):
-            self.dispatcher.emit('logData', 'Cannot start sequence: Ensure Serial and TCP connections are active', 'macro', 'error')
-            return
-        self.total_cycles = int(self.dispatcher.get('total_cycles'))
         self.completed_cycles = 0
         self.current_step = 0
         self.macro_running = True
@@ -208,6 +204,8 @@ class MacroService:
         elif self.current_step == 1:
             self.dispatcher.emit('alignWafer')
             self.dispatcher.register_event('responseReceived', self.handle_response_maln)
+        elif self.current_step == 2:
+            print("add other step in here")
         print("Stepping through sequence")
 
     def handle_response_mtrs(self, message):

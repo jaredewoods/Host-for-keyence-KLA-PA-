@@ -10,13 +10,13 @@ class SerialControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
 
-        self.lbl_com_port = ttk.Label(self, text="COM Port")
+        self.lbl_com_port = ttk.Label(self, text="COM PORT")
         self.lbl_com_port.grid(row=0, column=0, padx=5, pady=5)
 
         self.cbx_com_port = ttk.Combobox(self, width=7, values=available_ports)
         self.cbx_com_port.grid(row=1, column=0, pady=0, padx=5)
 
-        self.lbl_baudrate = ttk.Label(self, text="baud 9600")
+        self.lbl_baudrate = ttk.Label(self, text="BAUD 9600")
         self.lbl_baudrate.grid(row=0, column=1, padx=5, pady=5)
 
         self.btn_refresh = ttk.Button(self, text="Refresh", command=lambda: dispatcher.emit('scanForSerialPorts'))
@@ -68,10 +68,10 @@ class TCPControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
 
-        self.lbl_ip_address = ttk.Label(self, text="  IP Address")
+        self.lbl_ip_address = ttk.Label(self, text="  IP ADDRESS")
         self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=5)
 
-        self.lbl_ip_port = ttk.Label(self, text="          IP Port")
+        self.lbl_ip_port = ttk.Label(self, text="          IP PORT")
         self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=5)
 
         self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")

@@ -83,8 +83,8 @@ class MainWindow(tk.Tk):
 
     def configure_grid(self):
         self.grid_columnconfigure(0, weight=0)
-        self.grid_columnconfigure(1, weight=1)  # Makes column 1 resizable
-        self.grid_rowconfigure(0, weight=1)     # Makes row 0 resizable
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
     def create_control_frames(self):
         print("Creating Control Frames")
