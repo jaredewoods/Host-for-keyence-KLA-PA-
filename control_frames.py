@@ -28,11 +28,14 @@ class SerialControlFrame(ttk.Frame):
         self.btn_disconnect_serial = ttk.Button(self, text="Close", command=lambda: dispatcher.emit('closeSerialPort', self.cbx_com_port.get()))
         self.btn_disconnect_serial.grid(row=2, column=1, padx=5)
 
+        self.serial_separator0 = ttk.Separator(self, orient='horizontal')
+        self.serial_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+
         self.btn_mtrs = ttk.Button(self, text="MTRS", command=lambda: dispatcher.emit('moveToReadyStation'))
-        self.btn_mtrs.grid(row=4, column=0, padx=5, pady=5)
+        self.btn_mtrs.grid(row=4, column=0, padx=5, pady=0)
 
         self.btn_maln = ttk.Button(self, text="MALN", command=lambda: dispatcher.emit('alignWafer'))
-        self.btn_maln.grid(row=4, column=1, padx=5, pady=5)
+        self.btn_maln.grid(row=4, column=1, padx=5, pady=0)
 
         self.btn_csol = ttk.Button(self, text="CSOL", command=lambda: dispatcher.emit('toggleChuck'))
         self.btn_csol.grid(row=5, column=0, padx=5)
@@ -40,17 +43,23 @@ class SerialControlFrame(ttk.Frame):
         self.btn_hrst = ttk.Button(self, text="HRST", command=lambda: dispatcher.emit('hardwareReset'))
         self.btn_hrst.grid(row=5, column=1, padx=5)
 
+        self.serial_separator1 = ttk.Separator(self, orient='horizontal')
+        self.serial_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+
         self.ent_custom_serial = ttk.Entry(self)
-        self.ent_custom_serial.grid(row=6, column=0, columnspan=2, padx=5, sticky='ew', pady=5)
+        self.ent_custom_serial.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
 
         self.btn_custom_serial_send = ttk.Button(self, text="Send", command=lambda: dispatcher.emit('sendCustomSerial', self.ent_custom_serial.get()))
-        self.btn_custom_serial_send.grid(row=7, column=0, padx=5)
+        self.btn_custom_serial_send.grid(row=8, column=0, padx=5)
 
         self.btn_quit_application = ttk.Button(self, text="Quit", command=lambda: dispatcher.emit('quitApplication'))
-        self.btn_quit_application.grid(row=7, column=1, padx=5)
+        self.btn_quit_application.grid(row=8, column=1, padx=5)
+
+        self.serial_separator2 = ttk.Separator(self, orient='horizontal')
+        self.serial_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=9, column=0, columnspan=2, padx=5, sticky='ew', pady=5)
+        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
 
 
 class TCPControlFrame(ttk.Frame):
@@ -59,11 +68,11 @@ class TCPControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
 
-        self.lbl_ip_address = ttk.Label(self, text="IP Address")
-        self.lbl_ip_address.grid(row=0, column=0,padx=5, pady=5)
+        self.lbl_ip_address = ttk.Label(self, text="  IP Address")
+        self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=5)
 
-        self.lbl_ip_port = ttk.Label(self, text="IP Port")
-        self.lbl_ip_port.grid(row=0, column=1, padx=5, pady=5)
+        self.lbl_ip_port = ttk.Label(self, text="          IP Port")
+        self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=5)
 
         self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
@@ -79,11 +88,14 @@ class TCPControlFrame(ttk.Frame):
         self.btn_disconnect_socket = ttk.Button(self, text="Close", command=lambda: dispatcher.emit('disconnectTCP', self.ent_ip_address.get(), self.ent_ip_port.get()))
         self.btn_disconnect_socket.grid(row=2, column=1, padx=5)
 
+        self.tcp_separator0 = ttk.Separator(self, orient='horizontal')
+        self.tcp_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+
         self.btn_t1 = ttk.Button(self, text="Trig 1", command=lambda: dispatcher.emit('triggerOne'))
-        self.btn_t1.grid(row=4, column=0, padx=5, pady=(5, 0))
+        self.btn_t1.grid(row=4, column=0, padx=5, pady=0)
 
         self.btn_t2 = ttk.Button(self, text="Trig 2", command=lambda: dispatcher.emit('triggerTwo'))
-        self.btn_t2.grid(row=4, column=1, padx=5, pady=(5, 0))
+        self.btn_t2.grid(row=4, column=1, padx=5, pady=0)
 
         self.btn_prev_camera = ttk.Button(self, text="PrevCam", command=lambda: dispatcher.emit('prevCamera'))
         self.btn_prev_camera.grid(row=5, column=0, padx=5)
@@ -91,17 +103,23 @@ class TCPControlFrame(ttk.Frame):
         self.btn_next_camera = ttk.Button(self, text="NextCam", command=lambda: dispatcher.emit('nextCamera'))
         self.btn_next_camera.grid(row=5, column=1, padx=5)
 
+        self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
+        self.tcp_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+
         self.ent_custom_tcp = ttk.Entry(self)
-        self.ent_custom_tcp.grid(row=6, column=0, columnspan=2, padx=5, sticky='ew', pady=(5, 0))
+        self.ent_custom_tcp.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
 
         self.btn_custom_tcp_send = ttk.Button(self, text="Send", command=lambda: dispatcher.emit('sendCustomTCP', self.ent_custom_tcp.get()))
-        self.btn_custom_tcp_send.grid(row=7, column=0, padx=5)
+        self.btn_custom_tcp_send.grid(row=8, column=0, padx=5)
 
         self.btn_quit_application = ttk.Button(self, text="Quit", command=lambda: dispatcher.emit('quitApplication'))
-        self.btn_quit_application.grid(row=7, column=1, padx=5)
+        self.btn_quit_application.grid(row=8, column=1, padx=5)
+
+        self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
+        self.tcp_separator1.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=9, column=0, columnspan=2, padx=5, sticky='ew', pady=5)
+        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
 
 
 class MacroControlFrame(ttk.Frame):
@@ -144,7 +162,7 @@ class MacroControlFrame(ttk.Frame):
         self.btn_reset.grid(row=5, column=1, padx=5)
 
         self.macro_separator1 = ttk.Separator(self, orient='horizontal')
-        self.macro_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.macro_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=(5, 8), padx=5)
 
         self.lbl_start_time = ttk.Label(self, text="Start:")
         self.lbl_start_time.grid(row=7, column=0, padx=5)
@@ -162,7 +180,7 @@ class MacroControlFrame(ttk.Frame):
         self.macro_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew')
+        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, pady=0, sticky='ew')
 
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
@@ -190,7 +208,7 @@ class StatusFrame(ttk.Frame):
         self.dispatcher = dispatcher
 
         # Create a LabelFrame to hold the status labels
-        self.status_label_frame = ttk.LabelFrame(self, text="")
+        self.status_label_frame = ttk.LabelFrame(self, text="      Connection Status")
         self.status_label_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="new")
 
         self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark red")
@@ -223,4 +241,3 @@ class StatusFrame(ttk.Frame):
             self.lbl_macro_status.config(text="Macro: Running", foreground="green")
         else:
             self.lbl_macro_status.config(text="Macro: Stopped", foreground="red")
-
