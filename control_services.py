@@ -36,7 +36,7 @@ class SerialService:
                 self.dispatcher.emit('logData', f"Received: {message}", self.serial_port_name, 'received')
 
     def stop_reading(self):
-        if self.read_thread.is_alive():
+        if self.read_thread and self.read_thread.is_alive():
             self.read_thread.join()
 
     def send_serial_command(self, command):
