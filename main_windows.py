@@ -63,6 +63,9 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('continueSequence', self.macro_service.run_sequence)
         self.dispatcher.register_event('retrieve_cycle_count', self.macro_service.retrieve_cycle_count)
         self.dispatcher.register_event('send_initial_command', self.macro_service.send_initial_command)
+        self.dispatcher.register_event('next_step', self.macro_service.next_step)
+        self.dispatcher.register_event('handle_response_mtrs', self.macro_service.handle_response_mtrs)
+        self.dispatcher.register_event('handle_response_maln', self.macro_service.handle_response_maln)
 
         self.dispatcher.register_event('logData', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)

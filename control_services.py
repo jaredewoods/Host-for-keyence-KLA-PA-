@@ -206,17 +206,36 @@ class MacroService:
         print("Sending initial command")
         self.dispatcher.emit('next_step')
 
-    def get_cycle_count(self):
-        return 0
-
     def next_step(self):
-        print("Stepping through sequence")
+        print("Next step in macro sequence")
+
+        print("Sending command: MTRS")
+        self.dispatcher.emit('handle_response_mtrs', 'ACK')
+
 
     def handle_response_mtrs(self, message):
-        pass
+        print(f"Handling response for MTRS: {message}")
+        if message == 'ACK':
+            print("Acknowledgment received for MTRS")
+            # Proceed to the next command
+            self.dispatcher.emit('next_command', 'MALN')
+        else:
+            print("Error handling MTRS response")
+            self.dispatcher.emit('handle_error', 'MTRS error')
+
 
     def handle_response_maln(self, message):
-        pass
+        print(f"Handling response for MALN: {message}")
+        if message == 'ACK':
+            print("Acknowledgment received for MALN")
+            # Proceed to the next command
+            self.dispatcher.emit('next_command', 'CSOL')
+        else:
+            print("Error handling MALN response")
+            self.dispatcher.emit('handle_error', 'MALN error')
+
+    def get_cycle_count(self):
+        return 0
 
     def stop_sequence(self):
         print("Stopping Sequence")
