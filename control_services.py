@@ -190,6 +190,20 @@ class MacroService:
         print("Starting sequence")
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
+        self.initialize_macro_sequence()
+
+    def initialize_macro_sequence(self):
+        print("Initializing macro sequence")
+        # Retrieve cycle count
+        cycle_count = self.get_cycle_count()
+        print(f"Current cycle count: {cycle_count}")
+
+        # Emit event to retrieve cycle count
+        self.dispatcher.emit('retrieve_cycle_count', cycle_count)
+
+    def get_cycle_count(self):
+        # Implement actual cycle count retrieval
+        return 0
 
     def next_step(self):
         print("Stepping through sequence")
