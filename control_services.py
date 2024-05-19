@@ -255,7 +255,6 @@ class MacroService:
             print("Total cycles not reached, waiting for 0.1 seconds before repeating")
             threading.Timer(0.1, self.send_command_mtrs).start()
 
-
     def get_cycle_count(self):
         return 0
 

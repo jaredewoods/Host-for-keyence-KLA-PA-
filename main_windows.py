@@ -99,11 +99,6 @@ class MainWindow(tk.Tk):
         self.ntb_control = ttk.Notebook(self)
         self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 0))
 
-        macro_control_tab = ttk.Frame(self.ntb_control)
-        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
-        macro_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(macro_control_tab, text=" Macro ")
-
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
         serial_control.pack(fill=tk.BOTH, expand=True)
@@ -115,6 +110,11 @@ class MainWindow(tk.Tk):
         self.ntb_control.add(tcp_control_tab, text="TCP")
         self.ntb_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
         print("Control Frames created.")
+
+        macro_control_tab = ttk.Frame(self.ntb_control)
+        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
+        macro_control.pack(fill=tk.BOTH, expand=True)
+        self.ntb_control.add(macro_control_tab, text=" Macro ")
 
     def create_log_frame(self):
         self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
