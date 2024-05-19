@@ -184,52 +184,27 @@ class TCPService:
 class MacroService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
-        self.total_cycles = 0
-        self.completed_cycles = 0
-        self.current_step = 0
         self.macro_running = False
 
     def start_sequence(self):
         print("Starting sequence")
-        self.completed_cycles = 0
-        self.current_step = 0
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
-        self.next_step()
 
     def next_step(self):
-        if self.current_step == 0:
-            self.dispatcher.emit('moveToReadyStation')
-            self.dispatcher.register_event('responseReceived', self.handle_response_mtrs)
-        elif self.current_step == 1:
-            self.dispatcher.emit('alignWafer')
-            self.dispatcher.register_event('responseReceived', self.handle_response_maln)
-        elif self.current_step == 2:
-            print("add other step in here")
         print("Stepping through sequence")
 
     def handle_response_mtrs(self, message):
-        if message.startswith('@'):
-            self.current_step += 1
-            self.next_step()
+        pass
 
     def handle_response_maln(self, message):
-        if message.startswith('@'):
-            self.current_step += 1
-            self.dispatcher.after(3000, self.next_step)
+        pass
 
     def stop_sequence(self):
         print("Stopping Sequence")
-        self.macro_running = False
-        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
 
     def reset_sequence(self):
         print("Resetting sequence")
-        self.stop_sequence()
-        self.total_cycles = 0
-        self.completed_cycles = 0
-        self.current_step = 0
-        self.dispatcher.emit('updateCycleCount', self.total_cycles, self.completed_cycles)
 
     @staticmethod
     def pause_sequence():
