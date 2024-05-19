@@ -61,6 +61,8 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
         self.dispatcher.register_event('pauseSequence', self.macro_service.pause_sequence)
         self.dispatcher.register_event('continueSequence', self.macro_service.run_sequence)
+        self.dispatcher.register_event('retrieve_cycle_count', self.macro_service.retrieve_cycle_count)
+        self.dispatcher.register_event('send_initial_command', self.macro_service.send_initial_command)
 
         self.dispatcher.register_event('logData', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)
