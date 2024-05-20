@@ -16,14 +16,13 @@ from event_dispatcher import EventDispatcher
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.completed_cycles = None
         self.status_frame = None
         self.log_display = None
         self.serial_connected = False
         self.tcp_connected = False
         self.macro_running = False
-        self.total_cycles = 0
-        self.completed_cycles = 0
-
+        self.completed_cycles_value = tk.IntVar(value=0)
         print("Initializing MainWindow")
         self.title("Prealigner Vision Repeatability Test")
         self.ntb_control = None
@@ -31,7 +30,7 @@ class MainWindow(tk.Tk):
         self.dispatcher = EventDispatcher()
         self.serial_service = SerialService(dispatcher=self.dispatcher)
         self.tcp_service = TCPService(dispatcher=self.dispatcher)
-        self.macro_service = MacroService(dispatcher=self.dispatcher)
+        self.macro_service = MacroService(dispatcher=self.dispatcher, serial_service=self.serial_service)
         self.scan_com_ports()
         self.create_control_frames()
         self.create_log_frame()
@@ -69,7 +68,6 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('sendCommandT1', self.macro_service.send_command_t1)
         self.dispatcher.register_event('handleResponseT1', self.macro_service.handle_response_t1)
         self.dispatcher.register_event('incrementCycleCount', self.macro_service.increment_cycle_count)
-        self.dispatcher.register_event('receivedData', self.macro_service.handle_received_data)  # New event handler for received data
 
         self.dispatcher.register_event('logToDisplay', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)
@@ -81,7 +79,7 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
         self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_running_status)
-        self.dispatcher.register_event('updateCycleCount', self.update_cycle_count)
+        self.dispatcher.register_event('updateCompletedCycles', self.update_completed_cycles_display)
 
     def scan_com_ports(self):
         print("Scanning Ports")
@@ -113,7 +111,8 @@ class MainWindow(tk.Tk):
         print("Control Frames created.")
 
         macro_control_tab = ttk.Frame(self.ntb_control)
-        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher)
+        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher,
+                                          completed_cycles_value=self.completed_cycles_value)
         macro_control.pack(fill=tk.BOTH, expand=True)
         self.ntb_control.add(macro_control_tab, text=" Macro ")
 
@@ -143,9 +142,11 @@ class MainWindow(tk.Tk):
         self.macro_running = status
         print(f'macro running status: {status}')
 
-    def update_cycle_count(self, total, completed):
-        self.total_cycles = total
-        self.completed_cycles = completed
+    def update_completed_cycles_display(self, completed_cycles):
+        print(f"Updating completed cycles value MW: {completed_cycles}")
+        self.completed_cycles_value.set(completed_cycles)
+        print(f"New value in IntVar: {self.completed_cycles_value.get()}")
+        self.update_idletasks()
 
     @staticmethod
     def quit_application():

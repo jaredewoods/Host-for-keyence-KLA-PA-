@@ -124,11 +124,11 @@ class TCPControlFrame(ttk.Frame):
 
 
 class MacroControlFrame(ttk.Frame):
-    def __init__(self, master=None, dispatcher=None):
+    def __init__(self, master=None, dispatcher=None, completed_cycles_value=None):
         super().__init__(master)
 
         self.dispatcher = dispatcher
-        self.completed_cycles_value = tk.IntVar(value=0)
+        self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
         self.start_time = None
         self.elapsed_time = tk.StringVar(value="00:00:00")
 
@@ -194,8 +194,6 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
         self.dispatcher.register_event('startSequence', self.set_start_time)
         self.dispatcher.register_event('stopSequence', self.set_elapsed_time)
-        # Register the event handler for cycle count updates
-        self.dispatcher.register_event('update_cycle_count', self.update_completed_cycles)
 
     def update_serial_connection_status(self, status):
         self.serial_connected = status
@@ -212,10 +210,6 @@ class MacroControlFrame(ttk.Frame):
         else:
             self.btn_start.config(state='disabled')
             self.btn_step.config(state='disabled')
-
-    def update_completed_cycles(self, cycle_count):
-        print(f"Updating completed cycles value: {cycle_count}")
-        self.completed_cycles_value.set(cycle_count)
 
     def set_start_time(self):
         self.start_time = datetime.now()
