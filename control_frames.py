@@ -3,6 +3,7 @@
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
+"""TODO: when it comes time fine tune the UI for PC or Macbook"""
 
 
 class SerialControlFrame(ttk.Frame):
@@ -157,8 +158,8 @@ class MacroControlFrame(ttk.Frame):
         self.btn_stop = ttk.Button(self, text="Stop", state='normal', command=lambda: dispatcher.emit('stopSequence'))
         self.btn_stop.grid(row=4, column=1, padx=5)
 
-        self.btn_step = ttk.Button(self, text="Step", state='disabled', command=lambda: dispatcher.emit('stepSequence'))
-        self.btn_step.grid(row=5, column=0, padx=5)
+        self.btn_clear_log_display = ttk.Button(self, text="Clear", state='enabled', command=lambda: dispatcher.emit('clearLogDisplay'))
+        self.btn_clear_log_display.grid(row=5, column=0, padx=5)
 
         self.btn_reset = ttk.Button(self, text="Reset", state='normal', command=lambda: dispatcher.emit('resetSequence'))
         self.btn_reset.grid(row=5, column=1, padx=5)
@@ -206,10 +207,10 @@ class MacroControlFrame(ttk.Frame):
     def update_button_states(self):
         if self.serial_connected and self.tcp_connected:
             self.btn_start.config(state='normal')
-            self.btn_step.config(state='normal')
+            self.btn_clear_log_display.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
-            self.btn_step.config(state='disabled')
+            self.btn_clear_log_display.config(state='disabled')
 
     def set_start_time(self):
         self.start_time = datetime.now()

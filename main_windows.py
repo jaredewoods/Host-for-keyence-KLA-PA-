@@ -71,6 +71,7 @@ class MainWindow(tk.Tk):
 
         self.dispatcher.register_event('logToDisplay', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)
+        self.dispatcher.register_event('clearLogDisplay', self.clear_log_display)
 
         self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
         self.dispatcher.register_event('quitApplication', self.quit_application)
@@ -119,6 +120,10 @@ class MainWindow(tk.Tk):
     def create_log_frame(self):
         self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
         self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=10)
+
+    def clear_log_display(self):
+        self.log_display.delete('1.0', tk.END)
+        print("Log Display cleared")
 
     def create_status_frame(self):
         self.status_frame = StatusFrame(self, dispatcher=self.dispatcher)

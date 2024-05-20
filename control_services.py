@@ -1,6 +1,9 @@
 # control_services.py
-
+"""TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
+
+import psutil
+
 import threading
 from datetime import datetime
 from tkinter import messagebox
@@ -130,15 +133,25 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
-            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
+            local_ip, local_port = self.socket.getsockname()
+            adapter = self.get_network_adapter(local_ip)
+            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port} via {adapter}", 'tcp', 'opened')
             self.dispatcher.emit('updateTCPConnectionStatus', True)
-            print(f"Connected to {ip_address}:{port}")
+            print(f"Connected to {ip_address}:{port} via {adapter}")
             return True
         except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"Connection failed to {ip_address}:{port}: {e}", 'tcp', 'error')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
+
+    def get_network_adapter(self, ip_address):
+        addrs = psutil.net_if_addrs()
+        for interface, addresses in addrs.items():
+            for address in addresses:
+                if address.address == ip_address:
+                    return interface
+        return 'Unknown adapter'
 
     def close_tcp_socket(self, ip_address, port):
         if self.socket:
