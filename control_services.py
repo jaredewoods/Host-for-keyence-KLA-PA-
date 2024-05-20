@@ -163,7 +163,7 @@ class TCPService:
 
 # COMMANDS
     def trigger_one(self):
-        command = "T1\n"
+        command = "T1"
         self.send_data(command)
         print("Triggering T1")
 

@@ -13,7 +13,7 @@ from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
 
 
-class MainWindow(tk.Tk):
+class ainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.completed_cycles = None
