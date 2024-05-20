@@ -3,6 +3,7 @@
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
+from datetime import datetime
 
 
 class SerialControlFrame(ttk.Frame):
