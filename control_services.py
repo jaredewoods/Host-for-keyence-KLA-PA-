@@ -211,6 +211,7 @@ class MacroService:
 
     def send_command_mtrs(self):
         print("Sending command: MTRS")
+        self.dispatcher.emit('moveToReadyStation')
         self.dispatcher.emit('handle_response_mtrs', 'ACK')
 
     def handle_response_mtrs(self, message):
@@ -230,13 +231,18 @@ class MacroService:
         print(f"Handling response for MALN: {message}")
         if message == 'ACK':
             print("Acknowledgment received for MALN")
-            self.dispatcher.emit('send_command_t1')
+            self.wait_3_seconds()
         else:
             print("Error handling MALN response")
             self.dispatcher.emit('handle_error', 'MALN error')
 
+    def wait_3_seconds(self):
+        print("Waiting for 3 seconds")
+        threading.Timer(3, self.send_command_t1).start()
+
     def send_command_t1(self):
         print("Sending command: T1")
+        self.dispatcher.emit('triggerOne')
         self.dispatcher.emit('handle_response_t1', 'ACK')
 
     def handle_response_t1(self, message):
