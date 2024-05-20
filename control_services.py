@@ -186,27 +186,29 @@ class MacroService:
         self.dispatcher = dispatcher
         self.macro_running = False
         self.cycle_count = 0
-        self.total_cycles = 10  # Example total cycles
+        # this is temporary for testing
+        self.total_cycles = 105
 
-    def initiate_sequence(self):
-        print("Starting sequence")
+    def initialize_sequence(self):
+        print("Initializing Sequence")
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
-        self.initialize_macro_sequence()
+        "TODO: should have total cycles retrieve the user entry"
+        try:
+            self.total_cycles = int(105)
+        except ValueError:
+            print("Total Cycles Entry field value has to be an integer")
+            return
+        self.update_cycle_count()
 
-    def initialize_macro_sequence(self):
-        print("Initializing macro sequence")
-        cycle_count = self.get_cycle_count()
+    def update_cycle_count(self):
+        cycle_count = self.total_cycles
         print(f"Current cycle count: {cycle_count}")
-        self.run_sequence(cycle_count)
+        self.run_sequence()
 
-    def run_sequence(self, cycle_count):
+    def run_sequence(self):
         print("Running sequence")
-        self.dispatcher.emit('retrieve_cycle_count', cycle_count)
-
-    def retrieve_cycle_count(self, cycle_count):
-        print(f"Handling cycle count: {cycle_count}")
-        self.dispatcher.emit('send_command_mtrs')
+        self.send_command_mtrs()
 
     def send_command_mtrs(self):
         print("Sending command: MTRS")
@@ -251,16 +253,12 @@ class MacroService:
         print("Incrementing cycle count")
         self.cycle_count += 1
         print(f"New cycle count: {self.cycle_count}")
-
         if self.cycle_count >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
             self.stop_sequence()
         else:
             print("Total cycles not reached, waiting for 0.1 seconds before repeating")
             threading.Timer(0.1, self.send_command_mtrs).start()
-
-    def get_cycle_count(self):
-        return 0
 
     def stop_sequence(self):
         print("Stopping Sequence")
@@ -270,10 +268,3 @@ class MacroService:
     def reset_sequence(self):
         print("Resetting sequence")
 
-    @staticmethod
-    def pause_sequence():
-        print("Pausing sequence")
-
-    @staticmethod
-    def step_sequence():
-        print("not really stepping through sequence")

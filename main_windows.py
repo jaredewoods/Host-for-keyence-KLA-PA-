@@ -56,12 +56,9 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('sendCustomTCP', self.tcp_service.send_custom_tcp)
 
         self.dispatcher.register_event('stopSequence', self.macro_service.stop_sequence)
-        self.dispatcher.register_event('startSequence', self.macro_service.initiate_sequence)
-        self.dispatcher.register_event('stepSequence', self.macro_service.step_sequence)
+        self.dispatcher.register_event('startSequence', self.macro_service.initialize_sequence)
         self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
-        self.dispatcher.register_event('pauseSequence', self.macro_service.pause_sequence)
         self.dispatcher.register_event('runSequence', self.macro_service.run_sequence)
-        self.dispatcher.register_event('retrieve_cycle_count', self.macro_service.retrieve_cycle_count)
         self.dispatcher.register_event('send_command_mtrs', self.macro_service.send_command_mtrs)
         self.dispatcher.register_event('handle_response_mtrs', self.macro_service.handle_response_mtrs)
         self.dispatcher.register_event('send_command_maln', self.macro_service.send_command_maln)
