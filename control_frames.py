@@ -238,15 +238,15 @@ class StatusFrame(ttk.Frame):
         self.status_label_frame = ttk.LabelFrame(self, text="      Connection Status")
         self.status_label_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="new")
 
-        self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark red")
+        self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark grey")
         self.lbl_serial_status.grid(row=0, column=0, padx=20, pady=(10, 5))
 
-        self.lbl_tcp_status = ttk.Label(self.status_label_frame, text="TCP: Disconnected", foreground="dark red")
+        self.lbl_tcp_status = ttk.Label(self.status_label_frame, text="TCP: Disconnected", foreground="dark grey")
         self.lbl_tcp_status.grid(row=1, column=0, padx=20, pady=(0, 5))
 
-        self.lbl_macro_status = ttk.Label(self.status_label_frame, text="Macro: Stopped", foreground="dark red")
+        self.lbl_macro_status = ttk.Label(self.status_label_frame, text="Macro: Stopped", foreground="dark grey")
         self.lbl_macro_status.grid(row=2, column=0, padx=20, pady=(0, 10))
-
+        """TODO: move these out of here"""
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_status)
         self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_status)

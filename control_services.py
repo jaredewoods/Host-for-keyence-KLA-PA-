@@ -29,22 +29,27 @@ class SerialService:
         self.serial_port = serial_port
         print(f"Reading from {self.serial_port}.")
         print(f"[{self.get_timestamp()}] Started thread for reading from port.")
+
         while self.serial_port and self.serial_port.is_open:
-            message = self.serial_port.readline().decode('utf-8').strip()
-            if message:
-                self.dispatcher.emit('logData', f"Received: {message}", self.serial_port_name, 'received')
+            line = self.serial_port.readline().decode('utf-8').strip()  # Read a line
+            if line:
+                timestamp = self.get_timestamp()
+                print(f"Complete message received: {line}")
+                self.dispatcher.emit('receivedData', line, self.serial_port_name)
+                self.dispatcher.emit('logToDisplay', f"Received: {line}", self.serial_port_name)
 
     def stop_reading(self):
         if self.read_thread and self.read_thread.is_alive():
             self.read_thread.join()
 
     def send_serial_command(self, command):
-        self.dispatcher.emit('logData', f"Sent: {command}", self.serial_port_name, 'sent')
+        print(f"Sending command: {command}")  # Debug: Show sent command
+        self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
 
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
-        # Close the previous connection if it exists
+        print(f"Connecting to serial port: {self.serial_port_name}")  # Debug: Show connection attempt
         if self.serial_port and self.serial_port.is_open:
             self.close_serial_port(self.serial_port_name)  # Call the close method
 
@@ -60,7 +65,8 @@ class SerialService:
             )
 
             # Emit log and start read thread
-            self.dispatcher.emit('logData', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
+            print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")  # Debug: Show connection success
+            self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
             threading.Thread(
                 target=self.read_from_port, args=(self.serial_port,), daemon=True
             ).start()
@@ -68,6 +74,7 @@ class SerialService:
             print(f"Serial port {self.serial_port_name} opened and read thread started.")
 
         except serial.SerialException as e:
+            print(f"Serial port error: {e}")  # Debug: Show connection error
             messagebox.showerror(
                 "Serial Port Error",
                 f"Failed to open serial port {self.serial_port_name}: {e}"
@@ -79,7 +86,7 @@ class SerialService:
         if self.serial_port and self.serial_port.is_open:
             self.serial_port.close()
             self.stop_reading()
-            self.dispatcher.emit('logData', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
+            self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
@@ -120,12 +127,12 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
-            self.dispatcher.emit('logData', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
+            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
             self.dispatcher.emit('updateTCPConnectionStatus', True)
             print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
-            self.dispatcher.emit('logData', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
@@ -134,7 +141,7 @@ class TCPService:
         if self.socket:
             self.socket.close()
             self.socket = None
-            self.dispatcher.emit('logData', f"Close {ip_address}:{port}", 'tcp', 'closed')
+            self.dispatcher.emit('logToDisplay', f"Close {ip_address}:{port}", 'tcp', 'closed')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {ip_address}:{port}")
 
@@ -142,13 +149,13 @@ class TCPService:
         if self.socket:
             try:
                 self.socket.sendall(data.encode('utf-8'))
-                self.dispatcher.emit('logData', f"Data sent {data}", 'tcp', 'sent')
+                self.dispatcher.emit('logToDisplay', f"Data sent {data}", 'tcp', 'sent')
                 print(f"Data sent: {data}")
             except socket.error as e:
-                self.dispatcher.emit('logData', f"Data send failed", 'tcp', 'error')
+                self.dispatcher.emit('logToDisplay', f"Data send failed", 'tcp', 'error')
                 print(f"Failed to send data: {e}")
         else:
-            self.dispatcher.emit('logData', f"TCP not connected", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"TCP not connected", 'tcp', 'error')
             print("No active connection to send data.")
 
 # COMMANDS
@@ -187,6 +194,14 @@ class MacroService:
         self.cycle_count = 0
         self.total_cycles = 105
 
+    def handle_received_data(self, message, port_name):
+        print(f"Received data from {port_name}: {message}")
+        # Determine the command the response corresponds to and handle it
+        if 'MTRS' in message:
+            self.handle_response_mtrs(message)
+        elif 'MALN' in message:
+            self.handle_response_maln(message, port_name)
+
     def initialize_sequence(self):
         print("Initializing Sequence")
         self.macro_running = True
@@ -207,37 +222,76 @@ class MacroService:
     def run_sequence(self):
         print("Running sequence")
         if self.macro_running:
-            self.dispatcher.emit('sendCommandMTRS')
+            self.send_command_mtrs()
         else:
             print("Sequence Stopped")
 
     def send_command_mtrs(self):
         print("Sending command: MTRS")
         self.dispatcher.emit('moveToReadyStation')
-        self.dispatcher.emit('handleResponseMTRS', 'ACK')
 
-    def handle_response_mtrs(self, message):
-        print(f"Handling response for MTRS: {message}")
-        if message == 'ACK':
-            print("Acknowledgment received for MTRS")
-            self.dispatcher.emit('sendCommandMALN')
-        else:
-            print("Error handling MTRS response")
-            self.dispatcher.emit('handle_error', 'MTRS error')
+    def handle_response_mtrs(self, combined_response):
+        print(f"Handling response for MTRS: {combined_response}")
+        try:
+            receipt_response, completion_response = self.split_response(combined_response)
+            print(f"Receipt response: {receipt_response}")
+            print(f"Completion response: {completion_response}")
+            if receipt_response and completion_response:
+                receipt_data = self.parse_receipt_response(receipt_response)
+                print(f"Receipt Acknowledgment: {receipt_data}")
+                completion_data = self.parse_completion_response_mtrs(completion_response)
+                print(f"Completion Status: {completion_data}")
+
+                # Handle success and error based on alarm and subcodes
+                if completion_data['alarm_code'] == '0000':
+                    print("MTRS command completed successfully")
+                    self.dispatcher.emit('command_success', completion_data)
+                    self.send_command_maln()  # Continue to next command
+                else:
+                    print(f"MTRS command failed with alarm code: {completion_data['alarm_code']}")
+                    self.dispatcher.emit('command_failure', completion_data)
+            else:
+                print("Invalid combined MTRS response format")
+                self.dispatcher.emit('handle_error', 'Invalid combined MTRS response format')
+        except Exception as e:
+            print(f"Error handling MTRS response: {e}")
+            self.dispatcher.emit('handle_error', str(e))
 
     def send_command_maln(self):
         print("Sending command: MALN")
         self.dispatcher.emit('alignWafer')
-        self.dispatcher.emit('handleResponseMALN', 'ACK')
 
-    def handle_response_maln(self, message):
+    def handle_response_maln(self, message, serial_port_name):
         print(f"Handling response for MALN: {message}")
-        if message == 'ACK':
-            print("Acknowledgment received for MALN")
-            self.wait_3_seconds()
-        else:
-            print("Error handling MALN response")
-            self.dispatcher.emit('handle_error', 'MALN error')
+        try:
+            if message.startswith('$2') and 'MALN' in message:
+                parts = message.split('MALN')
+                if len(parts) == 2:
+                    response_data = parts[1]
+                    print(f"Response data: {response_data}")
+
+                    receipt_response = response_data[:4]  # Example: First 4 characters
+                    completion_response = response_data[4:]  # Example: Remaining characters
+
+                    print(f"Receipt response: {receipt_response}")
+                    print(f"Completion response: {completion_response}")
+
+                    if receipt_response and completion_response:
+                        print("Valid MALN response received")
+                        self.dispatcher.emit('logToDisplay', f"MALN response: {message}", serial_port_name, 'received')
+                        self.wait_3_seconds()
+                    else:
+                        print("Invalid MALN response format")
+                        self.dispatcher.emit('handle_error', "Invalid MALN response format")
+                else:
+                    print("Invalid combined MALN response format")
+                    self.dispatcher.emit('handle_error', "Invalid combined MALN response format")
+            else:
+                print("Unexpected MALN response format")
+                self.dispatcher.emit('handle_error', "Unexpected MALN response format")
+        except Exception as e:
+            print(f"Error handling MALN response: {e}")
+            self.dispatcher.emit('handle_error', str(e))
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
@@ -246,7 +300,6 @@ class MacroService:
     def send_command_t1(self):
         print("Sending command: T1")
         self.dispatcher.emit('triggerOne')
-        self.dispatcher.emit('handleResponseT1', 'ACK')
 
     def handle_response_t1(self, message):
         print(f"Handling response for T1: {message}")
@@ -279,3 +332,71 @@ class MacroService:
         print("Resetting sequence")
         self.cycle_count = 0
         self.macro_running = False
+
+    def split_response(self, combined_response):
+        if '@' in combined_response and '$' in combined_response:
+            receipt_index = combined_response.index('@')
+            completion_index = combined_response.index('$', receipt_index)
+            receipt_part = combined_response[receipt_index:completion_index].strip()
+            completion_part = combined_response[completion_index:].strip()
+            return receipt_part, completion_part
+        return None, None
+
+    def parse_receipt_response(self, receipt_response):
+        if receipt_response.startswith('@'):
+            # Example: '@2100000000013'
+            unit_number = receipt_response[1:2]
+            status_code = receipt_response[2:4]  # Ignored for now
+            alarm_code = receipt_response[4:8]
+            alarm_subcode = receipt_response[8:12]
+            checksum = receipt_response[12:]  # Ignored
+            return {
+                'unit_number': unit_number,
+                'status_code': status_code,
+                'alarm_code': alarm_code,
+                'alarm_subcode': alarm_subcode,
+                'checksum': checksum
+            }
+        raise ValueError("Invalid receipt response format")
+
+    def parse_completion_response_mtrs(self, completion_response):
+        if completion_response.startswith('$'):
+            # Example: '$23200000000MTRS5D'
+            unit_number = completion_response[1:2]
+            status_code = completion_response[2:4]  # Ignored for now
+            alarm_code = completion_response[4:8]
+            alarm_subcode = completion_response[8:12]
+            completed_command = completion_response[12:16]
+            checksum = completion_response[16:]  # Ignored
+            return {
+                'unit_number': unit_number,
+                'status_code': status_code,
+                'alarm_code': alarm_code,
+                'alarm_subcode': alarm_subcode,
+                'completed_command': completed_command,
+                'checksum': checksum
+            }
+        raise ValueError("Invalid MTRS completion response format")
+
+    def parse_completion_response_maln(self, completion_response):
+        if completion_response.startswith('$'):
+            # Example: '$24200000000MALN001701085137'
+            unit_number = completion_response[1:2]
+            status_code = completion_response[2:4]  # Ignored for now
+            alarm_code = completion_response[4:8]
+            alarm_subcode = completion_response[8:12]
+            completed_command = completion_response[12:16]
+            offset_distance = completion_response[16:20]
+            offset_angle = completion_response[20:26]
+            checksum = completion_response[26:]  # Ignored
+            return {
+                'unit_number': unit_number,
+                'status_code': status_code,
+                'alarm_code': alarm_code,
+                'alarm_subcode': alarm_subcode,
+                'completed_command': completed_command,
+                'offset_distance': offset_distance,
+                'offset_angle': offset_angle,
+                'checksum': checksum
+            }
+        raise ValueError("Invalid MALN completion response format")

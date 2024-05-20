@@ -63,14 +63,15 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
         self.dispatcher.register_event('runSequence', self.macro_service.run_sequence)
         self.dispatcher.register_event('sendCommandMTRS', self.macro_service.send_command_mtrs)
-        self.dispatcher.register_event('handleCommandMTRS', self.macro_service.handle_response_mtrs)
+        self.dispatcher.register_event('handleResponseMTRS', self.macro_service.handle_response_mtrs)
         self.dispatcher.register_event('sendCommandMALN', self.macro_service.send_command_maln)
         self.dispatcher.register_event('handleResponseMALN', self.macro_service.handle_response_maln)
         self.dispatcher.register_event('sendCommandT1', self.macro_service.send_command_t1)
         self.dispatcher.register_event('handleResponseT1', self.macro_service.handle_response_t1)
         self.dispatcher.register_event('incrementCycleCount', self.macro_service.increment_cycle_count)
+        self.dispatcher.register_event('receivedData', self.macro_service.handle_received_data)  # New event handler for received data
 
-        self.dispatcher.register_event('logData', self.log_to_display)
+        self.dispatcher.register_event('logToDisplay', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)
 
         self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
@@ -124,7 +125,7 @@ class MainWindow(tk.Tk):
         self.status_frame = StatusFrame(self, dispatcher=self.dispatcher)
         self.status_frame.grid(row=1, column=0, sticky="", padx=10, pady=5)
 
-    def log_to_display(self, message, source, direction):
+    def log_to_display(self, message, source, direction=None):
         timestamp = datetime.now().strftime("%H:%M:%S")
         log_message = f"[{timestamp}] {source} {message}"
         self.log_display.insert(tk.END, f"{log_message}\n")
