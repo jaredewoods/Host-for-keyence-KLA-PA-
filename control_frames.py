@@ -3,7 +3,6 @@
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
-from datetime import datetime
 
 
 class SerialControlFrame(ttk.Frame):
@@ -117,8 +116,8 @@ class TCPControlFrame(ttk.Frame):
         self.btn_quit_application = ttk.Button(self, text="Quit", command=lambda: dispatcher.emit('quitApplication'))
         self.btn_quit_application.grid(row=8, column=1, padx=5)
 
-        self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
-        self.tcp_separator1.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.tcp_separator2 = ttk.Separator(self, orient='horizontal')
+        self.tcp_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
         self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
@@ -134,7 +133,7 @@ class MacroControlFrame(ttk.Frame):
         self.elapsed_time = tk.StringVar(value="00:00:00")
 
         self.serial_connected = False
-        self.tcp_connected = False
+        self.tcp_connected = True
 
         self.lbl_alignments = ttk.Label(self, text="Alignments")
         self.lbl_alignments.grid(row=1, column=0, padx=5, pady=5)
@@ -146,8 +145,8 @@ class MacroControlFrame(ttk.Frame):
         self.lbl_completed_cycles = ttk.Label(self, text="Completed")
         self.lbl_completed_cycles.grid(row=1, column=1, padx=5, pady=5)
 
-        self.entry_completed_cycles = ttk.Entry(self, width=5, justify='center', textvariable=self.completed_cycles_value)
-        self.entry_completed_cycles.grid(row=2, column=1, padx=5)
+        self.ent_completed_cycles = ttk.Entry(self, width=5, justify='center', textvariable=self.completed_cycles_value)
+        self.ent_completed_cycles.grid(row=2, column=1, padx=5)
 
         self.macro_separator0 = ttk.Separator(self, orient='horizontal')
         self.macro_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)

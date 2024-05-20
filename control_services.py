@@ -206,28 +206,29 @@ class MacroService:
 
     def run_sequence(self):
         print("Running sequence")
-        if self.macro_running == True:
-            self.send_command_mtrs()
+        if self.macro_running:
+            self.dispatcher.emit('sendCommandMTRS')
         else:
             print("Sequence Stopped")
 
     def send_command_mtrs(self):
         print("Sending command: MTRS")
         self.dispatcher.emit('moveToReadyStation')
-        self.dispatcher.emit('handle_response_mtrs', 'ACK')
+        self.dispatcher.emit('handleResponseMTRS', 'ACK')
 
     def handle_response_mtrs(self, message):
         print(f"Handling response for MTRS: {message}")
         if message == 'ACK':
             print("Acknowledgment received for MTRS")
-            self.dispatcher.emit('send_command_maln')
+            self.dispatcher.emit('sendCommandMALN')
         else:
             print("Error handling MTRS response")
             self.dispatcher.emit('handle_error', 'MTRS error')
 
     def send_command_maln(self):
         print("Sending command: MALN")
-        self.dispatcher.emit('handle_response_maln', 'ACK')
+        self.dispatcher.emit('alignWafer')
+        self.dispatcher.emit('handleResponseMALN', 'ACK')
 
     def handle_response_maln(self, message):
         print(f"Handling response for MALN: {message}")
@@ -245,15 +246,16 @@ class MacroService:
     def send_command_t1(self):
         print("Sending command: T1")
         self.dispatcher.emit('triggerOne')
-        self.dispatcher.emit('handle_response_t1', 'ACK')
+        self.dispatcher.emit('handleResponseT1', 'ACK')
 
     def handle_response_t1(self, message):
         print(f"Handling response for T1: {message}")
         if message == 'ACK':
             print("Acknowledgment received for T1")
-            self.dispatcher.emit('increment_cycle_count')
+            self.dispatcher.emit('incrementCycleCount')
         else:
             print("Error handling T1 response")
+            """TODO: handle_error doesn't exist"""
             self.dispatcher.emit('handle_error', 'T1 error')
 
     def increment_cycle_count(self):
@@ -264,7 +266,6 @@ class MacroService:
         if self.cycle_count >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
             self.stop_sequence()
-            self.dispatcher.emit
         else:
             print("Total cycles not reached, waiting for 0.1 seconds before repeating")
             threading.Timer(0.1, self.run_sequence).start()
@@ -278,4 +279,3 @@ class MacroService:
         print("Resetting sequence")
         self.cycle_count = 0
         self.macro_running = False
-

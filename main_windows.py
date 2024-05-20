@@ -16,6 +16,7 @@ from event_dispatcher import EventDispatcher
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.status_frame = None
         self.log_display = None
         self.serial_connected = False
         self.tcp_connected = False
@@ -61,13 +62,13 @@ class MainWindow(tk.Tk):
         self.dispatcher.register_event('startSequence', self.macro_service.initialize_sequence)
         self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
         self.dispatcher.register_event('runSequence', self.macro_service.run_sequence)
-        self.dispatcher.register_event('send_command_mtrs', self.macro_service.send_command_mtrs)
-        self.dispatcher.register_event('handle_response_mtrs', self.macro_service.handle_response_mtrs)
-        self.dispatcher.register_event('send_command_maln', self.macro_service.send_command_maln)
-        self.dispatcher.register_event('handle_response_maln', self.macro_service.handle_response_maln)
-        self.dispatcher.register_event('send_command_t1', self.macro_service.send_command_t1)
-        self.dispatcher.register_event('handle_response_t1', self.macro_service.handle_response_t1)
-        self.dispatcher.register_event('increment_cycle_count', self.macro_service.increment_cycle_count)
+        self.dispatcher.register_event('sendCommandMTRS', self.macro_service.send_command_mtrs)
+        self.dispatcher.register_event('handleCommandMTRS', self.macro_service.handle_response_mtrs)
+        self.dispatcher.register_event('sendCommandMALN', self.macro_service.send_command_maln)
+        self.dispatcher.register_event('handleResponseMALN', self.macro_service.handle_response_maln)
+        self.dispatcher.register_event('sendCommandT1', self.macro_service.send_command_t1)
+        self.dispatcher.register_event('handleResponseT1', self.macro_service.handle_response_t1)
+        self.dispatcher.register_event('incrementCycleCount', self.macro_service.increment_cycle_count)
 
         self.dispatcher.register_event('logData', self.log_to_display)
         self.dispatcher.register_event('receivedData', self.log_to_display)
@@ -154,7 +155,7 @@ class MainWindow(tk.Tk):
     def emergency_stop():
         print("Emergency Stop!")
 
-    def on_tab_change(self, event):
+    def on_tab_change(self, event):  # forces immediate update
         self.ntb_control.update_idletasks()
 
 
