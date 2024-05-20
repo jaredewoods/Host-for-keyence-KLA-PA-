@@ -207,7 +207,10 @@ class MacroService:
 
     def run_sequence(self):
         print("Running sequence")
-        self.send_command_mtrs()
+        if self.macro_running == True:
+            self.send_command_mtrs()
+        else:
+            print("Sequence Stopped")
 
     def send_command_mtrs(self):
         print("Sending command: MTRS")
@@ -238,7 +241,7 @@ class MacroService:
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
-        threading.Timer(3, self.send_command_t1).start()
+        threading.Timer(0.3, self.send_command_t1).start()
 
     def send_command_t1(self):
         print("Sending command: T1")
@@ -264,7 +267,7 @@ class MacroService:
             self.stop_sequence()
         else:
             print("Total cycles not reached, waiting for 0.1 seconds before repeating")
-            threading.Timer(0.1, self.send_command_mtrs).start()
+            threading.Timer(0.1, self.run_sequence).start()
 
     def stop_sequence(self):
         print("Stopping Sequence")
