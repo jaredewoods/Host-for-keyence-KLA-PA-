@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from datetime import datetime
 
 
 class SerialControlFrame(ttk.Frame):
@@ -128,12 +129,11 @@ class MacroControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
         self.completed_cycles_value = tk.IntVar(value=0)
+        self.start_time = None
+        self.elapsed_time = tk.StringVar(value="00:00:00")
 
         self.serial_connected = False
         self.tcp_connected = False
-
-        self.lbl_alignments = ttk.Label(self, text="ROUND 1 of 5")
-        self.lbl_alignments.grid(row=0, column=0, columnspan=2, sticky="", padx=5, pady=5)
 
         self.lbl_alignments = ttk.Label(self, text="Alignments")
         self.lbl_alignments.grid(row=1, column=0, padx=5, pady=5)
@@ -178,15 +178,22 @@ class MacroControlFrame(ttk.Frame):
         self.val_stop_time = ttk.Label(self, text="--:--:--")
         self.val_stop_time.grid(row=8, column=1, pady=5, padx=5)
 
+        self.lbl_elapsed_time = ttk.Label(self, text="Elapsed:")
+        self.lbl_elapsed_time.grid(row=9, column=0, pady=5, padx=5)
+
+        self.val_elapsed_time = ttk.Label(self, text="--:--:--")
+        self.val_elapsed_time.grid(row=9, column=1, pady=5, padx=5)
+
         self.macro_separator2 = ttk.Separator(self, orient='horizontal')
-        self.macro_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.macro_separator2.grid(row=10, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, pady=0, sticky='ew')
+        self.btn_e_stop.grid(row=11, column=0, columnspan=2, padx=5, pady=0, sticky='ew')
 
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
-
+        self.dispatcher.register_event('startSequence', self.set_start_time)
+        self.dispatcher.register_event('stopSequence', self.set_elapsed_time)
         # Register the event handler for cycle count updates
         self.dispatcher.register_event('update_cycle_count', self.update_completed_cycles)
 
@@ -209,6 +216,17 @@ class MacroControlFrame(ttk.Frame):
     def update_completed_cycles(self, cycle_count):
         print(f"Updating completed cycles value: {cycle_count}")
         self.completed_cycles_value.set(cycle_count)
+
+    def set_start_time(self):
+        self.start_time = datetime.now()
+        self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
+        print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
+
+    def set_elapsed_time(self):
+        if self.start_time:
+            elapsed = datetime.now() - self.start_time
+            self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
+            print(f"Elapsed time: {str(elapsed).split('.')[0]}")
 
 
 
