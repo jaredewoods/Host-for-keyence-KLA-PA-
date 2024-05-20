@@ -186,7 +186,6 @@ class MacroService:
         self.dispatcher = dispatcher
         self.macro_running = False
         self.cycle_count = 0
-        # this is temporary for testing
         self.total_cycles = 105
 
     def initialize_sequence(self):
@@ -253,6 +252,7 @@ class MacroService:
         print("Incrementing cycle count")
         self.cycle_count += 1
         print(f"New cycle count: {self.cycle_count}")
+        self.dispatcher.emit('update_cycle_count', self.cycle_count)
         if self.cycle_count >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
             self.stop_sequence()
@@ -267,4 +267,6 @@ class MacroService:
 
     def reset_sequence(self):
         print("Resetting sequence")
+        self.cycle_count = 0
+        self.macro_running = False
 

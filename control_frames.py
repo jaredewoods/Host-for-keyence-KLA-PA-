@@ -127,6 +127,8 @@ class MacroControlFrame(ttk.Frame):
         super().__init__(master)
 
         self.dispatcher = dispatcher
+        self.completed_cycles_value = tk.IntVar(value=0)
+
         self.serial_connected = False
         self.tcp_connected = False
 
@@ -143,8 +145,8 @@ class MacroControlFrame(ttk.Frame):
         self.lbl_completed_cycles = ttk.Label(self, text="Completed")
         self.lbl_completed_cycles.grid(row=1, column=1, padx=5, pady=5)
 
-        self.lbl_completed_cycles_value = ttk.Label(self, text="0", justify='center')
-        self.lbl_completed_cycles_value.grid(row=2, column=1, padx=5)
+        self.entry_completed_cycles = ttk.Entry(self, width=5, justify='center', textvariable=self.completed_cycles_value)
+        self.entry_completed_cycles.grid(row=2, column=1, padx=5)
 
         self.macro_separator0 = ttk.Separator(self, orient='horizontal')
         self.macro_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
@@ -185,6 +187,9 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
 
+        # Register the event handler for cycle count updates
+        self.dispatcher.register_event('update_cycle_count', self.update_completed_cycles)
+
     def update_serial_connection_status(self, status):
         self.serial_connected = status
         self.update_button_states()
@@ -200,6 +205,11 @@ class MacroControlFrame(ttk.Frame):
         else:
             self.btn_start.config(state='disabled')
             self.btn_step.config(state='disabled')
+
+    def update_completed_cycles(self, cycle_count):
+        print(f"Updating completed cycles value: {cycle_count}")
+        self.completed_cycles_value.set(cycle_count)
+
 
 
 class StatusFrame(ttk.Frame):
