@@ -264,6 +264,7 @@ class MacroService:
         if self.cycle_count >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
             self.stop_sequence()
+            self.dispatcher.emit
         else:
             print("Total cycles not reached, waiting for 0.1 seconds before repeating")
             threading.Timer(0.1, self.run_sequence).start()

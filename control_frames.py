@@ -230,7 +230,6 @@ class MacroControlFrame(ttk.Frame):
             print(f"Elapsed time: {str(elapsed).split('.')[0]}")
 
 
-
 class StatusFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None):
         super().__init__(master)
