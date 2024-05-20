@@ -4,7 +4,6 @@ import socket
 import threading
 from datetime import datetime
 from tkinter import messagebox
-
 import serial
 
 
