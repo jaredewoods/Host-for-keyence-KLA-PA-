@@ -188,7 +188,7 @@ class MacroService:
         self.cycle_count = 0
         self.total_cycles = 10  # Example total cycles
 
-    def start_sequence(self):
+    def initiate_sequence(self):
         print("Starting sequence")
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
@@ -198,6 +198,10 @@ class MacroService:
         print("Initializing macro sequence")
         cycle_count = self.get_cycle_count()
         print(f"Current cycle count: {cycle_count}")
+        self.run_sequence(cycle_count)
+
+    def run_sequence(self, cycle_count):
+        print("Running sequence")
         self.dispatcher.emit('retrieve_cycle_count', cycle_count)
 
     def retrieve_cycle_count(self, cycle_count):
@@ -269,10 +273,6 @@ class MacroService:
     @staticmethod
     def pause_sequence():
         print("Pausing sequence")
-
-    @staticmethod
-    def run_sequence():
-        print("Running sequence")
 
     @staticmethod
     def step_sequence():
