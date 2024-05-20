@@ -4,8 +4,10 @@ import sys
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk, scrolledtext
+
 import serial
 import serial.tools.list_ports
+
 from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
 from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
