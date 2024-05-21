@@ -267,7 +267,7 @@ class MacroService:
 
     def send_command_t1(self):
         print("Sending command: T1")
-        # self.dispatcher.emit('incrementCycleCount')
+        self.dispatcher.emit('incrementCycleCount')
         self.dispatcher.emit('triggerOne')
 
     def handle_response_t1(self):
