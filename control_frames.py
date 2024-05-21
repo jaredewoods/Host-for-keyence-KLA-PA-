@@ -76,11 +76,11 @@ class TCPControlFrame(ttk.Frame):
         self.lbl_ip_port = ttk.Label(self, text="          IP PORT")
         self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=5)
 
-        self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
+        self.txt_ip_address_default = tk.StringVar(value="192.168.0.10")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
         self.ent_ip_address.grid(row=1, column=0, columnspan=2, sticky='w', padx=5)
 
-        self.txt_ip_port_default = tk.StringVar(value="80")
+        self.txt_ip_port_default = tk.StringVar(value="8500")
         self.ent_ip_port = ttk.Entry(self, width=5, textvariable=self.txt_ip_port_default, justify='center')
         self.ent_ip_port.grid(row=1, column=1, columnspan=2, sticky='e', padx=5)
 
@@ -128,6 +128,7 @@ class MacroControlFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None, completed_cycles_value=None):
         super().__init__(master)
 
+        self.stop_time = None
         self.dispatcher = dispatcher
         self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
         self.start_time = None
@@ -194,7 +195,7 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
         self.dispatcher.register_event('startSequence', self.set_start_time)
-        self.dispatcher.register_event('stopSequence', self.set_elapsed_time)
+        # self.dispatcher.register_event('stopSequence', self.set_elapsed_time)
 
     def update_serial_connection_status(self, status):
         self.serial_connected = status
@@ -217,11 +218,27 @@ class MacroControlFrame(ttk.Frame):
         self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
         print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
 
-    def set_elapsed_time(self):
+    def set_stop_time(self):
+        self.stop_time = datetime.now()
+        self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
+        print(f"Stop time set to: {self.start_time.strftime('%H:%M:%S')}")
+
+    def reset_sequence(self):
+        print("Sequence Reset")
+        self.start_time = None
+        self.val_start_time.config(text="00:00:00")
+        self.val_elapsed_time.config(text="--:--:--")
+        self.completed_cycles_value.set(0)
+        self.ent_total_cycles.delete(0, tk.END)
+        self.ent_total_cycles.insert(0, "0")
+        print("Sequence reset")
+
+    def update_elapsed_time(self):
         if self.start_time:
             elapsed = datetime.now() - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
-            print(f"Elapsed time: {str(elapsed).split('.')[0]}")
+            self.val_elapsed_time.config(text=self.elapsed_time.get())
+            self.after(1000, self.update_elapsed_time)
 
 
 class StatusFrame(ttk.Frame):

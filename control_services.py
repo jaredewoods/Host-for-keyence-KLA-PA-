@@ -52,12 +52,11 @@ class SerialService:
 
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
-        print(f"Connecting to serial port: {self.serial_port_name}")  # Debug: Show connection attempt
+        print(f"Connecting to serial port: {self.serial_port_name}")
         if self.serial_port and self.serial_port.is_open:
-            self.close_serial_port(self.serial_port_name)  # Call the close method
+            self.close_serial_port(self.serial_port_name)
 
         try:
-            # Create a new serial connection with error handling
             self.serial_port = serial.Serial(
                 self.serial_port_name,
                 self.baud_rate,
@@ -160,7 +159,7 @@ class TCPService:
                 self.dispatcher.emit('logToDisplay', f"Data send failed", 'TCP', 'error')
                 print(f"Failed to send data: {e}")
         else:
-            self.dispatcher.emit('logToDisplay', f"TCP not connected", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', f"not connected", 'TCP', 'error')
             print("No active connection to send data.")
 
     def handle_received_data(self):
@@ -224,7 +223,7 @@ class MacroService:
         self.dispatcher = dispatcher
         self.serial_service = serial_service
         self.macro_running = False
-        self.total_cycles = 105
+        self.total_cycles = 0
         self.completed_cycles = 0
 
     def initialize_sequence(self):
@@ -268,7 +267,6 @@ class MacroService:
 
     def send_command_t1(self):
         print("Sending command: T1")
-        self.dispatcher.emit('incrementCycleCount')
         self.dispatcher.emit('triggerOne')
 
     def handle_response_t1(self):
