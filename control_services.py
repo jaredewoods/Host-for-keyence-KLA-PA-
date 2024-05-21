@@ -191,22 +191,22 @@ class TCPService:
 
     # COMMANDS
     def trigger_one(self):
-        command = "T1"
+        command = "T1\r\n"
         self.send_tcp_data(command)
         print("Triggering T1")
 
     def trigger_two(self):
-        command = "T2"
+        command = "T2\r\n"
         self.send_tcp_data(command)
         print("Triggering T2")
 
     def prev_camera(self):
-        command = "FW,PV"
+        command = "FW,PV\r\n"
         self.send_tcp_data(command)
         print("Previous Camera View")
 
     def next_camera(self):
-        command = "FW,NX"
+        command = "FW,NX\r\n"
         self.send_tcp_data(command)
         print("Next Camera View")
 
