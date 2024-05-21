@@ -1,5 +1,5 @@
 # control_services.py
-
+"""TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
 import threading
 from datetime import datetime
@@ -148,38 +148,67 @@ class TCPService:
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {ip_address}:{port}")
 
-    def send_data(self, data):
+    def send_tcp_data(self, tcp_data):
         if self.socket:
             try:
-                self.socket.sendall(data.encode('utf-8'))
-                self.dispatcher.emit('logToDisplay', f"Data sent {data}", 'tcp', 'sent')
-                print(f"Data sent: {data}")
+                self.socket.sendall(tcp_data.encode('utf-8'))
+                self.dispatcher.emit('logToDisplay', f"Data sent: {tcp_data}", 'TCP', 'sent')
+                print(f"Data sent: {tcp_data}")
+                # After sending data, wait for response
+                self.handle_received_data()
             except socket.error as e:
-                self.dispatcher.emit('logToDisplay', f"Data send failed", 'tcp', 'error')
+                self.dispatcher.emit('logToDisplay', f"Data send failed", 'TCP', 'error')
                 print(f"Failed to send data: {e}")
         else:
-            self.dispatcher.emit('logToDisplay', f"TCP not connected", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"TCP not connected", 'TCP', 'error')
             print("No active connection to send data.")
 
-# COMMANDS
+    def handle_received_data(self):
+        try:
+            data = self.socket.recv(1024).decode('utf-8')
+            self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP', 'received')
+            print(f"Data received: {data}")
+            # Process the received message
+            self.handle_response(data)
+        except socket.timeout:
+            self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP', 'error')
+            print("Receive timeout")
+            self.dispatcher.emit('handleResponseT1')
+        except socket.error as e:
+            self.dispatcher.emit('logToDisplay', f"Data receive failed: {e}", 'TCP', 'error')
+            print(f"Failed to receive data: {e}")
+            self.dispatcher.emit('handleResponseT1')
+
+    def handle_response(self, data):
+        data = data.strip()
+        if data == "T1":
+            print("Received expected response: T1")
+            self.dispatcher.emit('logToDisplay', "Received expected response: T1", 'TCP', 'info')
+            self.dispatcher.emit('handleResponseT1')
+        else:
+            self.dispatcher.emit('logToDisplay', f"Unexpected response: {data}", 'TCP', 'error')
+            print(f"Unexpected response: {data}")
+            self.dispatcher.emit('handleResponseT1')
+
+    # COMMANDS
     def trigger_one(self):
-        command = "T1\n"
-        self.send_data(command)
+        command = "T1\r\n"
+        self.send_tcp_data(command)
         print("Triggering T1")
 
     def trigger_two(self):
-        command = "T2"
-        self.send_data(command)
+        command = "T2\r\n"
+        self.send_tcp_data(command)
         print("Triggering T2")
 
     def prev_camera(self):
-        command = "FW,PV"
-        self.send_data(command)
+        command = "FW,PV\r\n"
+        self.send_tcp_data(command)
         print("Previous Camera View")
 
     def next_camera(self):
-        command = "FW,NX"
-        self.send_data(command)
+        command = "FW,NX\r\n"
+        self.send_tcp_data(command)
         print("Next Camera View")
 
     def get_custom_serial_command(self):
@@ -240,12 +269,11 @@ class MacroService:
     def send_command_t1(self):
         print("Sending command: T1")
         self.dispatcher.emit('incrementCycleCount')
-        # self.dispatcher.emit('triggerOne')
+        self.dispatcher.emit('triggerOne')
 
-    def handle_response_t1(self, message):
-        if message == 'ACK':
-            print("Acknowledgment received for T1")
-            self.increment_cycle_count()
+    def handle_response_t1(self):
+        print("Acknowledgment received for T1")
+        self.dispatcher.emit('incrementCycleCount')
 
     def increment_cycle_count(self):
         self.completed_cycles += 1
