@@ -1,9 +1,6 @@
 # control_services.py
 """TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
-
-import psutil
-
 import threading
 from datetime import datetime
 from tkinter import messagebox
@@ -133,25 +130,15 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
-            local_ip, local_port = self.socket.getsockname()
-            adapter = self.get_network_adapter(local_ip)
-            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port} via {adapter}", 'tcp', 'opened')
+            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
             self.dispatcher.emit('updateTCPConnectionStatus', True)
-            print(f"Connected to {ip_address}:{port} via {adapter}")
+            print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Connection failed to {ip_address}:{port}: {e}", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
-
-    def get_network_adapter(self, ip_address):
-        addrs = psutil.net_if_addrs()
-        for interface, addresses in addrs.items():
-            for address in addresses:
-                if address.address == ip_address:
-                    return interface
-        return 'Unknown adapter'
 
     def close_tcp_socket(self, ip_address, port):
         if self.socket:
@@ -252,13 +239,13 @@ class MacroService:
 
     def send_command_t1(self):
         print("Sending command: T1")
-        self.dispatcher.emit('incrementCycleCount')
-        # self.dispatcher.emit('triggerOne')
+        # self.dispatcher.emit('incrementCycleCount')
+        self.dispatcher.emit('triggerOne')
 
     def handle_response_t1(self, message):
-        if message == 'ACK':
+        if message == 'T1':
             print("Acknowledgment received for T1")
-            self.increment_cycle_count()
+            self.dispatcher.emit('incrementCycleCount')
 
     def increment_cycle_count(self):
         self.completed_cycles += 1
