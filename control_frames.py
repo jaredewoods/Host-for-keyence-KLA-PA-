@@ -37,10 +37,10 @@ class SerialControlFrame(ttk.Frame):
         self.btn_maln = ttk.Button(self, text="MALN", command=lambda: dispatcher.emit('alignWafer'))
         self.btn_maln.grid(row=4, column=1, padx=5, pady=0)
 
-        self.btn_csol = ttk.Button(self, text="CSOL", command=lambda: dispatcher.emit('toggleChuck'))
+        self.btn_csol = ttk.Button(self, text="@+$", command=lambda: dispatcher.emit('toggleChuck'))
         self.btn_csol.grid(row=5, column=0, padx=5)
 
-        self.btn_hrst = ttk.Button(self, text="HRST", command=lambda: dispatcher.emit('hardwareReset'))
+        self.btn_hrst = ttk.Button(self, text="@", command=lambda: dispatcher.emit('hardwareReset'))
         self.btn_hrst.grid(row=5, column=1, padx=5)
 
         self.serial_separator1 = ttk.Separator(self, orient='horizontal')

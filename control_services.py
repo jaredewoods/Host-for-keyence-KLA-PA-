@@ -4,7 +4,7 @@ import socket
 import threading
 from datetime import datetime
 from tkinter import messagebox
-
+from threading import Thread
 import serial
 
 
@@ -16,10 +16,10 @@ class SerialService:
         self.serial_port_name = None
         self.baud_rate = 9600
         self.commands = {
-            'MTRS': '$2MTRSG100ALDD',
-            'MALN': '$2MALN1009000B4',
-            'CSOL': '$2CSOLA0D4',
-            'HRST': '$1HRST72',
+            'MTRS': '$24200000000MTRS5E',
+            'MALN': '$24200000000MALN0049-102783C',
+            'CSOL': '@2400000000016$24200000000MTRS5E',
+            'HRST': '@2400000000016',
         }
 
     @staticmethod
@@ -115,6 +115,34 @@ class TCPService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
         self.socket = None
+        self.server_socket = None
+
+    def setup_server(self, host, port):
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = (host, port)
+        try:
+            self.server_socket.bind(server_address)
+            self.dispatcher.emit('logData', f"Server started on {host}:{port}", 'tcp', 'opened')
+            Thread(target=self.wait_for_client_connection).start()
+        except Exception as e:
+            self.dispatcher.emit('logData', f"Error starting server: {e}", 'tcp', 'error')
+
+    def wait_for_client_connection(self):
+        self.server_socket.listen(1)
+        while True:
+            client_socket, client_address = self.server_socket.accept()
+            try:
+                self.dispatcher.emit('logData', f"Connected to {client_address}", 'tcp', 'opened')
+                Thread(target=self.handle_client_connection, args=(client_socket,)).start()
+            except Exception as e:
+                self.dispatcher.emit('logData', f"Error accepting connection: {e}", 'tcp', 'error')
+
+    def handle_client_connection(self, client_socket):
+        data = client_socket.recv(1024)
+        self.dispatcher.emit('logData', f"Received: {data}", 'tcp', 'received')
+        response = "Data received"
+        client_socket.sendall(response.encode('utf-8'))
+        self.dispatcher.emit('logData', "Response sent", 'tcp', 'sent')
 
     def connect_tcp_socket(self, ip_address, port, timeout=5.0):
         try:
