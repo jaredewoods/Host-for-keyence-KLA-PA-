@@ -180,6 +180,7 @@ class TCPService:
             self.dispatcher.emit('handleResponseT1')
 
     def handle_response(self, data):
+        data = data.strip()
         if data == "T1":
             print("Received expected response: T1")
             self.dispatcher.emit('logToDisplay', "Received expected response: T1", 'TCP', 'info')
