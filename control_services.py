@@ -5,6 +5,7 @@ import threading
 from datetime import datetime
 from tkinter import messagebox
 import serial
+import tkinter as tk
 
 
 class SerialService:
@@ -247,8 +248,17 @@ class MacroService:
         if '@' in message:
             print("MTRS acknowledgement received")
         if '$' in message:
-            print("MTRS completion received")
-            self.send_command_maln()
+            mtrs_index = message.find('MTRS')
+            if mtrs_index >= 8:
+                pre_mtrs = message[mtrs_index - 8:mtrs_index]
+                if pre_mtrs == '00000000':
+                    print("MTRS positive completion received")
+                    self.send_command_maln()
+                else:
+                    alarm = pre_mtrs[:4]
+                    subcode = pre_mtrs[4:]
+                    self.show_alarm_messagebox(alarm, subcode)
+                    print("MTRS negative completion received")
 
     def send_command_maln(self):
         print("Sending command: MALN")
@@ -263,7 +273,7 @@ class MacroService:
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
-        threading.Timer(0.3, self.send_command_t1).start()
+        threading.Timer(3, self.send_command_t1).start()
 
     def send_command_t1(self):
         print("Sending command: T1")
@@ -293,3 +303,9 @@ class MacroService:
         print("Resetting sequence")
         self.completed_cycles = 0
         self.macro_running = False
+
+    def show_alarm_messagebox(self, alarm, subcode):
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        messagebox.showerror("Alarm", f"Alarm: {alarm}\nSubcode: {subcode}")
+        root.destroy()
