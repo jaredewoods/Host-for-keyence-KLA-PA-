@@ -208,10 +208,8 @@ class MacroControlFrame(ttk.Frame):
     def update_button_states(self):
         if self.serial_connected and self.tcp_connected:
             self.btn_start.config(state='normal')
-            self.btn_clear_log_display.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
-            self.btn_clear_log_display.config(state='disabled')
 
     def set_start_time(self):
         self.start_time = datetime.now()
