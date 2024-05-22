@@ -1,13 +1,13 @@
 # control_services.py
-"""TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
 import threading
-from datetime import datetime
-from tkinter import messagebox
-import serial
 import tkinter as tk
+from tkinter import messagebox
+
+import serial
+import winsound
+
 from alarms import alarm_dict
-# import winsound
 
 
 class SerialService:
@@ -24,34 +24,6 @@ class SerialService:
             'HRST': '$1HRST72',
         }
         self.response_callback = None
-
-    @staticmethod
-    def get_timestamp():
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    def read_from_port(self, serial_port):
-        self.serial_port = serial_port
-        print(f"Reading from {self.serial_port}.")
-        print(f"[{self.get_timestamp()}] Started thread for reading from port.")
-
-        while self.serial_port and self.serial_port.is_open:
-            line = self.serial_port.readline().decode('utf-8').strip()  # Read a line
-            if line:
-                # timestamp = self.get_timestamp()
-                print(f"Complete message received: {line}")
-                self.dispatcher.emit('receivedData', line, self.serial_port_name)
-                if self.response_callback:
-                    self.response_callback(line)
-
-    def stop_reading(self):
-        if self.read_thread and self.read_thread.is_alive():
-            self.read_thread.join()
-
-    def send_serial_command(self, command, callback=None):
-        print(f"Sending command: {command}")
-        self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
-        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
-        self.response_callback = callback
 
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
@@ -95,6 +67,29 @@ class SerialService:
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
+    def read_from_port(self, serial_port):
+        self.serial_port = serial_port
+        print(f"Reading from {self.serial_port}.")
+        print(f"Started thread for reading from port.")
+
+        while self.serial_port and self.serial_port.is_open:
+            line = self.serial_port.readline().decode('utf-8').strip()
+            if line:
+                print(f"Complete message received: {line}")
+                self.dispatcher.emit('receivedData', line, self.serial_port_name)
+                if self.response_callback:
+                    self.response_callback(line)
+
+    def stop_reading(self):
+        if self.read_thread and self.read_thread.is_alive():
+            self.read_thread.join()
+
+    def send_serial_command(self, command, callback=None):
+        print(f"Sending command: {command}")
+        self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
+        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
+        self.response_callback = callback
+
     def move_to_ready_station(self):
         command = self.commands['MTRS']
         print(f"Sending: {command}")
@@ -105,7 +100,7 @@ class SerialService:
         print(f"Sending: {command}")
         self.send_serial_command(command)
 
-    def toggle_chuck(self):
+    def chuck_hold(self):
         command = self.commands['CSOL']
         print(f"Sending: {command}")
         self.send_serial_command(command)
@@ -119,6 +114,11 @@ class SerialService:
         command = custom_command
         print(f"Sending custom command: {command}")
         self.send_serial_command(command)
+
+    def emergency_stop(self):
+        command = "$2CEMG4E"
+        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
+        self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
 
 
 class TCPService:
@@ -212,7 +212,7 @@ class TCPService:
         self.send_tcp_data(command)
         print("Next Camera View")
 
-    def get_custom_serial_command(self):
+    def get_custom_tcp_command(self):
         pass
 
     @staticmethod
@@ -225,7 +225,7 @@ class MacroService:
         self.dispatcher = dispatcher
         self.serial_service = serial_service
         self.macro_running = False
-        self.total_cycles = 10
+        self.total_cycles = 105
         self.completed_cycles = 0
 
     def initialize_sequence(self):
@@ -274,6 +274,13 @@ class MacroService:
                 pre_mtrs = message[maln_index - 8:maln_index]
                 if pre_mtrs == '00000000':
                     print("MALN positive completion received")
+                    distance_start = maln_index + 5
+                    distance = message[distance_start:distance_start + 4]
+                    angle_start = distance_start + 4 + 1
+                    angle = message[angle_start:angle_start + 6]
+                    log_message = f"MALN positive completion: Distance: {distance} mm, Angle: {angle} degrees"
+                    self.dispatcher.emit('logToDisplay', log_message)
+
                     self.wait_3_seconds()
                 else:
                     alarm = pre_mtrs[:4]
@@ -312,9 +319,11 @@ class MacroService:
     def reset_sequence(self):
         print("Resetting sequence")
         self.completed_cycles = 0
+        self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         self.macro_running = False
 
-    def show_alarm_messagebox(self, alarm, subcode):
+    @staticmethod
+    def show_alarm_messagebox(alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
 
         if alarm_data is None:
@@ -340,7 +349,7 @@ class MacroService:
             f"Subcode: {subcode}"
         )
 
-        # winsound.Beep(1000, 1000)
+        winsound.Beep(1000, 1000)
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)

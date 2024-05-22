@@ -1,4 +1,4 @@
-# main_window.py
+# main_windows.py
 
 import sys
 import tkinter as tk
@@ -50,7 +50,6 @@ class MainWindow(tk.Tk):
             self.clear_log_display,
             self.scan_com_ports,
             self.quit_application,
-            self.emergency_stop,
             self.update_serial_connection_status,
             self.update_tcp_connection_status,
             self.update_macro_running_status,
@@ -77,12 +76,12 @@ class MainWindow(tk.Tk):
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
         serial_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(serial_control_tab, text="Serial")
+        self.ntb_control.add(serial_control_tab, text="   Serial   ")
 
         tcp_control_tab = ttk.Frame(self.ntb_control)
         tcp_control = TCPControlFrame(tcp_control_tab, dispatcher=self.dispatcher)
         tcp_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(tcp_control_tab, text="TCP")
+        self.ntb_control.add(tcp_control_tab, text="    TCP    ")
         self.ntb_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
         print("Control Frames created.")
 
@@ -90,10 +89,10 @@ class MainWindow(tk.Tk):
         macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher,
                                           completed_cycles_value=self.completed_cycles_value)
         macro_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(macro_control_tab, text=" Macro ")
+        self.ntb_control.add(macro_control_tab, text="   Macro   ")
 
     def create_log_frame(self):
-        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=80)
         self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=10)
 
     def clear_log_display(self):
@@ -132,10 +131,6 @@ class MainWindow(tk.Tk):
     def quit_application():
         print("Quitting")
         sys.exit()
-
-    @staticmethod
-    def emergency_stop():
-        print("Emergency Stop!")
 
     def on_tab_change(self, event):  # forces immediate update
         self.ntb_control.update_idletasks()
