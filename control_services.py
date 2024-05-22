@@ -37,7 +37,7 @@ class SerialService:
         while self.serial_port and self.serial_port.is_open:
             line = self.serial_port.readline().decode('utf-8').strip()  # Read a line
             if line:
-                timestamp = self.get_timestamp()
+                # timestamp = self.get_timestamp()
                 print(f"Complete message received: {line}")
                 self.dispatcher.emit('receivedData', line, self.serial_port_name)
                 if self.response_callback:

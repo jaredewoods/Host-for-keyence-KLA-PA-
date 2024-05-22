@@ -1,6 +1,8 @@
 # event_registry.py
 
-def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display, scan_com_ports, quit_application, emergency_stop, update_serial_connection_status, update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
+def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display,
+                    scan_com_ports, quit_application, emergency_stop, update_serial_connection_status,
+                    update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
     print("Registering Events")
     dispatcher.register_event('connectSerialPort', serial_service.connect_serial_port)
     dispatcher.register_event('closeSerialPort', serial_service.close_serial_port)
