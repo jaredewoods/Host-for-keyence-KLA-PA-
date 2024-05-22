@@ -1,6 +1,6 @@
 # event_registry.py
 
-def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display, scan_com_ports, quit_application, emergency_stop, update_serial_connection_status, update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
+def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display, scan_com_ports, quit_application, update_serial_connection_status, update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
     print("Registering Events")
     dispatcher.register_event('connectSerialPort', serial_service.connect_serial_port)
     dispatcher.register_event('closeSerialPort', serial_service.close_serial_port)
@@ -9,6 +9,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('chuckHold', serial_service.chuck_hold)
     dispatcher.register_event('hardwareReset', serial_service.hardware_reset)
     dispatcher.register_event('sendCustomSerial', serial_service.custom_serial_command)
+    dispatcher.register_event('emergencyStop', serial_service.emergency_stop)
 
     dispatcher.register_event('connectTCP', tcp_service.connect_tcp_socket)
     dispatcher.register_event('disconnectTCP', tcp_service.close_tcp_socket)
@@ -35,7 +36,6 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
 
     dispatcher.register_event('scanForSerialPorts', scan_com_ports)
     dispatcher.register_event('quitApplication', quit_application)
-    dispatcher.register_event('emergencyStop', emergency_stop)
 
     dispatcher.register_event('updateSerialConnectionStatus', update_serial_connection_status)
     dispatcher.register_event('updateTCPConnectionStatus', update_tcp_connection_status)

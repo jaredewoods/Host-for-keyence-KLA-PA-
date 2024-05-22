@@ -50,7 +50,6 @@ class MainWindow(tk.Tk):
             self.clear_log_display,
             self.scan_com_ports,
             self.quit_application,
-            self.emergency_stop,
             self.update_serial_connection_status,
             self.update_tcp_connection_status,
             self.update_macro_running_status,
@@ -132,10 +131,6 @@ class MainWindow(tk.Tk):
     def quit_application():
         print("Quitting")
         sys.exit()
-
-    @staticmethod
-    def emergency_stop():
-        print("Emergency Stop!")
 
     def on_tab_change(self, event):  # forces immediate update
         self.ntb_control.update_idletasks()
