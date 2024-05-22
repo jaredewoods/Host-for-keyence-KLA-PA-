@@ -322,7 +322,8 @@ class MacroService:
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         self.macro_running = False
 
-    def show_alarm_messagebox(self, alarm, subcode):
+    @staticmethod
+    def show_alarm_messagebox(alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
 
         if alarm_data is None:

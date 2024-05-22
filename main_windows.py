@@ -1,4 +1,4 @@
-# main_window.py
+# main_windows.py
 
 import sys
 import tkinter as tk
