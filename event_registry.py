@@ -6,7 +6,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('closeSerialPort', serial_service.close_serial_port)
     dispatcher.register_event('moveToReadyStation', serial_service.move_to_ready_station)
     dispatcher.register_event('alignWafer', serial_service.align_wafer)
-    dispatcher.register_event('toggleChuck', serial_service.toggle_chuck)
+    dispatcher.register_event('chuckHold', serial_service.chuck_hold)
     dispatcher.register_event('hardwareReset', serial_service.hardware_reset)
     dispatcher.register_event('sendCustomSerial', serial_service.custom_serial_command)
 
@@ -21,7 +21,6 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('stopSequence', macro_service.stop_sequence)
     dispatcher.register_event('startSequence', macro_service.initialize_sequence)
     dispatcher.register_event('resetSequence', macro_service.reset_sequence)
-    dispatcher.register_event('runSequence', macro_service.run_sequence)
     dispatcher.register_event('sendCommandMTRS', macro_service.send_command_mtrs)
     dispatcher.register_event('handleResponseMTRS', macro_service.handle_response_mtrs)
     dispatcher.register_event('sendCommandMALN', macro_service.send_command_maln)

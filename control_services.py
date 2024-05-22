@@ -1,13 +1,14 @@
 # control_services.py
-"""TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
 import threading
+import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox
+
 import serial
-import tkinter as tk
+import winsound
+
 from alarms import alarm_dict
-# import winsound
 
 
 class SerialService:
@@ -105,7 +106,7 @@ class SerialService:
         print(f"Sending: {command}")
         self.send_serial_command(command)
 
-    def toggle_chuck(self):
+    def chuck_hold(self):
         command = self.commands['CSOL']
         print(f"Sending: {command}")
         self.send_serial_command(command)
@@ -212,7 +213,7 @@ class TCPService:
         self.send_tcp_data(command)
         print("Next Camera View")
 
-    def get_custom_serial_command(self):
+    def get_custom_tcp_command(self):
         pass
 
     @staticmethod
@@ -274,6 +275,13 @@ class MacroService:
                 pre_mtrs = message[maln_index - 8:maln_index]
                 if pre_mtrs == '00000000':
                     print("MALN positive completion received")
+                    distance_start = maln_index + 5
+                    distance = message[distance_start:distance_start + 4]
+                    angle_start = distance_start + 4 + 1
+                    angle = message[angle_start:angle_start + 6]
+                    log_message = f"MALN positive completion: Distance: {distance} mm, Angle: {angle} degrees"
+                    self.dispatcher.emit('logToDisplay', log_message)
+
                     self.wait_3_seconds()
                 else:
                     alarm = pre_mtrs[:4]
@@ -340,7 +348,7 @@ class MacroService:
             f"Subcode: {subcode}"
         )
 
-        # winsound.Beep(1000, 1000)
+        winsound.Beep(1000, 1000)
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)
