@@ -2,7 +2,6 @@
 import socket
 import threading
 import tkinter as tk
-from datetime import datetime
 from tkinter import messagebox
 
 import serial
