@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 import serial
-import winsound
+# import winsound
 
 from alarms import alarm_dict
 
@@ -349,7 +349,7 @@ class MacroService:
             f"Subcode: {subcode}"
         )
 
-        winsound.Beep(1000, 1000)
+        # winsound.Beep(1000, 1000)
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)
