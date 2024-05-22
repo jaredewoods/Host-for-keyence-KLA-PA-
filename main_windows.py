@@ -11,6 +11,7 @@ import serial.tools.list_ports
 from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
 from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
+from event_registry import register_events
 
 
 class MainWindow(tk.Tk):
@@ -40,47 +41,21 @@ class MainWindow(tk.Tk):
         print("MainWindow initialized")
 
     def register_events(self):
-        print("Registering Events")
-        self.dispatcher.register_event('connectSerialPort', self.serial_service.connect_serial_port)
-        self.dispatcher.register_event('closeSerialPort', self.serial_service.close_serial_port)
-        self.dispatcher.register_event('moveToReadyStation', self.serial_service.move_to_ready_station)
-        self.dispatcher.register_event('alignWafer', self.serial_service.align_wafer)
-        self.dispatcher.register_event('toggleChuck', self.serial_service.toggle_chuck)
-        self.dispatcher.register_event('hardwareReset', self.serial_service.hardware_reset)
-        self.dispatcher.register_event('sendCustomSerial', self.serial_service.custom_serial_command)
-
-        self.dispatcher.register_event('connectTCP', self.tcp_service.connect_tcp_socket)
-        self.dispatcher.register_event('disconnectTCP', self.tcp_service.close_tcp_socket)
-        self.dispatcher.register_event('triggerOne', self.tcp_service.trigger_one)
-        self.dispatcher.register_event('triggerTwo', self.tcp_service.trigger_two)
-        self.dispatcher.register_event('prevCamera', self.tcp_service.prev_camera)
-        self.dispatcher.register_event('nextCamera', self.tcp_service.next_camera)
-        self.dispatcher.register_event('sendCustomTCP', self.tcp_service.send_custom_tcp)
-
-        self.dispatcher.register_event('stopSequence', self.macro_service.stop_sequence)
-        self.dispatcher.register_event('startSequence', self.macro_service.initialize_sequence)
-        self.dispatcher.register_event('resetSequence', self.macro_service.reset_sequence)
-        self.dispatcher.register_event('runSequence', self.macro_service.run_sequence)
-        self.dispatcher.register_event('sendCommandMTRS', self.macro_service.send_command_mtrs)
-        self.dispatcher.register_event('handleResponseMTRS', self.macro_service.handle_response_mtrs)
-        self.dispatcher.register_event('sendCommandMALN', self.macro_service.send_command_maln)
-        self.dispatcher.register_event('handleResponseMALN', self.macro_service.handle_response_maln)
-        self.dispatcher.register_event('sendCommandT1', self.macro_service.send_command_t1)
-        self.dispatcher.register_event('handleResponseT1', self.macro_service.handle_response_t1)
-        self.dispatcher.register_event('incrementCycleCount', self.macro_service.increment_cycle_count)
-
-        self.dispatcher.register_event('logToDisplay', self.log_to_display)
-        self.dispatcher.register_event('receivedData', self.log_to_display)
-        self.dispatcher.register_event('clearLogDisplay', self.clear_log_display)
-
-        self.dispatcher.register_event('scanForSerialPorts', self.scan_com_ports)
-        self.dispatcher.register_event('quitApplication', self.quit_application)
-        self.dispatcher.register_event('emergencyStop', self.emergency_stop)
-
-        self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
-        self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
-        self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_running_status)
-        self.dispatcher.register_event('updateCompletedCycles', self.update_completed_cycles_display)
+        register_events(
+            self.dispatcher,
+            self.serial_service,
+            self.tcp_service,
+            self.macro_service,
+            self.log_to_display,
+            self.clear_log_display,
+            self.scan_com_ports,
+            self.quit_application,
+            self.emergency_stop,
+            self.update_serial_connection_status,
+            self.update_tcp_connection_status,
+            self.update_macro_running_status,
+            self.update_completed_cycles_display
+        )
 
     def scan_com_ports(self):
         print("Scanning Ports")
@@ -102,12 +77,12 @@ class MainWindow(tk.Tk):
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
         serial_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(serial_control_tab, text="Serial")
+        self.ntb_control.add(serial_control_tab, text="   Serial   ")
 
         tcp_control_tab = ttk.Frame(self.ntb_control)
         tcp_control = TCPControlFrame(tcp_control_tab, dispatcher=self.dispatcher)
         tcp_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(tcp_control_tab, text="TCP")
+        self.ntb_control.add(tcp_control_tab, text="    TCP    ")
         self.ntb_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
         print("Control Frames created.")
 
@@ -115,10 +90,10 @@ class MainWindow(tk.Tk):
         macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher,
                                           completed_cycles_value=self.completed_cycles_value)
         macro_control.pack(fill=tk.BOTH, expand=True)
-        self.ntb_control.add(macro_control_tab, text=" Macro ")
+        self.ntb_control.add(macro_control_tab, text="   Macro   ")
 
     def create_log_frame(self):
-        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=80)
         self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=10)
 
     def clear_log_display(self):

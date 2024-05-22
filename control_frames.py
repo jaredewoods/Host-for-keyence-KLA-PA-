@@ -3,7 +3,6 @@
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
-"""TODO: when it comes time fine tune the UI for PC or Macbook"""
 
 
 class SerialControlFrame(ttk.Frame):
@@ -12,17 +11,17 @@ class SerialControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
 
-        self.lbl_com_port = ttk.Label(self, text="COM PORT")
-        self.lbl_com_port.grid(row=0, column=0, padx=5, pady=5)
+        self.lbl_com_port = ttk.Label(self, text="COM Port")
+        self.lbl_com_port.grid(row=0, column=0, padx=5, pady=(5, 0))
 
         self.cbx_com_port = ttk.Combobox(self, width=7, values=available_ports)
         self.cbx_com_port.grid(row=1, column=0, pady=0, padx=5)
 
-        self.lbl_baudrate = ttk.Label(self, text="BAUD 9600")
-        self.lbl_baudrate.grid(row=0, column=1, padx=5, pady=5)
+        self.lbl_baudrate = ttk.Label(self, text="Baud Rate")
+        self.lbl_baudrate.grid(row=0, column=1, padx=5, pady=(5, 0))
 
-        self.btn_refresh = ttk.Button(self, text="Refresh", command=lambda: dispatcher.emit('scanForSerialPorts'))
-        self.btn_refresh.grid(row=1, column=1, padx=5)
+        self.lbl_9600 = ttk.Label(self, text="9600")
+        self.lbl_9600.grid(row=1, column=1, padx=5, pady=5)
 
         self.btn_connect_serial = ttk.Button(self, text="Connect", command=lambda: dispatcher.emit('connectSerialPort', self.cbx_com_port.get()))
         self.btn_connect_serial.grid(row=2, column=0, padx=5)
@@ -39,7 +38,7 @@ class SerialControlFrame(ttk.Frame):
         self.btn_maln = ttk.Button(self, text="MALN", command=lambda: dispatcher.emit('alignWafer'))
         self.btn_maln.grid(row=4, column=1, padx=5, pady=0)
 
-        self.btn_csol = ttk.Button(self, text="CSOL", command=lambda: dispatcher.emit('toggleChuck'))
+        self.btn_csol = ttk.Button(self, text="CSOL", command=lambda: dispatcher.emit('chuckHold'))
         self.btn_csol.grid(row=5, column=0, padx=5)
 
         self.btn_hrst = ttk.Button(self, text="HRST", command=lambda: dispatcher.emit('hardwareReset'))
@@ -70,19 +69,19 @@ class TCPControlFrame(ttk.Frame):
 
         self.dispatcher = dispatcher
 
-        self.lbl_ip_address = ttk.Label(self, text="  IP ADDRESS")
-        self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=5)
+        self.lbl_ip_address = ttk.Label(self, text="IP Address")
+        self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=(5, 0))
 
-        self.lbl_ip_port = ttk.Label(self, text="          IP PORT")
-        self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=5)
+        self.lbl_ip_port = ttk.Label(self, text="IP Port")
+        self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=(5, 0))
 
         self.txt_ip_address_default = tk.StringVar(value="192.168.0.10")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
-        self.ent_ip_address.grid(row=1, column=0, columnspan=2, sticky='w', padx=5)
+        self.ent_ip_address.grid(row=1, column=0, padx=5, pady=(5, 3))
 
         self.txt_ip_port_default = tk.StringVar(value="8500")
         self.ent_ip_port = ttk.Entry(self, width=5, textvariable=self.txt_ip_port_default, justify='center')
-        self.ent_ip_port.grid(row=1, column=1, columnspan=2, sticky='e', padx=5)
+        self.ent_ip_port.grid(row=1, column=1, padx=5, pady=(5, 3))
 
         self.btn_connect_socket = ttk.Button(self, text="Connect", command=lambda: dispatcher.emit('connectTCP', self.ent_ip_address.get(), self.ent_ip_port.get()))
         self.btn_connect_socket.grid(row=2, column=0, padx=5)
@@ -181,10 +180,10 @@ class MacroControlFrame(ttk.Frame):
         self.val_stop_time.grid(row=8, column=1, pady=5, padx=5)
 
         self.lbl_elapsed_time = ttk.Label(self, text="Elapsed:")
-        self.lbl_elapsed_time.grid(row=9, column=0, pady=5, padx=5)
+        self.lbl_elapsed_time.grid(row=9, column=0, pady=(0, 4), padx=5)
 
         self.val_elapsed_time = ttk.Label(self, text="--:--:--")
-        self.val_elapsed_time.grid(row=9, column=1, pady=5, padx=5)
+        self.val_elapsed_time.grid(row=9, column=1, pady=(0, 4), padx=5)
 
         self.macro_separator2 = ttk.Separator(self, orient='horizontal')
         self.macro_separator2.grid(row=10, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
@@ -208,10 +207,8 @@ class MacroControlFrame(ttk.Frame):
     def update_button_states(self):
         if self.serial_connected and self.tcp_connected:
             self.btn_start.config(state='normal')
-            self.btn_clear_log_display.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
-            self.btn_clear_log_display.config(state='disabled')
 
     def set_start_time(self):
         self.start_time = datetime.now()
@@ -265,9 +262,9 @@ class StatusFrame(ttk.Frame):
 
     def update_serial_status(self, status):
         if status:
-            self.lbl_serial_status.config(text="Serial: Connected", foreground="green")
+            self.lbl_serial_status.config(text="SERIAL: Connected", foreground="green")
         else:
-            self.lbl_serial_status.config(text="Serial: Disconnected", foreground="red")
+            self.lbl_serial_status.config(text="SERIAL: Closed", foreground="red")
 
     def update_tcp_status(self, status):
         if status:
@@ -277,6 +274,6 @@ class StatusFrame(ttk.Frame):
 
     def update_macro_status(self, status):
         if status:
-            self.lbl_macro_status.config(text="Macro: Running", foreground="green")
+            self.lbl_macro_status.config(text="MACRO: Running", foreground="green")
         else:
-            self.lbl_macro_status.config(text="Macro: Stopped", foreground="red")
+            self.lbl_macro_status.config(text="MACRO: Stopped", foreground="red")

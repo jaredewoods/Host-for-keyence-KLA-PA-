@@ -1,11 +1,14 @@
 # control_services.py
-"""TODO: the received response trigger the next step on the macro when it is not even running"""
 import socket
 import threading
+import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox
+
 import serial
-import tkinter as tk
+import winsound
+
+from alarms import alarm_dict
 
 
 class SerialService:
@@ -46,10 +49,10 @@ class SerialService:
             self.read_thread.join()
 
     def send_serial_command(self, command, callback=None):
-        print(f"Sending command: {command}")  # Debug: Show sent command
+        print(f"Sending command: {command}")
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
-        self.response_callback = callback  # Set the callback for the response
+        self.response_callback = callback
 
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
@@ -93,7 +96,6 @@ class SerialService:
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
-    # COMMANDS
     def move_to_ready_station(self):
         command = self.commands['MTRS']
         print(f"Sending: {command}")
@@ -104,7 +106,7 @@ class SerialService:
         print(f"Sending: {command}")
         self.send_serial_command(command)
 
-    def toggle_chuck(self):
+    def chuck_hold(self):
         command = self.commands['CSOL']
         print(f"Sending: {command}")
         self.send_serial_command(command)
@@ -161,7 +163,7 @@ class TCPService:
                 print(f"Failed to send data: {e}")
         else:
             self.dispatcher.emit('logToDisplay', f"not connected", 'TCP', 'error')
-            print("No active connection to send data.")
+            messagebox.showwarning('Warning', "No active TCP connection to send data.")
 
     def handle_received_data(self):
         try:
@@ -211,7 +213,7 @@ class TCPService:
         self.send_tcp_data(command)
         print("Next Camera View")
 
-    def get_custom_serial_command(self):
+    def get_custom_tcp_command(self):
         pass
 
     @staticmethod
@@ -224,7 +226,7 @@ class MacroService:
         self.dispatcher = dispatcher
         self.serial_service = serial_service
         self.macro_running = False
-        self.total_cycles = 0
+        self.total_cycles = 10
         self.completed_cycles = 0
 
     def initialize_sequence(self):
@@ -258,7 +260,7 @@ class MacroService:
                     alarm = pre_mtrs[:4]
                     subcode = pre_mtrs[4:]
                     self.show_alarm_messagebox(alarm, subcode)
-                    print("MTRS negative completion received")
+                    print("MTRS alarm received")
 
     def send_command_maln(self):
         print("Sending command: MALN")
@@ -268,8 +270,24 @@ class MacroService:
         if '@' in message:
             print("MALN acknowledgement received")
         if '$' in message:
-            print("MALN completion received")
-            self.wait_3_seconds()
+            maln_index = message.find('MALN')
+            if maln_index >= 8:
+                pre_mtrs = message[maln_index - 8:maln_index]
+                if pre_mtrs == '00000000':
+                    print("MALN positive completion received")
+                    distance_start = maln_index + 5
+                    distance = message[distance_start:distance_start + 4]
+                    angle_start = distance_start + 4 + 1
+                    angle = message[angle_start:angle_start + 6]
+                    log_message = f"MALN positive completion: Distance: {distance} mm, Angle: {angle} degrees"
+                    self.dispatcher.emit('logToDisplay', log_message)
+
+                    self.wait_3_seconds()
+                else:
+                    alarm = pre_mtrs[:4]
+                    subcode = pre_mtrs[4:]
+                    self.show_alarm_messagebox(alarm, subcode)
+                    print("MALN alarm received")
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
@@ -305,7 +323,33 @@ class MacroService:
         self.macro_running = False
 
     def show_alarm_messagebox(self, alarm, subcode):
+        alarm_data = alarm_dict.get(alarm, None)
+
+        if alarm_data is None:
+            alarm_info = {
+                "Message": "Unknown message",
+            }
+        else:
+            alarm_info = next(iter(alarm_data.values()), {
+                "Message": "Unknown message",
+                "Cause": "Unknown cause",
+                "Potential Causes": ["Unknown potential causes"]
+            })
+
+        message = alarm_info.get("Message", "Unknown message")
+        cause = alarm_info.get("Cause", "Unknown cause")
+        potential_causes = alarm_info.get("Potential Causes", ["Unknown potential causes"])
+        potential_causes_formatted = "\n".join([f"• {cause}" for cause in potential_causes])
+        formatted_message = (
+            f"Alarm: {alarm}\n\n"
+            f"{message}\n\n"
+            f"{cause}\n\n"
+            f"Potential Causes:\n{potential_causes_formatted}\n\n"
+            f"Subcode: {subcode}"
+        )
+
+        winsound.Beep(1000, 1000)
         root = tk.Tk()
-        root.withdraw()  # Hide the root window
-        messagebox.showerror("Alarm", f"Alarm: {alarm}\nSubcode: {subcode}")
+        root.withdraw()
+        messagebox.showerror("Alarm", formatted_message)
         root.destroy()
