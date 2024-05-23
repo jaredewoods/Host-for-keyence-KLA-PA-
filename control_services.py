@@ -72,12 +72,17 @@ class SerialService:
         print(f"Started thread for reading from port.")
 
         while self.serial_port and self.serial_port.is_open:
-            line = self.serial_port.readline().decode('utf-8').strip()
-            if line:
-                print(f"Complete message received: {line}")
-                self.dispatcher.emit('receivedData', line, self.serial_port_name)
-                if self.response_callback:
-                    self.response_callback(line)
+            try:
+                line = self.serial_port.readline()  # Non-blocking read operation
+                if line:
+                    line = line.decode('utf-8').strip()
+                    print(f"Complete message received: {line}")
+                    self.dispatcher.emit('receivedData', line, self.serial_port_name)
+                    if self.response_callback:
+                        self.response_callback(line)
+            except serial.SerialException as e:
+                print(f"Read failed: {str(e)}")
+
 
     def stop_reading(self):
         if self.read_thread and self.read_thread.is_alive():
@@ -233,13 +238,14 @@ class MacroService:
         self.total_cycles = 105
         self.completed_cycles = 0
 
-    def initialize_sequence(self):
+    def initialize_sequence(self, total_cycles):
         print("Initializing Sequence")
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
+        self.dispatcher.emit('startSequence')
         self.run_sequence()
-
+        self.total_cycles = total_cycles
     def run_sequence(self):
         if self.macro_running:
             print("Running sequence")
