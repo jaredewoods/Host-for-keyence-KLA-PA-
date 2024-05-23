@@ -352,6 +352,10 @@ class MacroService:
             threading.Timer(0.1, self.run_sequence).start()
 
     @staticmethod
+    def show_completion_messagebox():
+        pass
+
+    @staticmethod
     def show_alarm_messagebox(alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
 
