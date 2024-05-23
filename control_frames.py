@@ -68,6 +68,7 @@ class TCPControlFrame(ttk.Frame):
         super().__init__(master)
 
         self.dispatcher = dispatcher
+        self.tcp_connected = False
 
         self.lbl_ip_address = ttk.Label(self, text="IP Address")
         self.lbl_ip_address.grid(row=0, column=0, padx=5, pady=(5, 0))
@@ -75,11 +76,11 @@ class TCPControlFrame(ttk.Frame):
         self.lbl_ip_port = ttk.Label(self, text="IP Port")
         self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=(5, 0))
 
-        self.txt_ip_address_default = tk.StringVar(value="192.168.0.10")
+        self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
         self.ent_ip_address.grid(row=1, column=0, padx=5, pady=(5, 3))
 
-        self.txt_ip_port_default = tk.StringVar(value="8500")
+        self.txt_ip_port_default = tk.StringVar(value="80")
         self.ent_ip_port = ttk.Entry(self, width=5, textvariable=self.txt_ip_port_default, justify='center')
         self.ent_ip_port.grid(row=1, column=1, padx=5, pady=(5, 3))
 
@@ -92,22 +93,22 @@ class TCPControlFrame(ttk.Frame):
         self.tcp_separator0 = ttk.Separator(self, orient='horizontal')
         self.tcp_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.btn_t1 = ttk.Button(self, text="Trig 1", command=lambda: dispatcher.emit('triggerOne'))
+        self.btn_t1 = ttk.Button(self, text="Trig 1", state='disabled', command=lambda: dispatcher.emit('triggerOne'))
         self.btn_t1.grid(row=4, column=0, padx=5, pady=0)
 
-        self.btn_t2 = ttk.Button(self, text="Trig 2", command=lambda: dispatcher.emit('triggerTwo'))
+        self.btn_t2 = ttk.Button(self, text="Trig 2", state='disabled', command=lambda: dispatcher.emit('triggerTwo'))
         self.btn_t2.grid(row=4, column=1, padx=5, pady=0)
 
-        self.btn_prev_camera = ttk.Button(self, text="PrevCam", command=lambda: dispatcher.emit('prevCamera'))
+        self.btn_prev_camera = ttk.Button(self, text="PrevCam", state='disabled', command=lambda: dispatcher.emit('prevCamera'))
         self.btn_prev_camera.grid(row=5, column=0, padx=5)
 
-        self.btn_next_camera = ttk.Button(self, text="NextCam", command=lambda: dispatcher.emit('nextCamera'))
+        self.btn_next_camera = ttk.Button(self, text="NextCam", state='disabled', command=lambda: dispatcher.emit('nextCamera'))
         self.btn_next_camera.grid(row=5, column=1, padx=5)
 
         self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
         self.tcp_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.ent_custom_tcp = ttk.Entry(self)
+        self.ent_custom_tcp = ttk.Entry(self, text='Enter custom TCP command')
         self.ent_custom_tcp.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
 
         self.btn_custom_tcp_send = ttk.Button(self, text="Send", command=lambda: dispatcher.emit('sendCustomTCP', self.ent_custom_tcp.get()))
@@ -121,6 +122,25 @@ class TCPControlFrame(ttk.Frame):
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
         self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+
+        self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
+
+    def update_tcp_connection_status(self, status):
+        self.tcp_connected = status
+        self.update_button_states()
+
+    def update_button_states(self):
+        if self.tcp_connected:
+            self.btn_t1.config(state='normal')
+            self.btn_t2.config(state='normal')
+            self.btn_prev_camera.config(state='normal')
+            self.btn_next_camera.config(state='normal')
+        else:
+            self.btn_t1.config(state='disabled')
+            self.btn_t2.config(state='disabled')
+            self.btn_prev_camera.config(state='disabled')
+            self.btn_next_camera.config(state='disabled')
+            self.btn_custom_tcp_send.config(state='disabled')
 
 
 class MacroControlFrame(ttk.Frame):
@@ -167,13 +187,13 @@ class MacroControlFrame(ttk.Frame):
         self.macro_separator1 = ttk.Separator(self, orient='horizontal')
         self.macro_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=(5, 8), padx=5)
 
-        self.lbl_start_time = ttk.Label(self, text="Start:")
+        self.lbl_start_time = ttk.Label(self, text="Started:")
         self.lbl_start_time.grid(row=7, column=0, padx=5)
 
         self.val_start_time = ttk.Label(self, text="00:00:00")
         self.val_start_time.grid(row=7, column=1, padx=5)
 
-        self.lbl_stop_time = ttk.Label(self, text="Stop:")
+        self.lbl_stop_time = ttk.Label(self, text="Stopped:")
         self.lbl_stop_time.grid(row=8, column=0, pady=5, padx=5)
 
         self.val_stop_time = ttk.Label(self, text="--:--:--")
@@ -194,7 +214,6 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
         self.dispatcher.register_event('startSequence', self.set_start_time)
-        # self.dispatcher.register_event('stopSequence', self.set_elapsed_time)
 
     def update_serial_connection_status(self, status):
         self.serial_connected = status
@@ -215,6 +234,7 @@ class MacroControlFrame(ttk.Frame):
         self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
         print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
 
+# TODO why doesnt stop time update
     def set_stop_time(self):
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))

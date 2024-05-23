@@ -41,8 +41,7 @@ class SerialService:
                 bytesize=serial.EIGHTBITS
             )
 
-            # Emit log and start read thread
-            print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")  # Debug: Show connection success
+            print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")
             self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
             threading.Thread(
                 target=self.read_from_port, args=(self.serial_port,), daemon=True
@@ -110,7 +109,7 @@ class SerialService:
         print(f"Sending: {command}")
         self.send_serial_command(command)
 
-    def custom_serial_command(self, custom_command):
+    def send_custom_serial(self, custom_command):
         command = custom_command
         print(f"Sending custom command: {command}")
         self.send_serial_command(command)
@@ -155,13 +154,14 @@ class TCPService:
                 self.socket.sendall(tcp_data.encode('utf-8'))
                 self.dispatcher.emit('logToDisplay', f"Data sent: {tcp_data}", 'TCP', 'sent')
                 print(f"Data sent: {tcp_data}")
-                # After sending data, wait for response
                 self.handle_received_data()
             except socket.error as e:
                 self.dispatcher.emit('logToDisplay', f"Data send failed", 'TCP', 'error')
                 print(f"Failed to send data: {e}")
+                self.dispatcher.emit('updateTCPConnectionStatus', False)
         else:
             self.dispatcher.emit('logToDisplay', f"not connected", 'TCP', 'error')
+            self.dispatcher.emit('updateTCPConnectionStatus', False)
             messagebox.showwarning('Warning', "No active TCP connection to send data.")
 
     def handle_received_data(self):
@@ -169,7 +169,6 @@ class TCPService:
             data = self.socket.recv(1024).decode('utf-8')
             self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP', 'received')
             print(f"Data received: {data}")
-            # Process the received message
             self.handle_response(data)
         except socket.timeout:
             self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP', 'error')
@@ -212,12 +211,11 @@ class TCPService:
         self.send_tcp_data(command)
         print("Next Camera View")
 
-    def get_custom_tcp_command(self):
-        pass
-
-    @staticmethod
-    def send_custom_tcp(command):
+    def send_custom_tcp(self, custom_command):
+        command = custom_command
         print(f"Sending tcp command: {command}")
+        self.dispatcher.emit('logToDisplay', f"Sent: {command}", "TCP")
+        self.handle_received_data()
 
 
 class MacroService:
