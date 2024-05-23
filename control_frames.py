@@ -10,6 +10,7 @@ class SerialControlFrame(ttk.Frame):
         super().__init__(master)
 
         self.dispatcher = dispatcher
+        self.serial_connected = False
 
         self.lbl_com_port = ttk.Label(self, text="COM Port")
         self.lbl_com_port.grid(row=0, column=0, padx=5, pady=(5, 0))
@@ -32,16 +33,16 @@ class SerialControlFrame(ttk.Frame):
         self.serial_separator0 = ttk.Separator(self, orient='horizontal')
         self.serial_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.btn_mtrs = ttk.Button(self, text="MTRS", command=lambda: dispatcher.emit('moveToReadyStation'))
+        self.btn_mtrs = ttk.Button(self, text="MTRS", state='disabled', command=lambda: dispatcher.emit('moveToReadyStation'))
         self.btn_mtrs.grid(row=4, column=0, padx=5, pady=0)
 
-        self.btn_maln = ttk.Button(self, text="MALN", command=lambda: dispatcher.emit('alignWafer'))
+        self.btn_maln = ttk.Button(self, text="MALN", state='disabled', command=lambda: dispatcher.emit('alignWafer'))
         self.btn_maln.grid(row=4, column=1, padx=5, pady=0)
 
-        self.btn_csol = ttk.Button(self, text="CSOL", command=lambda: dispatcher.emit('chuckHold'))
+        self.btn_csol = ttk.Button(self, text="CSOL", state='disabled', command=lambda: dispatcher.emit('chuckHold'))
         self.btn_csol.grid(row=5, column=0, padx=5)
 
-        self.btn_hrst = ttk.Button(self, text="HRST", command=lambda: dispatcher.emit('hardwareReset'))
+        self.btn_hrst = ttk.Button(self, text="HRST", state='disabled', command=lambda: dispatcher.emit('hardwareReset'))
         self.btn_hrst.grid(row=5, column=1, padx=5)
 
         self.serial_separator1 = ttk.Separator(self, orient='horizontal')
@@ -61,6 +62,25 @@ class SerialControlFrame(ttk.Frame):
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
         self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+
+        self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
+
+    def update_serial_connection_status(self, status):
+        self.serial_connected = status
+        self.update_button_states()
+
+    def update_button_states(self):
+        if self.serial_connected:
+            self.btn_mtrs.config(state='normal')
+            self.btn_maln.config(state='normal')
+            self.btn_csol.config(state='normal')
+            self.btn_hrst.config(state='normal')
+        else:
+            self.btn_mtrs.config(state='disabled')
+            self.btn_maln.config(state='disabled')
+            self.btn_csol.config(state='disabled')
+            self.btn_hrst.config(state='disabled')
+            self.btn_custom_serial_send.config(state='disabled')
 
 
 class TCPControlFrame(ttk.Frame):

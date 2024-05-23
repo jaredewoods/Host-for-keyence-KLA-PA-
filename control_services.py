@@ -84,6 +84,10 @@ class SerialService:
             self.read_thread.join()
 
     def send_serial_command(self, command, callback=None):
+        if self.serial_port is None or not self.serial_port.is_open:
+            print("Error: No open port to send command")
+            messagebox.showerror("Serial Port Error", "Attempted to send command with no open port.")
+            return
         print(f"Sending command: {command}")
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
@@ -115,10 +119,13 @@ class SerialService:
         self.send_serial_command(command)
 
     def emergency_stop(self):
+        if self.serial_port is None or not self.serial_port.is_open:
+            print("Error: No open port to send emergency stop command")
+            messagebox.showerror("Serial Port Error", "Attempted to send emergency stop with no open port.")
+            return
         command = "$2CEMG4E"
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
-
 
 class TCPService:
     def __init__(self, dispatcher=None):
