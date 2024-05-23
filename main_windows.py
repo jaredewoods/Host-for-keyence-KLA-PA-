@@ -110,19 +110,23 @@ class MainWindow(tk.Tk):
         self.log_display.see(tk.END)
 
     def update_serial_connection_status(self, status):
+        print("debug this function from MainWindow")
         self.serial_connected = status
         self.dispatcher.emit('updateButtonStates')
 
     def update_tcp_connection_status(self, status):
+        print("debug this function from MainWindow")
         self.tcp_connected = status
         self.dispatcher.emit('updateButtonStates')
 
     def update_macro_running_status(self, status):
+        print("debug this function from MainWindow")
         self.macro_running = status
         print(f'macro running status: {status}')
 
     def update_completed_cycles_display(self, completed_cycles):
-        print(f"Updating completed cycles value MW: {completed_cycles}")
+        print("debug this function from MainWindow")
+        print(f"Updating completed cycles value: {completed_cycles}")
         self.completed_cycles_value.set(completed_cycles)
         print(f"New value in IntVar: {self.completed_cycles_value.get()}")
         self.update_idletasks()

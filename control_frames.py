@@ -67,10 +67,12 @@ class SerialControlFrame(ttk.Frame):
 
     # UI UPDATES
     def update_serial_connection_status(self, status):
+        print("debug this function from SeriaControlFrame")
         self.serial_connected = status
         self.update_button_states()
 
     def update_button_states(self):
+        print("debug this function from SeriaControlFrame")
         if self.serial_connected:
             self.btn_mtrs.config(state='normal')
             self.btn_maln.config(state='normal')
@@ -152,10 +154,12 @@ class TCPControlFrame(ttk.Frame):
 
         # UI UPDATES
     def update_tcp_connection_status(self, status):
+        print("debug this function from TCPControlFrame")
         self.tcp_connected = status
         self.update_button_states()
 
     def update_button_states(self):
+        print("debug this function from TCPControlFrame")
         if self.tcp_connected:
             self.btn_t1.config(state='normal')
             self.btn_t2.config(state='normal')
@@ -247,37 +251,45 @@ class MacroControlFrame(ttk.Frame):
 
 # UI UPDATES
     def update_serial_connection_status(self, status):
+        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame")
         self.serial_connected = status
         self.update_button_states()
 
     def update_tcp_connection_status(self, status):
+        print("debug this function from MacroControlFrame")
         self.tcp_connected = status
         self.update_button_states()
 
     def update_button_states(self):
+        print("debug this function from MacroControlFrame")
         if self.serial_connected and self.tcp_connected:
             self.btn_start.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
 
     def set_start_time(self):
+        print("debug this function from MacroControlFrame")
         self.start_time = datetime.now()
         self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
         print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
 
     def set_stop_time(self):
+        print("debug this function from MacroControlFrame")
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.start_time.strftime('%H:%M:%S')}")
         self.update_elapsed_time()
 
     def update_elapsed_time(self):
+        print("debug this function from MacroControlFrame")
         if self.start_time:
             elapsed = self.stop_time - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
             self.val_elapsed_time.config(text=self.elapsed_time.get())
 
     def reset_sequence(self):
+        print("debug this function from MacroControlFrame")
         print("Sequence Reset")
         self.start_time = None
         self.val_start_time.config(text="00:00:00")

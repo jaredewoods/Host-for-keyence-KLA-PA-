@@ -12,8 +12,8 @@ from alarms import alarm_dict
 
 class SerialService:
     def __init__(self, dispatcher=None):
-        self.read_thread = None
         self.dispatcher = dispatcher
+        self.read_thread = None
         self.serial_port = None
         self.serial_port_name = None
         self.baud_rate = 9600
@@ -125,7 +125,7 @@ class SerialService:
                 if line:
                     line = line.decode('utf-8').strip()
                     print(f"Complete message received: {line}")
-                    self.dispatcher.emit('receivedData', line, self.serial_port_name)
+                    self.dispatcher.emit('receivedData', f'Received: {line}', self.serial_port_name)
                     if self.response_callback:
                         self.response_callback(line)
             except serial.SerialException as e:
@@ -244,6 +244,7 @@ class MacroService:
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
+        self.dispatcher.emit('logToDisplay', '1', 'STARTING CYCLE:')
         self.run_sequence()
 
     def run_sequence(self):
@@ -290,19 +291,30 @@ class MacroService:
     def handle_response_maln(self, message):
         if '@' in message:
             print("MALN acknowledgement received")
+            self.dispatcher.emit('logToDisplay', 'Wafer...', 'Aligning')
         if '$' in message:
             maln_index = message.find('MALN')
             if maln_index >= 8:
                 pre_mtrs = message[maln_index - 8:maln_index]
                 if pre_mtrs == '00000000':
                     print("MALN positive completion received")
-                    distance_start = maln_index + 5
-                    distance = message[distance_start:distance_start + 4]
-                    angle_start = distance_start + 4 + 1
-                    angle = message[angle_start:angle_start + 6]
-                    log_message = f"MALN positive completion: Distance: {distance} mm, Angle: {angle} degrees"
-                    self.dispatcher.emit('logToDisplay', log_message)
-
+                    distance_start = maln_index + 4
+                    distance_raw = message[distance_start:distance_start + 4]
+                    try:
+                        distance_value = int(distance_raw)
+                        distance = f"{distance_value / 100:.2f}"
+                    except ValueError:
+                        distance = "Invalid distance format"
+                    angle_start = distance_start + 4
+                    angle_raw = message[angle_start:angle_start + 6]
+                    angle_sign = '-' if angle_raw[0] == '-' else ''
+                    try:
+                        angle_value = int(angle_raw.lstrip('-'))
+                        angle = f"{angle_value / 100:.2f}"
+                    except ValueError:
+                        angle = "Invalid angle format"
+                    log_message = f"{distance}mm {angle_sign}{angle}deg"
+                    self.dispatcher.emit('logToDisplay', log_message, "OFFSET:")
                     self.wait_3_seconds()
                 else:
                     alarm = pre_mtrs[:4]
@@ -312,7 +324,9 @@ class MacroService:
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
-        threading.Timer(3, self.send_command_t1).start()
+        self.dispatcher.emit('logToDisplay', '3 secs.', 'Waiting for')
+        # threading.Timer(3, self.send_command_t1).start()
+        threading.Timer(3, self.increment_cycle_count).start()
 
     def send_command_t1(self):
         print("Sending command: T1")
@@ -324,13 +338,15 @@ class MacroService:
 
     def increment_cycle_count(self):
         self.completed_cycles += 1
+        self.dispatcher.emit('logToDisplay', self.completed_cycles + 1, "STARTING CYCLE:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
         if self.completed_cycles >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
+            self.dispatcher.emit('logToData', {})
             self.dispatcher.emit("stopSequence", self.completed_cycles)
-            self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
+            self.dispatcher.emit("updateCompletedCycles", f'{self.total_cycles} completed', "SEQUENCE COMPLETED: ")
         else:
             threading.Timer(0.1, self.run_sequence).start()
 
