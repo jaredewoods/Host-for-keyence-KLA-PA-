@@ -235,16 +235,16 @@ class MacroService:
         self.dispatcher = dispatcher
         self.serial_service = serial_service
         self.macro_running = False
-        self.total_cycles = 105
+        self.total_cycles = None
         self.completed_cycles = 0
 
-    def initialize_sequence(self):
+    def initialize_sequence(self, total_cycles):
         print("Initializing Sequence")
-        self.total_cycles = 105
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
-        self.dispatcher.emit('logToDisplay', '1', 'STARTING CYCLE:')
+        self.total_cycles = int(total_cycles)
+        self.dispatcher.emit('logToDisplay', total_cycles, 'STARTING CYCLE 1 of')
         self.run_sequence()
 
     def run_sequence(self):
@@ -342,11 +342,11 @@ class MacroService:
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
-        if self.completed_cycles >= self.total_cycles:
+        if self.completed_cycles >= int(self.total_cycles):
             print("Total cycles reached, stopping sequence")
             self.dispatcher.emit('logToData', {})
-            self.dispatcher.emit("stopSequence", self.completed_cycles)
-            self.dispatcher.emit("updateCompletedCycles", f'{self.total_cycles} completed', "SEQUENCE COMPLETED: ")
+            self.dispatcher.emit("stopSequence")
+            self.dispatcher.emit("updateCompletedCycles", self.total_cycles)
         else:
             threading.Timer(0.1, self.run_sequence).start()
 

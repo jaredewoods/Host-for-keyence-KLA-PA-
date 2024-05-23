@@ -20,6 +20,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('sendCustomTCP', tcp_service.send_custom_tcp)
 
     dispatcher.register_event('stopSequence', macro_service.stop_sequence)
+    dispatcher.register_event('initializeSequence', macro_service.initialize_sequence)
     dispatcher.register_event('startSequence', macro_service.initialize_sequence)
     dispatcher.register_event('resetSequence', macro_service.reset_sequence)
     dispatcher.register_event('sendCommandMTRS', macro_service.send_command_mtrs)

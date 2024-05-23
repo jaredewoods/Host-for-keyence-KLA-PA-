@@ -177,8 +177,9 @@ class TCPControlFrame(ttk.Frame):
 
 
 class MacroControlFrame(ttk.Frame):
-    def __init__(self, master=None, dispatcher=None, completed_cycles_value=None):
+    def __init__(self, master=None, dispatcher=None, completed_cycles_value=None, total_cycles=None):
         super().__init__(master)
+        self.total_cycles = tk.StringVar(value="100")
 
         self.stop_time = None
         self.dispatcher = dispatcher
@@ -192,8 +193,7 @@ class MacroControlFrame(ttk.Frame):
         self.lbl_alignments = ttk.Label(self, text="Alignments")
         self.lbl_alignments.grid(row=1, column=0, padx=5, pady=5)
 
-        self.txt_total_cycles_default = tk.StringVar(value="105")
-        self.ent_total_cycles = ttk.Entry(self, width=5, textvariable=self.txt_total_cycles_default, justify='center')
+        self.ent_total_cycles = ttk.Entry(self, width=5, textvariable=self.total_cycles, justify='center')
         self.ent_total_cycles.grid(row=2, column=0, padx=5)
 
         self.lbl_completed_cycles = ttk.Label(self, text="Completed")
@@ -205,7 +205,7 @@ class MacroControlFrame(ttk.Frame):
         self.macro_separator0 = ttk.Separator(self, orient='horizontal')
         self.macro_separator0.grid(row=3, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.btn_start = ttk.Button(self, text="Start", state='disabled', command=lambda: dispatcher.emit('startSequence'))
+        self.btn_start = ttk.Button(self, text="Start", state='disabled', command=self.starting_sequence)
         self.btn_start.grid(row=4, column=0, padx=5)
 
         self.btn_stop = ttk.Button(self, text="Stop", state='normal', command=lambda: dispatcher.emit('stopSequence'))
@@ -250,8 +250,11 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('stopSequence', self.set_stop_time)
 
 # UI UPDATES
+    def starting_sequence(self):
+        self.set_start_time()
+        self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
+
     def update_serial_connection_status(self, status):
-        print("debug this function from MacroControlFrame")
         print("debug this function from MacroControlFrame")
         self.serial_connected = status
         self.update_button_states()
