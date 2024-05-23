@@ -339,7 +339,7 @@ class MacroService:
     # TODO Create a completion frame with a popup window trhat allows for exporting or saving of the log
     def increment_cycle_count(self):
         self.completed_cycles += 1
-        self.dispatcher.emit('logToDisplay', self.completed_cycles + 1, "STARTING CYCLE:")
+        self.dispatcher.emit('logToDisplay', self.completed_cycles, "COMPLETED CYCLE:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
