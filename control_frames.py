@@ -262,12 +262,17 @@ class MacroControlFrame(ttk.Frame):
         self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
         print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
 
-# TODO why doesnt stop time update
     def set_stop_time(self):
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.start_time.strftime('%H:%M:%S')}")
         self.update_elapsed_time()
+
+    def update_elapsed_time(self):
+        if self.start_time:
+            elapsed = self.stop_time - self.start_time
+            self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
+            self.val_elapsed_time.config(text=self.elapsed_time.get())
 
     def reset_sequence(self):
         print("Sequence Reset")
@@ -278,12 +283,6 @@ class MacroControlFrame(ttk.Frame):
         self.ent_total_cycles.delete(0, tk.END)
         self.ent_total_cycles.insert(0, "0")
         print("Sequence reset")
-
-    def update_elapsed_time(self):
-        if self.start_time:
-            elapsed = self.stop_time - self.start_time
-            self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
-            self.val_elapsed_time.config(text=self.elapsed_time.get())
 
 
 class StatusFrame(ttk.Frame):
