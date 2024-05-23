@@ -132,6 +132,7 @@ class SerialService:
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
 
+
 class TCPService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
@@ -238,14 +239,14 @@ class MacroService:
         self.total_cycles = 105
         self.completed_cycles = 0
 
-    def initialize_sequence(self, total_cycles):
+    def initialize_sequence(self):
         print("Initializing Sequence")
+        self.total_cycles = 105
         self.macro_running = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
-        self.dispatcher.emit('startSequence')
         self.run_sequence()
-        self.total_cycles = total_cycles
+
     def run_sequence(self):
         if self.macro_running:
             print("Running sequence")
