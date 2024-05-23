@@ -66,23 +66,6 @@ class SerialService:
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
-    def read_from_port(self, serial_port):
-        self.serial_port = serial_port
-        print(f"Reading from {self.serial_port}.")
-        print(f"Started thread for reading from port.")
-
-        while self.serial_port and self.serial_port.is_open:
-            try:
-                line = self.serial_port.readline()  # Non-blocking read operation
-                if line:
-                    line = line.decode('utf-8').strip()
-                    print(f"Complete message received: {line}")
-                    self.dispatcher.emit('receivedData', line, self.serial_port_name)
-                    if self.response_callback:
-                        self.response_callback(line)
-            except serial.SerialException as e:
-                print(f"Read failed: {str(e)}")
-
     def stop_reading(self):
         if self.read_thread and self.read_thread.is_alive():
             self.read_thread.join()
@@ -130,6 +113,23 @@ class SerialService:
         command = "$2CEMG4E"
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
+
+    def read_from_port(self, serial_port):
+        self.serial_port = serial_port
+        print(f"Reading from {self.serial_port}.")
+        print(f"Started thread for reading from port.")
+
+        while self.serial_port and self.serial_port.is_open:
+            try:
+                line = self.serial_port.readline()  # Non-blocking read operation
+                if line:
+                    line = line.decode('utf-8').strip()
+                    print(f"Complete message received: {line}")
+                    self.dispatcher.emit('receivedData', line, self.serial_port_name)
+                    if self.response_callback:
+                        self.response_callback(line)
+            except serial.SerialException as e:
+                print(f"Read failed: {str(e)}")
 
 
 class TCPService:
@@ -251,6 +251,17 @@ class MacroService:
             print("Running sequence")
             self.send_command_mtrs()
 
+    def stop_sequence(self):
+        print("Stopping Sequence")
+        self.macro_running = False
+        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
+
+    def reset_sequence(self):
+        print("Resetting sequence")
+        self.completed_cycles = 0
+        self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
+        self.macro_running = False
+
     def send_command_mtrs(self):
         print("Sending command: MTRS")
         self.dispatcher.emit('moveToReadyPosition')
@@ -322,17 +333,6 @@ class MacroService:
             self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         else:
             threading.Timer(0.1, self.run_sequence).start()
-
-    def stop_sequence(self):
-        print("Stopping Sequence")
-        self.macro_running = False
-        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
-
-    def reset_sequence(self):
-        print("Resetting sequence")
-        self.completed_cycles = 0
-        self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
-        self.macro_running = False
 
     @staticmethod
     def show_alarm_messagebox(alarm, subcode):

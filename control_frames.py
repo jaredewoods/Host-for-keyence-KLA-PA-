@@ -65,6 +65,7 @@ class SerialControlFrame(ttk.Frame):
 
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
 
+    # UI UPDATES
     def update_serial_connection_status(self, status):
         self.serial_connected = status
         self.update_button_states()
@@ -149,6 +150,7 @@ class TCPControlFrame(ttk.Frame):
 
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
 
+        # UI UPDATES
     def update_tcp_connection_status(self, status):
         self.tcp_connected = status
         self.update_button_states()
@@ -243,6 +245,7 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('startSequence', self.set_start_time)
         self.dispatcher.register_event('stopSequence', self.set_stop_time)
 
+# UI UPDATES
     def update_serial_connection_status(self, status):
         self.serial_connected = status
         self.update_button_states()
@@ -307,6 +310,7 @@ class StatusFrame(ttk.Frame):
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_status)
         self.dispatcher.register_event('updateMacroRunningStatus', self.update_macro_status)
 
+    # UI UPDATES
     def update_serial_status(self, status):
         if status:
             self.lbl_serial_status.config(text="SERIAL: Connected", foreground="green")
