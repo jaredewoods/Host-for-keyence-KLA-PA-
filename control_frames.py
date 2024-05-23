@@ -48,7 +48,7 @@ class SerialControlFrame(ttk.Frame):
         self.serial_separator1 = ttk.Separator(self, orient='horizontal')
         self.serial_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.ent_custom_serial = ttk.Entry(self)
+        self.ent_custom_serial = ttk.Entry(self, state='disabled')
         self.ent_custom_serial.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
         self.btn_custom_serial_send = ttk.Button(self, text="Send", state='disabled', command=lambda: dispatcher.emit('sendCustomSerial', self.ent_custom_serial.get()))
@@ -76,6 +76,7 @@ class SerialControlFrame(ttk.Frame):
             self.btn_csol.config(state='normal')
             self.btn_hrst.config(state='normal')
             self.btn_custom_serial_send.config(state='normal')
+            self.ent_custom_serial.config(state='normal')
 
         else:
             self.btn_mtrs.config(state='disabled')
@@ -83,6 +84,7 @@ class SerialControlFrame(ttk.Frame):
             self.btn_csol.config(state='disabled')
             self.btn_hrst.config(state='disabled')
             self.btn_custom_serial_send.config(state='disabled')
+            self.ent_custom_serial.config(state='disabled')
 
 
 class TCPControlFrame(ttk.Frame):
@@ -130,7 +132,7 @@ class TCPControlFrame(ttk.Frame):
         self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
         self.tcp_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.ent_custom_tcp = ttk.Entry(self)
+        self.ent_custom_tcp = ttk.Entry(self, state='disabled')
         self.ent_custom_tcp.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
         self.btn_custom_tcp_send = ttk.Button(self, text="Send", state='disabled', command=lambda: dispatcher.emit('sendCustomTCP', self.ent_custom_tcp.get()))
@@ -158,12 +160,14 @@ class TCPControlFrame(ttk.Frame):
             self.btn_prev_camera.config(state='normal')
             self.btn_next_camera.config(state='normal')
             self.btn_custom_tcp_send.config(state='normal')
+            self.ent_custom_tcp.config(state='normal')
         else:
             self.btn_t1.config(state='disabled')
             self.btn_t2.config(state='disabled')
             self.btn_prev_camera.config(state='disabled')
             self.btn_next_camera.config(state='disabled')
             self.btn_custom_tcp_send.config(state='disabled')
+            self.ent_custom_tcp.config(state='disabled')
 
 
 class MacroControlFrame(ttk.Frame):

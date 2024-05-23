@@ -83,7 +83,6 @@ class SerialService:
             except serial.SerialException as e:
                 print(f"Read failed: {str(e)}")
 
-
     def stop_reading(self):
         if self.read_thread and self.read_thread.is_alive():
             self.read_thread.join()
