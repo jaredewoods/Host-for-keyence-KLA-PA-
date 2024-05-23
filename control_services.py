@@ -319,7 +319,8 @@ class MacroService:
         print(f"New cycle count: {self.completed_cycles}")
         if self.completed_cycles >= self.total_cycles:
             print("Total cycles reached, stopping sequence")
-            self.stop_sequence()
+            self.dispatcher.emit("stopSequence", self.completed_cycles)
+            self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         else:
             threading.Timer(0.1, self.run_sequence).start()
 

@@ -49,9 +49,9 @@ class SerialControlFrame(ttk.Frame):
         self.serial_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.ent_custom_serial = ttk.Entry(self)
-        self.ent_custom_serial.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+        self.ent_custom_serial.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
-        self.btn_custom_serial_send = ttk.Button(self, text="Send", command=lambda: dispatcher.emit('sendCustomSerial', self.ent_custom_serial.get()))
+        self.btn_custom_serial_send = ttk.Button(self, text="Send", state='disabled', command=lambda: dispatcher.emit('sendCustomSerial', self.ent_custom_serial.get()))
         self.btn_custom_serial_send.grid(row=8, column=0, padx=5)
 
         self.btn_quit_application = ttk.Button(self, text="Quit", command=lambda: dispatcher.emit('quitApplication'))
@@ -61,7 +61,7 @@ class SerialControlFrame(ttk.Frame):
         self.serial_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
 
@@ -75,6 +75,8 @@ class SerialControlFrame(ttk.Frame):
             self.btn_maln.config(state='normal')
             self.btn_csol.config(state='normal')
             self.btn_hrst.config(state='normal')
+            self.btn_custom_serial_send.config(state='normal')
+
         else:
             self.btn_mtrs.config(state='disabled')
             self.btn_maln.config(state='disabled')
@@ -128,10 +130,10 @@ class TCPControlFrame(ttk.Frame):
         self.tcp_separator1 = ttk.Separator(self, orient='horizontal')
         self.tcp_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
-        self.ent_custom_tcp = ttk.Entry(self, text='Enter custom TCP command')
-        self.ent_custom_tcp.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+        self.ent_custom_tcp = ttk.Entry(self)
+        self.ent_custom_tcp.grid(row=7, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
-        self.btn_custom_tcp_send = ttk.Button(self, text="Send", command=lambda: dispatcher.emit('sendCustomTCP', self.ent_custom_tcp.get()))
+        self.btn_custom_tcp_send = ttk.Button(self, text="Send", state='disabled', command=lambda: dispatcher.emit('sendCustomTCP', self.ent_custom_tcp.get()))
         self.btn_custom_tcp_send.grid(row=8, column=0, padx=5)
 
         self.btn_quit_application = ttk.Button(self, text="Quit", command=lambda: dispatcher.emit('quitApplication'))
@@ -141,7 +143,7 @@ class TCPControlFrame(ttk.Frame):
         self.tcp_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
-        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=0)
+        self.btn_e_stop.grid(row=10, column=0, columnspan=2, padx=5, sticky='ew', pady=(0, 3))
 
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
 
@@ -155,6 +157,7 @@ class TCPControlFrame(ttk.Frame):
             self.btn_t2.config(state='normal')
             self.btn_prev_camera.config(state='normal')
             self.btn_next_camera.config(state='normal')
+            self.btn_custom_tcp_send.config(state='normal')
         else:
             self.btn_t1.config(state='disabled')
             self.btn_t2.config(state='disabled')
@@ -226,7 +229,7 @@ class MacroControlFrame(ttk.Frame):
         self.val_elapsed_time.grid(row=9, column=1, pady=(0, 4), padx=5)
 
         self.macro_separator2 = ttk.Separator(self, orient='horizontal')
-        self.macro_separator2.grid(row=10, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.macro_separator2.grid(row=10, column=0, columnspan=2, sticky='ew', pady=(8, 5), padx=5)
 
         self.btn_e_stop = ttk.Button(self, text="EMERGENCY STOP", command=lambda: dispatcher.emit('emergencyStop'))
         self.btn_e_stop.grid(row=11, column=0, columnspan=2, padx=5, pady=0, sticky='ew')
@@ -234,6 +237,7 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_connection_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_connection_status)
         self.dispatcher.register_event('startSequence', self.set_start_time)
+        self.dispatcher.register_event('stopSequence', self.set_stop_time)
 
     def update_serial_connection_status(self, status):
         self.serial_connected = status
@@ -259,6 +263,7 @@ class MacroControlFrame(ttk.Frame):
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.start_time.strftime('%H:%M:%S')}")
+        self.update_elapsed_time()
 
     def reset_sequence(self):
         print("Sequence Reset")
@@ -272,10 +277,9 @@ class MacroControlFrame(ttk.Frame):
 
     def update_elapsed_time(self):
         if self.start_time:
-            elapsed = datetime.now() - self.start_time
+            elapsed = self.stop_time - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
             self.val_elapsed_time.config(text=self.elapsed_time.get())
-            self.after(1000, self.update_elapsed_time)
 
 
 class StatusFrame(ttk.Frame):
