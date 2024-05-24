@@ -115,6 +115,7 @@ class SerialService:
         self.send_serial_command(command)
 
     def emergency_stop(self):
+        self.dispatcher.emit('stopSequence')
         if self.serial_port is None or not self.serial_port.is_open:
             print("Error: No open port to send emergency stop command")
             messagebox.showerror("Serial Port Error", "Attempted to send emergency stop with no open port.")
