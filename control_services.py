@@ -43,12 +43,9 @@ class SerialService:
             )
 
             print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")
-            self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
+            self.dispatcher.emit('logToDisplay', f"at {self.baud_rate} baud.", f"Opened {self.serial_port_name}",)
             time.sleep(0.5)
-
-            threading.Thread(
-                target=self.read_from_port, args=(self.serial_port,), daemon=True
-            ).start()
+            threading.Thread(target=self.read_from_port, args=(self.serial_port,), daemon=True).start()
             self.dispatcher.emit('updateSerialConnectionStatus', True)
             print(f"Serial port {self.serial_port_name} opened and read thread started.")
 
@@ -425,8 +422,7 @@ class MacroService:
             f"Subcode: {subcode}"
         )
 
-        # winsound.Beep(1000, 1000)
-        root = tk.Tk()
+        root = tk.Toplevel()
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)
         self.dispatcher.emit('emergencyStop')

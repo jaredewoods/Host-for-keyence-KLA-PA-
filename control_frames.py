@@ -318,22 +318,18 @@ class MacroControlFrame(ttk.Frame):
         print("Sequence reset")
 
 
-class StatusFrame(ttk.Frame):
+class StatusFrame(tk.Frame):
     def __init__(self, master=None, dispatcher=None):
         super().__init__(master)
         self.dispatcher = dispatcher
 
-        # Create a LabelFrame to hold the status labels
-        self.status_label_frame = ttk.LabelFrame(self, text="Connection Status")
-        self.status_label_frame.grid(row=0, column=0, padx=10, pady=5, sticky="new")
-
-        self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark grey")
+        self.lbl_serial_status = ttk.Label(self, text="Serial: Disconnected", foreground="dark grey")
         self.lbl_serial_status.grid(row=0, column=0, padx=20, pady=5)
 
-        self.lbl_tcp_status = ttk.Label(self.status_label_frame, text="TCP: Disconnected", foreground="dark grey")
+        self.lbl_tcp_status = ttk.Label(self, text="TCP: Disconnected", foreground="dark grey")
         self.lbl_tcp_status.grid(row=1, column=0, padx=20, pady=0)
 
-        self.lbl_macro_status = ttk.Label(self.status_label_frame, text="Macro: Stopped", foreground="dark grey")
+        self.lbl_macro_status = ttk.Label(self, text="Macro: Stopped", foreground="dark grey")
         self.lbl_macro_status.grid(row=2, column=0, padx=20, pady=5)
         """TODO: move these out of here"""
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_status)
@@ -345,11 +341,11 @@ class StatusFrame(ttk.Frame):
         if status:
             self.lbl_serial_status.config(text="SERIAL: Connected", foreground="green")
         else:
-            self.lbl_serial_status.config(text="SERIAL: Closed", foreground="red")
+            self.lbl_serial_status.config(text="SERIAL: Closed   ", foreground="red")
 
     def update_tcp_status(self, status):
         if status:
-            self.lbl_tcp_status.config(text="TCP: Connected", foreground="green")
+            self.lbl_tcp_status.config(text="TCP: Connected   ", foreground="green")
         else:
             self.lbl_tcp_status.config(text="TCP: Disconnected", foreground="red")
 

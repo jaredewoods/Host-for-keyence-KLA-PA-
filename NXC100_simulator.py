@@ -46,7 +46,7 @@ class SerialSimulator:
         self.serial_ports = self.get_serial_ports()
         self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width - 3,
                                                  textvariable=self.serial_port_var, values=self.serial_ports,
-                                                 state='readonly')
+                                                 state='readonly', justify='center')
 
         # Connect button
         self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width,
@@ -73,12 +73,14 @@ class SerialSimulator:
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
 
         # Entry for custom commands
-        self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width)
+        self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
         self.send_custom_command_btn = ttk.Button(self.frame, text="Send Error Command", command=self.send_custom_command)
 
         # Log display
-        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=20)
+        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=12)
+        fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
+        self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 
     def grid_widgets(self):
         self.frame.grid(row=0, column=0, sticky='nsew')
@@ -94,8 +96,8 @@ class SerialSimulator:
         self.btn_maln_response.grid(row=4, column=1, pady=5)
         self.btn_mtrs_completed.grid(row=5, column=0, pady=5)
         self.btn_maln_completed.grid(row=5, column=1, pady=5)
-        self.custom_command_entry.grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky='ew')
-        self.send_custom_command_btn.grid(row=7, column=0, columnspan=2, pady=5)
+        self.custom_command_entry.grid(row=6, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
+        self.send_custom_command_btn.grid(row=7, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
         self.log_display.grid(row=0, column=2, rowspan=8, pady=5, padx=10, sticky='nsew')
 
     def get_serial_ports(self):

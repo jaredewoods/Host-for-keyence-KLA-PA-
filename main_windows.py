@@ -4,7 +4,7 @@ import sys
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk, scrolledtext, Menu
-
+import subprocess
 import serial
 import serial.tools.list_ports
 
@@ -27,7 +27,6 @@ class MainWindow(tk.Tk):
         self.completed_cycles_value = tk.IntVar(value=0)
         print("Initializing MainWindow")
         self.title("KLA Prealigner Vision Repeatability (Keyence)")
-        self.configure(bg="#FFFFFF")
         self.ntb_control = None
         self.available_ports = []
         self.dispatcher = EventDispatcher()
@@ -74,7 +73,7 @@ class MainWindow(tk.Tk):
     def create_control_frames(self):
         print("Creating Control Frames")
         self.ntb_control = ttk.Notebook(self)
-        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=0)
+        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 0))
 
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
@@ -95,10 +94,10 @@ class MainWindow(tk.Tk):
         self.ntb_control.add(macro_control_tab, text="   Macro   ")
 
     def create_log_frame(self):
-        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
-        self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=5)
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, height=22, width=60)
+        self.log_display.grid(row=0, column=1, rowspan=2, sticky="", padx=5, pady=5)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
-        self.log_display.configure(bg="#000000", fg="white", font=(fallback_fonts, 10))
+        self.log_display.configure(bg="#000040", fg="yellow", font=(fallback_fonts, 10))
 
     def clear_log_display(self):
         self.log_display.delete('1.0', tk.END)
@@ -106,7 +105,9 @@ class MainWindow(tk.Tk):
 
     def create_status_frame(self):
         self.status_frame = StatusFrame(self, dispatcher=self.dispatcher)
-        self.status_frame.grid(row=1, column=0, sticky="", padx=10, pady=5)
+        self.status_frame.grid(row=1, column=0, padx=5, pady=5)
+        self.status_frame.grid_propagate(False)
+        self.status_frame.config(width=150, height=90)
 
     def log_to_display(self, message, source, direction=None):
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -159,15 +160,13 @@ class MainWindow(tk.Tk):
 
         # Create the Windows menu
         windows_menu = Menu(menu_bar, tearoff=0)
-        windows_menu.add_command(label="Serial Settings", command=self.show_about)
-        windows_menu.add_command(label="TCP Settings", command=self.show_about)
+        windows_menu.add_command(label="Macro Status", command=self.show_about)
 
         menu_bar.add_cascade(label="Windows", menu=windows_menu)
 
         # Create the Windows menu
         simulator_menu = Menu(menu_bar, tearoff=0)
-        simulator_menu.add_command(label="Start NXC100 Simulator", command=self.show_about)
-        simulator_menu.add_command(label="Stop NXC100 Simulator", command=self.show_about)
+        simulator_menu.add_command(label="Launch NXC100 Simulator", command=self.launch_simulator)
 
         menu_bar.add_cascade(label="Simulator", menu=simulator_menu)
 
@@ -187,6 +186,10 @@ class MainWindow(tk.Tk):
     def quit_application():
         print("Quitting")
         sys.exit()
+
+    @staticmethod
+    def launch_simulator():
+        subprocess.Popen(["python", "NXC100_simulator.py"])
 
 
 if __name__ == "__main__":
