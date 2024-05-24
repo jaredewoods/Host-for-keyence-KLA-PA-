@@ -30,9 +30,9 @@ class SerialSimulator:
         self.master = master
         self.master.title("Serial Command Simulator")
 
-        self.auto_reply = tk.BooleanVar(value=False)
+        self.auto_reply = tk.BooleanVar(value=True)
         self.mtrs_delay = tk.DoubleVar(value=0.5)
-        self.maln_delay = tk.DoubleVar(value=5.0)
+        self.maln_delay = tk.DoubleVar(value=1.0)
 
         self.create_widgets()
         self.setup_serial_connection()
@@ -75,7 +75,7 @@ class SerialSimulator:
         # Entry for custom commands
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width)
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
-        self.send_custom_command_btn = ttk.Button(self.frame, text="Send Custom Command", command=self.send_custom_command)
+        self.send_custom_command_btn = ttk.Button(self.frame, text="Send Error Command", command=self.send_custom_command)
 
         # Log display
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=20)

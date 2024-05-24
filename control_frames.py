@@ -179,13 +179,12 @@ class TCPControlFrame(ttk.Frame):
 class MacroControlFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None, completed_cycles_value=None, total_cycles=None):
         super().__init__(master)
-        self.total_cycles = tk.StringVar(value="105")
-
-        self.stop_time = None
-        self.dispatcher = dispatcher
-        self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
         self.start_time = None
+        self.stop_time = None
+        self.total_cycles = tk.StringVar(value="105")
+        self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
         self.elapsed_time = tk.StringVar(value="00:00:00")
+        self.dispatcher = dispatcher
 
         self.serial_connected = False
         self.tcp_connected = True
