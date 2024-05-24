@@ -26,7 +26,8 @@ class MainWindow(tk.Tk):
         self.macro_running = False
         self.completed_cycles_value = tk.IntVar(value=0)
         print("Initializing MainWindow")
-        self.title("Prealigner Vision Repeatability Test")
+        self.title("KLA Prealigner Vision Repeatability (Keyence)")
+        self.configure(bg="#FFFFFF")
         self.ntb_control = None
         self.available_ports = []
         self.dispatcher = EventDispatcher()
@@ -72,7 +73,7 @@ class MainWindow(tk.Tk):
     def create_control_frames(self):
         print("Creating Control Frames")
         self.ntb_control = ttk.Notebook(self)
-        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 0))
+        self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=0)
 
         serial_control_tab = ttk.Frame(self.ntb_control)
         serial_control = SerialControlFrame(serial_control_tab, self.available_ports, dispatcher=self.dispatcher)
@@ -94,7 +95,9 @@ class MainWindow(tk.Tk):
 
     def create_log_frame(self):
         self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, width=60)
-        self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=10)
+        self.log_display.grid(row=0, column=1, rowspan=2, sticky="nsew", padx=5, pady=5)
+        fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
+        self.log_display.configure(bg="#000000", fg="white", font=(fallback_fonts, 10))
 
     def clear_log_display(self):
         self.log_display.delete('1.0', tk.END)
