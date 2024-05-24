@@ -26,7 +26,7 @@ class SerialSimulator:
         self.mtrs_delay_label = None
         self.serial_port_var = None
         self.frame = None
-        self.std_width = 9
+        self.std_width = 16
         self.master = master
         self.master.title("Serial Command Simulator")
 
@@ -44,10 +44,13 @@ class SerialSimulator:
         # Dropdown for serial ports
         self.serial_port_var = tk.StringVar()
         self.serial_ports = self.get_serial_ports()
-        self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width + 2, textvariable=self.serial_port_var, values=self.serial_ports, state='readonly')
+        self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width - 3,
+                                                 textvariable=self.serial_port_var, values=self.serial_ports,
+                                                 state='readonly')
 
         # Connect button
-        self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width, command=self.connect_serial_port)
+        self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width,
+                                         command=self.connect_serial_port)
 
         # Radio buttons for auto/manual reply
         self.rad_auto_on = ttk.Radiobutton(self.frame, text=" Auto  ON", variable=self.auto_reply, value=True)
@@ -55,11 +58,13 @@ class SerialSimulator:
 
         # Spinbox for MTRS delay
         self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (sec):")
-        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 6, from_=0.0, to=1.0, increment=0.1, textvariable=self.mtrs_delay, format="%.1f", justify='center')
+        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1,
+                                             textvariable=self.mtrs_delay, format="%.1f", justify='center')
 
         # Spinbox for MALN delay
         self.maln_delay_label = ttk.Label(self.frame, text="MALN Delay (sec):")
-        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 6, from_=0, to=9, increment=1, textvariable=self.maln_delay, justify='center')
+        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1,
+                                             textvariable=self.maln_delay, justify='center')
 
         # Buttons for predefined responses
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
