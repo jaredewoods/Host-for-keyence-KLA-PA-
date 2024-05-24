@@ -3,7 +3,7 @@
 import sys
 import tkinter as tk
 from datetime import datetime
-from tkinter import ttk, scrolledtext
+from tkinter import ttk, scrolledtext, Menu
 
 import serial
 import serial.tools.list_ports
@@ -38,6 +38,7 @@ class MainWindow(tk.Tk):
         self.create_control_frames()
         self.create_log_frame()
         self.create_status_frame()
+        self.create_menu_bar()
         self.register_events()
         self.configure_grid()
         print("MainWindow initialized")
@@ -135,13 +136,57 @@ class MainWindow(tk.Tk):
         print(f"New value in IntVar: {self.completed_cycles_value.get()}")
         self.update_idletasks()
 
+    def on_tab_change(self, event):  # forces immediate update
+        self.ntb_control.update_idletasks()
+
+    def create_menu_bar(self):
+        # Create a menu bar
+        menu_bar = Menu(self)
+
+        # Create the File menu
+        file_menu = Menu(menu_bar, tearoff=0)
+        file_menu.add_command(label="Preferences", command=self.show_about)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.quit_application)
+        menu_bar.add_cascade(label="File", menu=file_menu)
+
+        # Create the Edit menu
+        settings_menu = Menu(menu_bar, tearoff=0)
+        settings_menu.add_command(label="Serial Settings", command=self.show_about)
+        settings_menu.add_command(label="TCP Settings", command=self.show_about)
+
+        menu_bar.add_cascade(label="Settings", menu=settings_menu)
+
+        # Create the Windows menu
+        windows_menu = Menu(menu_bar, tearoff=0)
+        windows_menu.add_command(label="Serial Settings", command=self.show_about)
+        windows_menu.add_command(label="TCP Settings", command=self.show_about)
+
+        menu_bar.add_cascade(label="Windows", menu=windows_menu)
+
+        # Create the Windows menu
+        simulator_menu = Menu(menu_bar, tearoff=0)
+        simulator_menu.add_command(label="Start NXC100 Simulator", command=self.show_about)
+        simulator_menu.add_command(label="Stop NXC100 Simulator", command=self.show_about)
+
+        menu_bar.add_cascade(label="Simulator", menu=simulator_menu)
+
+        # Create the Help menu
+        help_menu = Menu(menu_bar, tearoff=0)
+        help_menu.add_command(label="About", command=self.show_about)
+        menu_bar.add_cascade(label="Help", menu=help_menu)
+
+        # Set the menu bar
+        self.config(menu=menu_bar)
+
+    @staticmethod
+    def show_about():
+        print("You selected an option reserved for future use")
+
     @staticmethod
     def quit_application():
         print("Quitting")
         sys.exit()
-
-    def on_tab_change(self, event):  # forces immediate update
-        self.ntb_control.update_idletasks()
 
 
 if __name__ == "__main__":

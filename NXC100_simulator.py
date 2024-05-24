@@ -28,7 +28,7 @@ class SerialSimulator:
         self.frame = None
         self.std_width = 16
         self.master = master
-        self.master.title("Serial Command Simulator")
+        self.master.title("NXC100 Simulator")
 
         self.auto_reply = tk.BooleanVar(value=True)
         self.mtrs_delay = tk.DoubleVar(value=0.5)

@@ -443,4 +443,3 @@ class MacroService:
             # Handle the Cancel response here
             print("Emergency stop not cleared")
         root.destroy()
-
