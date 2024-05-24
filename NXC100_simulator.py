@@ -74,6 +74,7 @@ class SerialSimulator:
 
         # Entry for custom commands
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width)
+        self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
         self.send_custom_command_btn = ttk.Button(self.frame, text="Send Custom Command", command=self.send_custom_command)
 
         # Log display
