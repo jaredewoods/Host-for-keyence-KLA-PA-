@@ -103,11 +103,11 @@ class TCPControlFrame(ttk.Frame):
         self.lbl_ip_port = ttk.Label(self, text="IP Port")
         self.lbl_ip_port.grid(row=0, column=1, padx=0, pady=(5, 0))
 
-        self.txt_ip_address_default = tk.StringVar(value="192.168.1.1")
+        self.txt_ip_address_default = tk.StringVar(value="127.0.0.1")
         self.ent_ip_address = ttk.Entry(self, width=11, textvariable=self.txt_ip_address_default, justify='center')
         self.ent_ip_address.grid(row=1, column=0, padx=5, pady=(5, 3))
 
-        self.txt_ip_port_default = tk.StringVar(value="80")
+        self.txt_ip_port_default = tk.StringVar(value="8500")
         self.ent_ip_port = ttk.Entry(self, width=5, textvariable=self.txt_ip_port_default, justify='center')
         self.ent_ip_port.grid(row=1, column=1, padx=5, pady=(5, 3))
 

@@ -4,17 +4,20 @@ import serial
 import serial.tools.list_ports
 import threading
 import time
+import socket
 
 
 class SerialSimulator:
     def __init__(self, master):
+        self.read_thread = None
+        self.serial_port = None
         self.btn_maln_completed = None
         self.btn_mtrs_completed = None
         self.custom_command_entry = None
         self.btn_maln_response = None
         self.maln_delay_spinbox = None
         self.maln_delay_label = None
-        self.send_custom_command_btn = None
+        self.btn_send_error_command = None
         self.log_display = None
         self.btn_mtrs_response = None
         self.rad_auto_off = None
@@ -35,8 +38,22 @@ class SerialSimulator:
         self.maln_delay = tk.DoubleVar(value=1.0)
 
         self.create_widgets()
-        self.setup_serial_connection()
         self.grid_widgets()
+        self.tcp_server = TCPServer()
+        self.start_tcp_server()
+
+    def start_tcp_server(self):
+        self.tcp_server.start_server()
+        self.log_display.insert(tk.END, "Server started 172.0.0.1:8500\n")
+
+    def stop_tcp_server(self):
+        self.tcp_server.stop_server()
+
+    def on_closing(self):
+        self.stop_tcp_server()
+        if self.serial_port and self.serial_port.is_open:
+            self.serial_port.close()
+        self.master.destroy()
 
     def create_widgets(self):
         self.frame = ttk.Frame(self.master, padding="10")
@@ -75,7 +92,7 @@ class SerialSimulator:
         # Entry for custom commands
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
-        self.send_custom_command_btn = ttk.Button(self.frame, text="Send Error Command", command=self.send_custom_command)
+        self.btn_send_error_command = ttk.Button(self.frame, text="Send Error Command", command=self.send_custom_command)
 
         # Log display
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=12)
@@ -97,16 +114,13 @@ class SerialSimulator:
         self.btn_mtrs_completed.grid(row=5, column=0, pady=5)
         self.btn_maln_completed.grid(row=5, column=1, pady=5)
         self.custom_command_entry.grid(row=6, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
-        self.send_custom_command_btn.grid(row=7, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
+        self.btn_send_error_command.grid(row=7, column=0, columnspan=2, pady=5, padx=5)
         self.log_display.grid(row=0, column=2, rowspan=8, pady=5, padx=10, sticky='nsew')
 
-    def get_serial_ports(self):
+    @staticmethod
+    def get_serial_ports():
         ports = serial.tools.list_ports.comports()
         return [port.device for port in ports]
-
-    def setup_serial_connection(self):
-        self.serial_port = None
-        self.read_thread = None
 
     def connect_serial_port(self):
         selected_port = self.serial_port_var.get()
@@ -199,6 +213,52 @@ class SerialSimulator:
     def close(self):
         self.close_serial_port()
         self.master.destroy()
+
+
+class TCPServer:
+    def __init__(self, host='127.0.0.1', port=8500):
+        self.host = host
+        self.port = port
+        self.server_socket = None
+        self.client_socket = None
+        self.is_running = False
+
+    def start_server(self):
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(1)
+        self.is_running = True
+        threading.Thread(target=self.accept_connections, daemon=True).start()
+
+    def accept_connections(self):
+        while self.is_running:
+            self.client_socket, _ = self.server_socket.accept()
+            self.handle_client()
+
+    def handle_client(self):
+        while self.is_running:
+            try:
+                data = self.client_socket.recv(1024).decode('utf-8')
+                if data:
+                    response = self.process_command(data)
+                    self.client_socket.sendall(response.encode('utf-8'))
+            except (socket.error, AttributeError):
+                self.stop_server()
+
+    @staticmethod
+    def process_command(command):
+        if command.strip() == "T1":
+            time.sleep(0.5)
+            return "T1"
+        else:
+            return command
+
+    def stop_server(self):
+        self.is_running = False
+        if self.client_socket:
+            self.client_socket.close()
+        if self.server_socket:
+            self.server_socket.close()
 
 
 if __name__ == "__main__":

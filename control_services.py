@@ -155,12 +155,12 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
-            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'tcp', 'opened')
+            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'TCP', 'opened')
             self.dispatcher.emit('updateTCPConnectionStatus', True)
             print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'tcp', 'error')
+            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'TCP', 'error')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
@@ -169,16 +169,17 @@ class TCPService:
         if self.socket:
             self.socket.close()
             self.socket = None
-            self.dispatcher.emit('logToDisplay', f"Close {ip_address}:{port}", 'tcp', 'closed')
+            self.dispatcher.emit('logToDisplay', f"Close {ip_address}:{port}", 'TCP', 'closed')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {ip_address}:{port}")
 
     def send_tcp_data(self, tcp_data):
         if self.socket:
             try:
-                self.socket.sendall(tcp_data.encode('utf-8'))
+                tcp_data_with_terminator = tcp_data + '\r\n'
+                self.socket.sendall(tcp_data_with_terminator.encode('utf-8'))
                 self.dispatcher.emit('logToDisplay', f"Data sent: {tcp_data}", 'TCP', 'sent')
-                print(f"Data sent: {tcp_data}")
+                print(f"Data sent: {tcp_data_with_terminator}")
                 self.handle_received_data()
             except socket.error as e:
                 self.dispatcher.emit('logToDisplay', f"Data send failed", 'TCP', 'error')
@@ -208,16 +209,14 @@ class TCPService:
         data = data.strip()
         if data == "T1":
             print("Received expected response: T1")
-            self.dispatcher.emit('logToDisplay', "Received expected response: T1", 'TCP', 'info')
             self.dispatcher.emit('handleResponseT1')
         else:
             self.dispatcher.emit('logToDisplay', f"Unexpected response: {data}", 'TCP', 'error')
             print(f"Unexpected response: {data}")
-            self.dispatcher.emit('handleResponseT1')
 
     # COMMANDS
     def trigger_one(self):
-        command = "T1\r\n"
+        command = "T1"
         self.send_tcp_data(command)
         print("Triggering T1")
 
@@ -259,7 +258,7 @@ class MacroService:
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
         self.total_cycles = int(total_cycles)
-        self.dispatcher.emit('logToDisplay', total_cycles, 'STARTING CYCLE 1 of')
+        self.dispatcher.emit('logToDisplay', f"{total_cycles} CYCLES", 'STARTING SEQUENCE for')
         self.run_sequence()
 
     def run_sequence(self):
@@ -350,7 +349,7 @@ class MacroService:
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
         self.dispatcher.emit('logToDisplay', '3 secs.', 'Waiting for')
-        threading.Timer(3, self.increment_cycle_count).start()
+        threading.Timer(3, self.send_command_t1).start()
 
     def send_command_t1(self):
         if self.stop_requested:
@@ -368,7 +367,7 @@ class MacroService:
         if self.stop_requested:
             return
         self.completed_cycles += 1
-        self.dispatcher.emit('logToDisplay', self.completed_cycles, "COMPLETED CYCLE:")
+        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} \n", "Completed Cycle:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
@@ -390,7 +389,7 @@ class MacroService:
         self.show_emergency_stop_messagebox()
 
     def show_completion_messagebox(self):
-        message = f"{self.completed_cycles} alignments recorded\n"
+        message = f"{self.completed_cycles} Alignments Completed\nExport Log?"
         root = tk.Tk()
         root.withdraw()
         messagebox.showinfo("SEQUENCE COMPLETED", message)
