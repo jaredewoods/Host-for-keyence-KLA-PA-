@@ -3,7 +3,7 @@ import socket
 import threading
 import tkinter as tk
 from tkinter import messagebox
-
+from datetime import datetime
 import serial
 # import winsound
 
@@ -348,12 +348,17 @@ class MacroService:
             self.dispatcher.emit('logToData', {})
             self.dispatcher.emit("stopSequence")
             self.dispatcher.emit("updateCompletedCycles", self.total_cycles)
+            self.show_completion_messagebox()
         else:
             threading.Timer(0.1, self.run_sequence).start()
 
-    @staticmethod
-    def show_completion_messagebox():
-        pass
+    def show_completion_messagebox(self):
+        message = f"{self.completed_cycles} cycles completed\n"
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror("Alarm", message)
+        root.destroy()
+
 
     @staticmethod
     def show_alarm_messagebox(alarm, subcode):
