@@ -22,6 +22,7 @@ class SerialService:
             'MALN': '$2MALN1009000B4',
             'CSOL': '$2CSOLA0D4',
             'HRST': '$1HRST72',
+            'CCLR': '$2CCLRE9B',
         }
         self.response_callback = None
 
@@ -111,8 +112,14 @@ class SerialService:
             messagebox.showerror("Serial Port Error", "Attempted to send emergency stop with no open port.")
             return
         command = "$2CEMG4E"
-        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", self.serial_port_name)
+        self.serial_port.write(f"{command}\r\n".encode('utf-8'))
+        print("Emergency stop command sent")
+
+    def send_clear_command(self):
+        command = self.commands['CCLR']
+        print(f"Sending: {command}")
+        self.send_serial_command(command)
 
     def read_from_port(self, serial_port):
         self.serial_port = serial_port
@@ -237,10 +244,12 @@ class MacroService:
         self.macro_running = False
         self.total_cycles = None
         self.completed_cycles = 0
+        self.stop_requested = False
 
     def initialize_sequence(self, total_cycles):
         print("Initializing Sequence")
         self.macro_running = True
+        self.stop_requested = False
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
         self.total_cycles = int(total_cycles)
@@ -248,13 +257,14 @@ class MacroService:
         self.run_sequence()
 
     def run_sequence(self):
-        if self.macro_running:
+        if self.macro_running and not self.stop_requested:
             print("Running sequence")
             self.send_command_mtrs()
 
     def stop_sequence(self):
         print("Stopping Sequence")
         self.macro_running = False
+        self.stop_requested = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
 
     def reset_sequence(self):
@@ -262,13 +272,18 @@ class MacroService:
         self.completed_cycles = 0
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         self.macro_running = False
+        self.stop_requested = False
 
     def send_command_mtrs(self):
+        if self.stop_requested:
+            return
         print("Sending command: MTRS")
         self.dispatcher.emit('moveToReadyPosition')
         self.serial_service.send_serial_command(self.serial_service.commands['MTRS'], self.handle_response_mtrs)
 
     def handle_response_mtrs(self, message):
+        if self.stop_requested:
+            return
         if '@' in message:
             print("MTRS acknowledgement received")
         if '$' in message:
@@ -285,10 +300,14 @@ class MacroService:
                     print("MTRS alarm received")
 
     def send_command_maln(self):
+        if self.stop_requested:
+            return
         print("Sending command: MALN")
         self.serial_service.send_serial_command(self.serial_service.commands['MALN'], self.handle_response_maln)
 
     def handle_response_maln(self, message):
+        if self.stop_requested:
+            return
         if '@' in message:
             print("MALN acknowledgement received")
             self.dispatcher.emit('logToDisplay', 'Wafer...', 'Aligning')
@@ -325,19 +344,23 @@ class MacroService:
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
         self.dispatcher.emit('logToDisplay', '3 secs.', 'Waiting for')
-        # threading.Timer(3, self.send_command_t1).start()
         threading.Timer(3, self.increment_cycle_count).start()
 
     def send_command_t1(self):
+        if self.stop_requested:
+            return
         print("Sending command: T1")
         self.dispatcher.emit('triggerOne')
 
     def handle_response_t1(self):
+        if self.stop_requested:
+            return
         print("Acknowledgment received for T1")
         self.dispatcher.emit('incrementCycleCount')
 
-    # TODO Create a completion frame with a popup window that allows for exporting or saving of the log
     def increment_cycle_count(self):
+        if self.stop_requested:
+            return
         self.completed_cycles += 1
         self.dispatcher.emit('logToDisplay', self.completed_cycles, "COMPLETED CYCLE:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
@@ -352,13 +375,20 @@ class MacroService:
         else:
             threading.Timer(0.1, self.run_sequence).start()
 
+    def emergency_stop_sequence(self):
+        print("Emergency stop triggered")
+        self.macro_running = False
+        self.stop_requested = True
+        self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
+        self.dispatcher.emit('logToDisplay', "Emergency stop activated", 'Macro', 'stopped')
+        self.show_emergency_stop_messagebox()
+
     def show_completion_messagebox(self):
-        message = f"{self.completed_cycles} cycles completed\n"
+        message = f"{self.completed_cycles} alignments recorded\n"
         root = tk.Tk()
         root.withdraw()
-        messagebox.showerror("Alarm", message)
+        messagebox.showinfo("SEQUENCE COMPLETED", message)
         root.destroy()
-
 
     @staticmethod
     def show_alarm_messagebox(alarm, subcode):
@@ -392,3 +422,16 @@ class MacroService:
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)
         root.destroy()
+
+    def show_emergency_stop_messagebox(self):
+        root = tk.Tk()
+        root.withdraw()
+        response = messagebox.askokcancel("EMERGENCY STOP", "Clear Emergency Stop?")
+        if response:
+            print("Emergency stop cleared")
+            self.dispatcher.emit('sendClearCommand')
+        else:
+            # Handle the Cancel response here
+            print("Emergency stop not cleared")
+        root.destroy()
+

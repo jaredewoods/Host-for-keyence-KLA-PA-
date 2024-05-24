@@ -10,6 +10,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('hardwareReset', serial_service.hardware_reset)
     dispatcher.register_event('sendCustomSerial', serial_service.send_custom_serial)
     dispatcher.register_event('emergencyStop', serial_service.emergency_stop)
+    dispatcher.register_event('sendClearCommand', serial_service.send_clear_command)
 
     dispatcher.register_event('connectTCP', tcp_service.connect_tcp_socket)
     dispatcher.register_event('disconnectTCP', tcp_service.close_tcp_socket)
@@ -30,6 +31,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('sendCommandT1', macro_service.send_command_t1)
     dispatcher.register_event('handleResponseT1', macro_service.handle_response_t1)
     dispatcher.register_event('incrementCycleCount', macro_service.increment_cycle_count)
+    dispatcher.register_event('emergencyStop', macro_service.emergency_stop_sequence)
 
     dispatcher.register_event('logToDisplay', log_to_display)
     dispatcher.register_event('receivedData', log_to_display)

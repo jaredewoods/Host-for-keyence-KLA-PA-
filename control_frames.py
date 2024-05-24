@@ -179,7 +179,7 @@ class TCPControlFrame(ttk.Frame):
 class MacroControlFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None, completed_cycles_value=None, total_cycles=None):
         super().__init__(master)
-        self.total_cycles = tk.StringVar(value="100")
+        self.total_cycles = tk.StringVar(value="105")
 
         self.stop_time = None
         self.dispatcher = dispatcher
@@ -214,7 +214,7 @@ class MacroControlFrame(ttk.Frame):
         self.btn_clear_log_display = ttk.Button(self, text="Clear", state='enabled', command=lambda: dispatcher.emit('clearLogDisplay'))
         self.btn_clear_log_display.grid(row=5, column=0, padx=5)
 
-        self.btn_reset = ttk.Button(self, text="Reset", state='normal', command=lambda: dispatcher.emit('resetSequence'))
+        self.btn_reset = ttk.Button(self, text="Reset", state='normal', command=self.reset_sequence)
         self.btn_reset.grid(row=5, column=1, padx=5)
 
         self.macro_separator1 = ttk.Separator(self, orient='horizontal')
@@ -249,7 +249,7 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('startSequence', self.set_start_time)
         self.dispatcher.register_event('stopSequence', self.set_stop_time)
 
-# UI UPDATES
+    # UI UPDATES
     def starting_sequence(self):
         self.set_start_time()
         self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
@@ -281,25 +281,30 @@ class MacroControlFrame(ttk.Frame):
         print("debug this function from MacroControlFrame")
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
-        print(f"Stop time set to: {self.start_time.strftime('%H:%M:%S')}")
+        print(f"Stop time set to: {self.stop_time.strftime('%H:%M:%S')}")
         self.update_elapsed_time()
 
     def update_elapsed_time(self):
         print("debug this function from MacroControlFrame")
-        if self.start_time:
+        if self.start_time and self.stop_time:
             elapsed = self.stop_time - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
             self.val_elapsed_time.config(text=self.elapsed_time.get())
+        else:
+            self.val_elapsed_time.config(text="--:--:--")
 
     def reset_sequence(self):
         print("debug this function from MacroControlFrame")
         print("Sequence Reset")
         self.start_time = None
+        self.stop_time = None
         self.val_start_time.config(text="00:00:00")
+        self.val_stop_time.config(text="--:--:--")
         self.val_elapsed_time.config(text="--:--:--")
+        self.elapsed_time.set("00:00:00")
         self.completed_cycles_value.set(0)
         self.ent_total_cycles.delete(0, tk.END)
-        self.ent_total_cycles.insert(0, "0")
+        self.ent_total_cycles.insert(0, "105")
         print("Sequence reset")
 
 
