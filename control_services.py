@@ -336,7 +336,7 @@ class MacroService:
         print("Acknowledgment received for T1")
         self.dispatcher.emit('incrementCycleCount')
 
-    # TODO Create a completion frame with a popup window trhat allows for exporting or saving of the log
+    # TODO Create a completion frame with a popup window that allows for exporting or saving of the log
     def increment_cycle_count(self):
         self.completed_cycles += 1
         self.dispatcher.emit('logToDisplay', self.completed_cycles, "COMPLETED CYCLE:")
