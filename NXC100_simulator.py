@@ -3,9 +3,29 @@ from tkinter import ttk, scrolledtext
 import serial
 import serial.tools.list_ports
 import threading
+import time
+
 
 class SerialSimulator:
     def __init__(self, master):
+        self.btn_maln_completed = None
+        self.btn_mtrs_completed = None
+        self.custom_command_entry = None
+        self.btn_maln_response = None
+        self.maln_delay_spinbox = None
+        self.maln_delay_label = None
+        self.send_custom_command_btn = None
+        self.log_display = None
+        self.btn_mtrs_response = None
+        self.rad_auto_off = None
+        self.rad_auto_on = None
+        self.connect_button = None
+        self.serial_port_dropdown = None
+        self.serial_ports = None
+        self.mtrs_delay_spinbox = None
+        self.mtrs_delay_label = None
+        self.serial_port_var = None
+        self.frame = None
         self.std_width = 9
         self.master = master
         self.master.title("Serial Command Simulator")
@@ -30,8 +50,8 @@ class SerialSimulator:
         self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width, command=self.connect_serial_port)
 
         # Radio buttons for auto/manual reply
-        self.auto_radio = ttk.Radiobutton(self.frame, text="Auto Reply", variable=self.auto_reply, value=True)
-        self.manual_radio = ttk.Radiobutton(self.frame, text="Manual Reply", variable=self.auto_reply, value=False)
+        self.rad_auto_on = ttk.Radiobutton(self.frame, text=" Auto  ON", variable=self.auto_reply, value=True)
+        self.rad_auto_off = ttk.Radiobutton(self.frame, text=" Auto OFF", variable=self.auto_reply, value=False)
 
         # Spinbox for MTRS delay
         self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (sec):")
@@ -42,8 +62,8 @@ class SerialSimulator:
         self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 6, from_=0, to=9, increment=1, textvariable=self.maln_delay, justify='center')
 
         # Buttons for predefined responses
-        self.btn_mtrs_received = ttk.Button(self.frame, width=self.std_width, text="MTRS Rcvd", command=self.send_mtrs_received)
-        self.btn_maln_received = ttk.Button(self.frame, width=self.std_width, text="MALN Rcvd", command=self.send_maln_received)
+        self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
+        self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
         self.btn_mtrs_completed = ttk.Button(self.frame, width=self.std_width, text="MTRS Comp", command=self.send_mtrs_completed)
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
 
@@ -58,19 +78,19 @@ class SerialSimulator:
         self.frame.grid(row=0, column=0, sticky='nsew')
         self.serial_port_dropdown.grid(row=0, column=0, padx=5, pady=5)
         self.connect_button.grid(row=1, column=0, padx=5, pady=5)
-        self.auto_radio.grid(row=0, column=1, sticky='w', padx=(26, 0))
-        self.manual_radio.grid(row=1, column=1, sticky='w', padx=(26, 0))
+        self.rad_auto_on.grid(row=0, column=1, sticky='', padx=(10, 0))
+        self.rad_auto_off.grid(row=1, column=1, sticky='', padx=(10, 0))
         self.mtrs_delay_label.grid(row=2, column=0, pady=5)
         self.mtrs_delay_spinbox.grid(row=3, column=0, pady=5)
         self.maln_delay_label.grid(row=2, column=1, pady=5)
         self.maln_delay_spinbox.grid(row=3, column=1, pady=5)
-        self.btn_mtrs_received.grid(row=4, column=0, pady=5)
-        self.btn_maln_received.grid(row=4, column=1, pady=5)
+        self.btn_mtrs_response.grid(row=4, column=0, pady=5)
+        self.btn_maln_response.grid(row=4, column=1, pady=5)
         self.btn_mtrs_completed.grid(row=5, column=0, pady=5)
         self.btn_maln_completed.grid(row=5, column=1, pady=5)
         self.custom_command_entry.grid(row=6, column=0, columnspan=2, pady=5, padx=10, sticky='ew')
         self.send_custom_command_btn.grid(row=7, column=0, columnspan=2, pady=5)
-        self.log_display.grid(row=8, column=0, columnspan=2, pady=5)
+        self.log_display.grid(row=0, column=2, rowspan=8, pady=5, padx=10, sticky='nsew')
 
     def get_serial_ports(self):
         ports = serial.tools.list_ports.comports()
@@ -105,16 +125,12 @@ class SerialSimulator:
         self.send_command(command)
 
     def get_auto_response(self, command):
-        print(f"get_auto_response called with command: {command}")
+        print(f"received: {command}")
         if command.strip() == "$2MTRSG100ALDD":
-            print("Matched MTRS command")
-            # Immediately send MTRS received and completed
             self.send_command("@2300000000015")
             time.sleep(self.mtrs_delay.get())  # Use spinbox value for delay
             self.send_command("$23200000000MTRS5D")
         elif command.strip() == "$2MALN1009000B4":
-            print("Matched MALN command")
-            # Immediately send MALN received and wait for spinbox value to send completed
             self.send_command("@2100000000013")
             print("Starting timer for MALN completed response")
             threading.Timer(self.maln_delay.get(), self.send_maln_completed).start()
@@ -122,7 +138,7 @@ class SerialSimulator:
             print(f"No auto-response match for command: {command}")
 
     def send_command(self, command):
-        print(f"send_command called with command: {command}")
+        print(f"send: {command}")
         if not self.serial_port or not self.serial_port.is_open:
             self.log_to_display(f"Error: Serial port not open")
             print("Error: Serial port not open")
@@ -130,12 +146,10 @@ class SerialSimulator:
 
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.log_to_display(f"Sent: {command}")
-        print(f"Sent: {command}")
 
     def log_to_display(self, message):
         self.log_display.insert(tk.END, f"{message}\n")
         self.log_display.see(tk.END)
-        print(message)
 
     def open_serial_port(self, port, baudrate=9600):
         try:
@@ -143,10 +157,8 @@ class SerialSimulator:
             self.read_thread = threading.Thread(target=self.read_from_port, daemon=True)
             self.read_thread.start()
             self.log_to_display(f"Opened serial port {port} at {baudrate} baud.")
-            print(f"Opened serial port {port} at {baudrate} baud.")
         except serial.SerialException as e:
             self.log_to_display(f"Failed to open serial port {port}: {e}")
-            print(f"Failed to open serial port {port}: {e}")
 
     def close_serial_port(self):
         if self.serial_port and self.serial_port.is_open:
@@ -159,13 +171,11 @@ class SerialSimulator:
             try:
                 line = self.serial_port.readline().decode('utf-8').strip()
                 if line:
-                    print(f"Read from port: {line}")
                     self.log_to_display(f"Received: {line}")
                     if self.auto_reply.get():
-                        print(f"Auto reply is enabled, processing command: {line}")
                         self.get_auto_response(line)
                 else:
-                    print("No data read from port.")
+                    pass
             except serial.SerialException as e:
                 self.log_to_display(f"Read failed: {e}")
                 print(f"Read failed: {e}")
@@ -181,6 +191,7 @@ class SerialSimulator:
     def close(self):
         self.close_serial_port()
         self.master.destroy()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
