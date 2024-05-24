@@ -179,12 +179,14 @@ class TCPControlFrame(ttk.Frame):
 class MacroControlFrame(ttk.Frame):
     def __init__(self, master=None, dispatcher=None, completed_cycles_value=None, total_cycles=None):
         super().__init__(master)
-        self.start_time = None
-        self.stop_time = None
         self.total_cycles = tk.StringVar(value="105")
-        self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
-        self.elapsed_time = tk.StringVar(value="00:00:00")
+
+        self.stop_time = None
         self.dispatcher = dispatcher
+        self.completed_cycles_value = completed_cycles_value or tk.IntVar(value=0)
+        self.start_time = None
+        self.elapsed_time = tk.StringVar(value="00:00:00")
+        self.macro_running = False
 
         self.serial_connected = False
         self.tcp_connected = True
@@ -225,17 +227,17 @@ class MacroControlFrame(ttk.Frame):
         self.val_start_time = ttk.Label(self, text="00:00:00")
         self.val_start_time.grid(row=7, column=1, padx=5)
 
-        self.lbl_stop_time = ttk.Label(self, text="Stopped:")
-        self.lbl_stop_time.grid(row=8, column=0, pady=5, padx=5)
-
-        self.val_stop_time = ttk.Label(self, text="--:--:--")
-        self.val_stop_time.grid(row=8, column=1, pady=5, padx=5)
-
         self.lbl_elapsed_time = ttk.Label(self, text="Elapsed:")
-        self.lbl_elapsed_time.grid(row=9, column=0, pady=(0, 4), padx=5)
+        self.lbl_elapsed_time.grid(row=8, column=0, pady=5, padx=5)
 
         self.val_elapsed_time = ttk.Label(self, text="--:--:--")
-        self.val_elapsed_time.grid(row=9, column=1, pady=(0, 4), padx=5)
+        self.val_elapsed_time.grid(row=8, column=1, pady=5, padx=5)
+
+        self.lbl_stop_time = ttk.Label(self, text="Stopped:")
+        self.lbl_stop_time.grid(row=9, column=0, pady=(0, 4), padx=5)
+
+        self.val_stop_time = ttk.Label(self, text="--:--:--")
+        self.val_stop_time.grid(row=9, column=1, pady=(0, 4), padx=5)
 
         self.macro_separator2 = ttk.Separator(self, orient='horizontal')
         self.macro_separator2.grid(row=10, column=0, columnspan=2, sticky='ew', pady=(8, 5), padx=5)
@@ -252,6 +254,8 @@ class MacroControlFrame(ttk.Frame):
     def starting_sequence(self):
         self.set_start_time()
         self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
+        self.macro_running = True  # Set the flag when the sequence starts
+        self.update_elapsed_time()  # Start the timer
 
     def update_serial_connection_status(self, status):
         print("debug this function from MacroControlFrame")
@@ -281,11 +285,17 @@ class MacroControlFrame(ttk.Frame):
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.stop_time.strftime('%H:%M:%S')}")
+        self.macro_running = False  # Clear the flag when the sequence stops
         self.update_elapsed_time()
 
     def update_elapsed_time(self):
         print("debug this function from MacroControlFrame")
-        if self.start_time and self.stop_time:
+        if self.start_time and self.macro_running:
+            elapsed = datetime.now() - self.start_time
+            self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
+            self.val_elapsed_time.config(text=self.elapsed_time.get())
+            self.after(1000, self.update_elapsed_time)  # Schedule to update every second
+        elif self.start_time and self.stop_time:
             elapsed = self.stop_time - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
             self.val_elapsed_time.config(text=self.elapsed_time.get())
@@ -295,6 +305,7 @@ class MacroControlFrame(ttk.Frame):
     def reset_sequence(self):
         print("debug this function from MacroControlFrame")
         print("Sequence Reset")
+        self.macro_running = False  # Ensure the flag is cleared
         self.start_time = None
         self.stop_time = None
         self.val_start_time.config(text="00:00:00")
@@ -303,7 +314,7 @@ class MacroControlFrame(ttk.Frame):
         self.elapsed_time.set("00:00:00")
         self.completed_cycles_value.set(0)
         self.ent_total_cycles.delete(0, tk.END)
-        self.ent_total_cycles.insert(0, "105")
+        self.ent_total_cycles.insert(0, "0")
         print("Sequence reset")
 
 
@@ -313,7 +324,7 @@ class StatusFrame(ttk.Frame):
         self.dispatcher = dispatcher
 
         # Create a LabelFrame to hold the status labels
-        self.status_label_frame = ttk.LabelFrame(self, text="Connection Status")
+        self.status_label_frame = ttk.LabelFrame(self, text="      Connection Status")
         self.status_label_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="new")
 
         self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark grey")
