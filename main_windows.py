@@ -11,7 +11,7 @@ import serial.tools.list_ports
 from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
 from control_services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
-from event_registry import register_events
+from event_dispatcher import register_events
 
 
 class MainWindow(tk.Tk):

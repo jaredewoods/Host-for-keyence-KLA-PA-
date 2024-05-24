@@ -314,7 +314,7 @@ class StatusFrame(ttk.Frame):
         self.dispatcher = dispatcher
 
         # Create a LabelFrame to hold the status labels
-        self.status_label_frame = ttk.LabelFrame(self, text="      Connection Status")
+        self.status_label_frame = ttk.LabelFrame(self, text="Connection Status")
         self.status_label_frame.grid(row=0, column=0, padx=10, pady=(0, 20), sticky="new")
 
         self.lbl_serial_status = ttk.Label(self.status_label_frame, text="Serial: Disconnected", foreground="dark grey")

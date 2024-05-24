@@ -3,10 +3,8 @@ import socket
 import threading
 import tkinter as tk
 from tkinter import messagebox
-from datetime import datetime
 import serial
-# import winsound
-
+import time
 from alarms import alarm_dict
 
 
@@ -29,8 +27,10 @@ class SerialService:
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
         print(f"Connecting to serial port: {self.serial_port_name}")
+
         if self.serial_port and self.serial_port.is_open:
             self.close_serial_port(self.serial_port_name)
+            print("Serial port was already open")
 
         try:
             self.serial_port = serial.Serial(
@@ -44,6 +44,8 @@ class SerialService:
 
             print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")
             self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Opened at {self.baud_rate} baud.", "")
+            time.sleep(0.5)
+
             threading.Thread(
                 target=self.read_from_port, args=(self.serial_port,), daemon=True
             ).start()
@@ -56,13 +58,19 @@ class SerialService:
                 "Serial Port Error",
                 f"Failed to open serial port {self.serial_port_name}: {e}"
             )
-            print(f"Failed to open serial port {self.serial_port_name}: {e}")
+            self.dispatcher.emit('updateSerialConnectionStatus', False)
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            messagebox.showerror(
+                "Serial Port Error",
+                f"An unexpected error occurred: {e}"
+            )
             self.dispatcher.emit('updateSerialConnectionStatus', False)
 
     def close_serial_port(self, serial_port):
         if self.serial_port and self.serial_port.is_open:
+            time.sleep(0.5)
             self.serial_port.close()
-            self.stop_reading()
             self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
@@ -390,8 +398,7 @@ class MacroService:
         messagebox.showinfo("SEQUENCE COMPLETED", message)
         root.destroy()
 
-    @staticmethod
-    def show_alarm_messagebox(alarm, subcode):
+    def show_alarm_messagebox(self, alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
 
         if alarm_data is None:
@@ -421,6 +428,7 @@ class MacroService:
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror("Alarm", formatted_message)
+        self.dispatcher.emit('emergencyStop')
         root.destroy()
 
     def show_emergency_stop_messagebox(self):
