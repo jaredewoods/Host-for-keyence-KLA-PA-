@@ -8,8 +8,6 @@ import time
 from alarms import alarm_dict
 
 
-# TODO if serial is connected, connect button is disabled
-# TODO if serial is disconnected close button is disabled
 class SerialService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
@@ -150,8 +148,6 @@ class SerialService:
                 break
 
 
-# TODO if tcp is connected, connect button is disabled
-# TODO if tcp is disconnected close button is disabled
 class TCPService:
     def __init__(self, dispatcher=None):
         self.port = None
@@ -256,9 +252,6 @@ class TCPService:
         self.handle_received_data()
 
 # TODO allow realtime updates of the alignments input value
-# TODO if macro is running, reset button is disabled
-# TODO if macro is running start button is disabled
-# TODO if macro is stopped stop button is disabled
 
 
 class MacroService:

@@ -89,8 +89,10 @@ class SerialControlFrame(ttk.Frame):
 
         if self.serial_connected:
             self.set_widget_states(widgets, 'normal')
+            self.btn_connect_serial.config(state='disabled')
         else:
             self.set_widget_states(widgets, 'disabled')
+            self.btn_connect_serial.config(state='normal')
 
 
 class TCPControlFrame(ttk.Frame):
@@ -168,20 +170,21 @@ class TCPControlFrame(ttk.Frame):
 
     def update_button_states(self):
         print("debug this function from TCPControlFrame1")
+        widgets = [
+            self.btn_t1,
+            self.btn_t2,
+            self.btn_prev_camera,
+            self.btn_next_camera,
+            self.btn_custom_tcp_send,
+            self.ent_custom_tcp
+        ]
+
         if self.tcp_connected:
-            self.btn_t1.config(state='normal')
-            self.btn_t2.config(state='normal')
-            self.btn_prev_camera.config(state='normal')
-            self.btn_next_camera.config(state='normal')
-            self.btn_custom_tcp_send.config(state='normal')
-            self.ent_custom_tcp.config(state='normal')
+            self.set_widget_states(widgets, 'normal')
+            self.btn_connect_socket.config(state='disabled')
         else:
-            self.btn_t1.config(state='disabled')
-            self.btn_t2.config(state='disabled')
-            self.btn_prev_camera.config(state='disabled')
-            self.btn_next_camera.config(state='disabled')
-            self.btn_custom_tcp_send.config(state='disabled')
-            self.ent_custom_tcp.config(state='disabled')
+            self.set_widget_states(widgets, 'disabled')
+            self.btn_connect_socket.config(state='normal')
 
 
 class MacroControlFrame(ttk.Frame):
@@ -220,10 +223,10 @@ class MacroControlFrame(ttk.Frame):
         self.btn_stop = ttk.Button(self, text="Stop", state='normal', command=lambda: dispatcher.emit('stopSequence'))
         self.btn_stop.grid(row=4, column=1, padx=5)
 
-        self.btn_clear_log_display = ttk.Button(self, text="Clear", state='enabled', command=lambda: dispatcher.emit('clearLogDisplay'))
+        self.btn_clear_log_display = ttk.Button(self, text="Clear", state='normal', command=lambda: dispatcher.emit('clearLogDisplay'))
         self.btn_clear_log_display.grid(row=5, column=0, padx=5)
 
-        self.btn_reset = ttk.Button(self, text="Reset", state='normal', command=self.reset_sequence)
+        self.btn_reset = ttk.Button(self, text="Reset", state='disabled', command=self.reset_sequence)
         self.btn_reset.grid(row=5, column=1, padx=5)
 
         self.macro_separator1 = ttk.Separator(self, orient='horizontal')
@@ -258,7 +261,8 @@ class MacroControlFrame(ttk.Frame):
         self.dispatcher.register_event('startSequence', self.set_start_time)
         self.dispatcher.register_event('stopSequence', self.set_stop_time)
 
-    # UI UPDATES
+        self.update_button_states()
+
     def starting_sequence(self):
         self.set_start_time()
         self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
@@ -277,10 +281,15 @@ class MacroControlFrame(ttk.Frame):
 
     def update_button_states(self):
         print("debug this function from MacroControlFrame1.5")
-        if self.serial_connected and self.tcp_connected:
+        if self.serial_connected:
             self.btn_start.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
+
+        if self.macro_running:
+            self.btn_reset.config(state='disabled')
+        else:
+            self.btn_reset.config(state='normal')
 
     def set_start_time(self):
         print("debug this function from MacroControlFrame2")
@@ -295,6 +304,7 @@ class MacroControlFrame(ttk.Frame):
         print(f"Stop time set to: {self.stop_time.strftime('%H:%M:%S')}")
         self.macro_running = False
         self.update_elapsed_time()
+        self.update_button_states()
 
     def update_elapsed_time(self):
         if self.start_time and self.macro_running:
@@ -323,6 +333,8 @@ class MacroControlFrame(ttk.Frame):
         self.ent_total_cycles.delete(0, tk.END)
         self.ent_total_cycles.insert(0, "105")
         print("Sequence reset")
+        self.update_button_states()
+
 
 
 class StatusFrame(tk.Frame):

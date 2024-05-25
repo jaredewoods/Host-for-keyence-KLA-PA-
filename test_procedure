@@ -1,29 +1,34 @@
 connect serial
-MTRS, MALN, CSOL, HRST
-custom send,
+MTRS, OK
+MALN,
+CSOL, no auto response match
+HRST, no auto response match
+custom send, OK
 emergency stop
-connect serial - FAILED
-close
-connect serial
-quit
+reconnect serial, OK
+close, OK
+reconnect serial, OK
+quit, OK
 
 connect TCP
-Trig1, Trig2, PrevCam, NextCam (Funny logging format for T2 PC NC)
-commands trigger macro responses (need to add if macro= stopped)
-custom send - FAILED with data received error
-emergency stop
-close - FAILED non responsive
-connect TCP
+Trig1, (log shows extra spaces trim \n)
+Trig2, (log shows extra spaces trim \n)
+PrevCam, (log shows extra spaces trim \n)
+NextCam, (log shows extra spaces trim \n)
+custom send - FAILED with data received timeout
+emergency stop - doesn't stop the tcp connection
+close - OK
+reconnect TCP - OK
 quit
 
 change alignments
-start wait a few cycles
-stop
+start - OK
+stop - OK
 enter small value for change alignments
 start until completion
-reset
-clear
-start
-emergency stop
+reset - OK
+clear - OK
+start - OK
+emergency stop - OK
 
-test controller alarm
+test controller alarm - OK
