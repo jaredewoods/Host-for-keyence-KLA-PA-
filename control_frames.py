@@ -262,8 +262,8 @@ class MacroControlFrame(ttk.Frame):
     def starting_sequence(self):
         self.set_start_time()
         self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
-        self.macro_running = True  # Set the flag when the sequence starts
-        self.update_elapsed_time()  # Start the timer
+        self.macro_running = True
+        self.update_elapsed_time()
 
     def update_serial_connection_status(self, status):
         print("debug this function from MacroControlFrame0")
@@ -293,7 +293,7 @@ class MacroControlFrame(ttk.Frame):
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.stop_time.strftime('%H:%M:%S')}")
-        self.macro_running = False  # Clear the flag when the sequence stops
+        self.macro_running = False
         self.update_elapsed_time()
 
     def update_elapsed_time(self):
@@ -312,7 +312,7 @@ class MacroControlFrame(ttk.Frame):
     def reset_sequence(self):
         print("debug this function from MacroControlFrame5")
         print("Sequence Reset")
-        self.macro_running = False  # Ensure the flag is cleared
+        self.macro_running = False
         self.start_time = None
         self.stop_time = None
         self.val_start_time.config(text="00:00:00")

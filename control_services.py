@@ -136,7 +136,7 @@ class SerialService:
 
         while self.serial_port and self.serial_port.is_open:
             try:
-                line = self.serial_port.readline()  # Non-blocking read operation
+                line = self.serial_port.readline()
                 if line:
                     line = line.decode('utf-8').strip()
                     print(f"Complete message received: {line}")
@@ -147,7 +147,7 @@ class SerialService:
                 print(f"Read failed: {str(e)}")
             except Exception as e:
                 print(f"Unhandled exception: {str(e)}")
-                break  # Exit loop for any other exceptions
+                break
 
 
 # TODO if tcp is connected, connect button is disabled
@@ -406,9 +406,6 @@ class MacroService:
         self.stop_requested = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.dispatcher.emit('logToDisplay', "Emergency stop activated", 'Macro')
-        # self.serial_service.close_serial_port(self.serial_service.serial_port_name)
-        # self.tcp_service.close_tcp_socket()
-        # self.dispatcher.emit('disconnectTCP')
         self.macro_running = False
         self.show_emergency_stop_messagebox()
 
@@ -460,6 +457,5 @@ class MacroService:
             print("Emergency stop cleared")
             self.dispatcher.emit('sendClearCommand')
         else:
-            # Handle the Cancel response here
             print("Emergency stop not cleared")
         root.destroy()

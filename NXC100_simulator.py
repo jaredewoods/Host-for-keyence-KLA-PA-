@@ -59,6 +59,8 @@ class SerialSimulator:
         self.create_widgets()
         self.grid_widgets()
         self.setup_logging()
+
+        # noinspection PyTypeChecker
         self.tcp_server = TCPServer(log_callback=self.log_to_display, t1_delay=self.t1_delay)
         self.start_tcp_server()
 
@@ -80,7 +82,7 @@ class SerialSimulator:
         formatted_message = f"{current_time} - {message}\n"
         self.log_display.insert(tk.END, formatted_message)
         self.log_display.see(tk.END)
-        print(f"Debug: {formatted_message}")  # Debug print to check if the method is triggered
+        print(f"Debug: {formatted_message}")
 
     def start_tcp_server(self):
         self.tcp_server.start_server()
@@ -140,6 +142,7 @@ class SerialSimulator:
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
 
+        # Reset Button
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", command=self.reset_server_command)
 
         # Log display
@@ -203,7 +206,7 @@ class SerialSimulator:
         print(f"received: {command}")
         if command.strip() == "$2MTRSG100ALDD":
             self.send_command("@2300000000015")
-            time.sleep(self.mtrs_delay.get())  # Use spinbox value for delay
+            time.sleep(self.mtrs_delay.get())
             self.send_command("$23200000000MTRS5D")
         elif command.strip() == "$2MALN1009000B4":
             self.send_command("@2100000000013")
@@ -321,7 +324,7 @@ class TCPServer:
             if command.strip() == "T1":
                 if self.t1_delay:
                     self.log_callback(f"Applying T1 delay: {self.t1_delay.get()} seconds")
-                    time.sleep(self.t1_delay.get())  # Use the float value for delay
+                    time.sleep(self.t1_delay.get())
                     self.log_callback(f"T1 delay applied: {self.t1_delay.get()} seconds")
                 response = "T1"
             else:
