@@ -11,53 +11,84 @@ import datetime
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
+class GUIHandler(logging.Handler):
+    def __init__(self, log_callback):
+        super().__init__()
+        self.log_callback = log_callback
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.log_callback(log_entry)
+
+
 class SerialSimulator:
     def __init__(self, master):
-        self.sim_separator0 = None
-        self.t1_delay_spinbox = None
-        self.t1_delay = None
-        self.t1_delay_label = None
         self.read_thread = None
         self.serial_port = None
-        self.btn_maln_completed = None
-        self.btn_mtrs_completed = None
-        self.custom_command_entry = None
-        self.btn_maln_response = None
-        self.maln_delay_spinbox = None
-        self.maln_delay_label = None
-        self.btn_send_error_command = None
+        self.sim_separator0 = None
         self.log_display = None
+        self.btn_reset_server_command = None
+        self.btn_maln_completed = None
+        self.btn_send_error_command = None
+        self.btn_mtrs_completed = None
+        self.btn_maln_response = None
         self.btn_mtrs_response = None
+        self.t1_delay_spinbox = None
+        self.t1_delay_label = None
+        self.maln_delay_spinbox = None
+        self.custom_command_entry = None
+        self.maln_delay_label = None
+        self.mtrs_delay_spinbox = None
+        self.mtrs_delay_label = None
         self.rad_auto_off = None
         self.rad_auto_on = None
         self.connect_button = None
         self.serial_port_dropdown = None
         self.serial_ports = None
-        self.mtrs_delay_spinbox = None
-        self.mtrs_delay_label = None
         self.serial_port_var = None
-        self.frame = None
-        self.std_width = 16
         self.master = master
+        self.frame = ttk.Frame(self.master, padding="10")
         self.master.title("NXC100 Simulator")
 
         self.auto_reply = tk.BooleanVar(value=True)
         self.mtrs_delay = tk.DoubleVar(value=0.5)
         self.maln_delay = tk.DoubleVar(value=1.0)
+        self.t1_delay = tk.DoubleVar(value=0.0)
+        self.std_width = 16
 
         self.create_widgets()
         self.grid_widgets()
-        self.tcp_server = TCPServer()
+        self.setup_logging()
+        self.tcp_server = TCPServer(log_callback=self.log_to_display, t1_delay=self.t1_delay)
         self.start_tcp_server()
 
+    def setup_logging(self):
+        # Setup logging to output to both console and GUI
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        gui_handler = GUIHandler(self.log_to_display)
+        gui_handler.setLevel(logging.INFO)
+        gui_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+        logging.getLogger().addHandler(console_handler)
+        logging.getLogger().addHandler(gui_handler)
+        logging.getLogger().setLevel(logging.INFO)
+
+    def log_to_display(self, message):
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")
+        formatted_message = f"{current_time} - {message}\n"
+        self.log_display.insert(tk.END, formatted_message)
+        self.log_display.see(tk.END)
+        print(f"Debug: {formatted_message}")  # Debug print to check if the method is triggered
+
     def start_tcp_server(self):
-        self.tcp_server = TCPServer(log_callback=self.log_to_display)
         self.tcp_server.start_server()
         self.log_display.insert(tk.END, "Server started at 127.0.0.1:8500\n")
 
     def stop_tcp_server(self):
         self.tcp_server.stop_server()
-        self.log_display.insert(tk.END, "Server stopped 172.0.0.1:8500\n")
+        self.log_display.insert(tk.END, "Server stopped 127.0.0.1:8500\n")
 
     def on_closing(self):
         self.stop_tcp_server()
@@ -95,9 +126,9 @@ class SerialSimulator:
 
         # Spinbox for T1 delay
         self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (sec):")
-        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1, 
+        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=2.0, increment=0.1,
                                            textvariable=self.t1_delay, format="%.1f", justify='center')
-        
+
         # Buttons for predefined responses
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
         self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
@@ -109,10 +140,10 @@ class SerialSimulator:
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
 
-        self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", command=self.send_custom_command)
+        self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", command=self.reset_server_command)
 
         # Log display
-        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=12)
+        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 
@@ -136,7 +167,7 @@ class SerialSimulator:
         self.btn_maln_completed.grid(row=7, column=1, pady=5)
         self.custom_command_entry.grid(row=8, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
         self.btn_send_error_command.grid(row=9, column=0, pady=5, padx=5)
-        self.btn_reset_server_command.grid(row=9, column=1, pady=5, padx=5)
+        self.btn_reset_server_command.grid(row=9, column=1, pady=5)
         self.log_display.grid(row=0, column=2, rowspan=9, pady=5, padx=10, sticky='nsew')
 
     @staticmethod
@@ -191,13 +222,6 @@ class SerialSimulator:
         self.serial_port.write(f"{command}\r\n".encode('utf-8'))
         self.log_to_display(f"Sent: {command}")
 
-    def log_to_display(self, message):
-        current_time = datetime.datetime.now().strftime("%H:%M:%S")
-        formatted_message = f"{current_time} - {message}\n"
-        self.log_display.insert(tk.END, formatted_message)
-        self.log_display.see(tk.END)
-        print(f"Debug: {formatted_message}")  # Debug print to check if the method is triggered
-
     def open_serial_port(self, port, baudrate=9600):
         try:
             self.serial_port = serial.Serial(port, baudrate, timeout=1)
@@ -239,11 +263,15 @@ class SerialSimulator:
         self.close_serial_port()
         self.master.destroy()
 
+    def reset_server_command(self):
+        self.close_serial_port()
+
 
 class TCPServer:
-    def __init__(self, host='127.0.0.1', port=8500, log_callback=None):
+    def __init__(self, host='127.0.0.1', port=8500, log_callback=None, t1_delay=0.0):
         self.host = host
         self.port = port
+        self.t1_delay = t1_delay
         self.server_socket = None
         self.client_socket = None
         self.is_running = False
@@ -257,34 +285,52 @@ class TCPServer:
             self.server_socket.listen(1)
             self.is_running = True
             threading.Thread(target=self.accept_connections, daemon=True).start()
-            logging.info("Server started on {}:{}".format(self.host, self.port))
+            self.log_callback("Server started on {}:{}".format(self.host, self.port))
         except Exception as e:
-            logging.error("Failed to start server: {}".format(e))
+            self.log_callback("Failed to start server: {}".format(e))
 
     def accept_connections(self):
         while self.is_running:
-            self.client_socket, _ = self.server_socket.accept()
-            self.handle_client()
+            try:
+                self.client_socket, addr = self.server_socket.accept()
+                self.log_callback(f"Connection accepted from {addr}")
+                self.handle_client()
+            except socket.error as e:
+                self.log_callback("Error accepting connections: {}".format(e))
+                continue
 
     def handle_client(self):
         while self.is_running:
             try:
-                data = self.client_socket.recv(1024).decode('utf-8').strip()  # Strip whitespace here
+                data = self.client_socket.recv(1024).decode('utf-8').strip()
                 if data:
-                    self.log_callback(f"Received TCP: {data}")  # Log received data
+                    self.log_callback(f"Received TCP: {data}")
                     response = self.process_command(data)
                     self.client_socket.sendall(response.encode('utf-8'))
-                    self.log_callback(f"Sent TCP: {response}")  # Log sent response
-            except (socket.error, AttributeError):
-                self.stop_server()
+                    self.log_callback(f"Sent TCP: {response}")
+            except socket.error as e:
+                self.log_callback(f"Socket error: {e}")
+                break
+            except Exception as e:
+                self.log_callback(f"Unhandled error: {e}")
+                break
 
-    @staticmethod
-    def process_command(command):
-        if command.strip() == "T1":
-            time.sleep(self.t1_delay.get())  # Use the value from the Spinbox
-            return "T1"
-        else:
-            return command
+    def process_command(self, command):
+        try:
+            self.log_callback(f"Processing command: {command}")
+            if command.strip() == "T1":
+                if self.t1_delay:
+                    self.log_callback(f"Applying T1 delay: {self.t1_delay.get()} seconds")
+                    time.sleep(self.t1_delay.get())  # Use the float value for delay
+                    self.log_callback(f"T1 delay applied: {self.t1_delay.get()} seconds")
+                response = "T1"
+            else:
+                response = command
+            self.log_callback(f"Response generated: {response}")
+            return response
+        except Exception as e:
+            self.log_callback(f"Error processing command {command}: {e}")
+            return "Error"
 
     def stop_server(self):
         self.is_running = False
@@ -293,9 +339,9 @@ class TCPServer:
                 self.client_socket.close()
             if self.server_socket:
                 self.server_socket.close()
-            logging.info("Server stopped")
+            self.log_callback("Server stopped")
         except Exception as e:
-            logging.error("Error stopping server: {}".format(e))
+            self.log_callback("Error stopping server: {}".format(e))
 
 
 if __name__ == "__main__":
