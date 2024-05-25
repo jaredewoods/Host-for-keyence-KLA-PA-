@@ -6,6 +6,7 @@ import threading
 import time
 import socket
 import logging
+import datetime
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -46,11 +47,13 @@ class SerialSimulator:
         self.start_tcp_server()
 
     def start_tcp_server(self):
+        self.tcp_server = TCPServer(log_callback=self.log_to_display)
         self.tcp_server.start_server()
-        self.log_display.insert(tk.END, "Server started 172.0.0.1:8500\n")
+        self.log_display.insert(tk.END, "Server started at 127.0.0.1:8500\n")
 
     def stop_tcp_server(self):
         self.tcp_server.stop_server()
+        self.log_display.insert(tk.END, "Server stopped 172.0.0.1:8500\n")
 
     def on_closing(self):
         self.stop_tcp_server()
@@ -173,8 +176,11 @@ class SerialSimulator:
         self.log_to_display(f"Sent: {command}")
 
     def log_to_display(self, message):
-        self.log_display.insert(tk.END, f"{message}\n")
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")
+        formatted_message = f"{current_time} - {message}\n"
+        self.log_display.insert(tk.END, formatted_message)
         self.log_display.see(tk.END)
+        print(f"Debug: {formatted_message}")  # Debug print to check if the method is triggered
 
     def open_serial_port(self, port, baudrate=9600):
         try:
@@ -219,12 +225,13 @@ class SerialSimulator:
 
 
 class TCPServer:
-    def __init__(self, host='127.0.0.1', port=8500):
+    def __init__(self, host='127.0.0.1', port=8500, log_callback=None):
         self.host = host
         self.port = port
         self.server_socket = None
         self.client_socket = None
         self.is_running = False
+        self.log_callback = log_callback
 
     def start_server(self):
         try:
@@ -246,10 +253,12 @@ class TCPServer:
     def handle_client(self):
         while self.is_running:
             try:
-                data = self.client_socket.recv(1024).decode('utf-8')
+                data = self.client_socket.recv(1024).decode('utf-8').strip()  # Strip whitespace here
                 if data:
+                    self.log_callback(f"Received TCP: {data}")  # Log received data
                     response = self.process_command(data)
                     self.client_socket.sendall(response.encode('utf-8'))
+                    self.log_callback(f"Sent TCP: {response}")  # Log sent response
             except (socket.error, AttributeError):
                 self.stop_server()
 
