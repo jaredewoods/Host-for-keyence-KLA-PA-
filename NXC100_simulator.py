@@ -5,6 +5,9 @@ import serial.tools.list_ports
 import threading
 import time
 import socket
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SerialSimulator:
@@ -224,11 +227,16 @@ class TCPServer:
         self.is_running = False
 
     def start_server(self):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.host, self.port))
-        self.server_socket.listen(1)
-        self.is_running = True
-        threading.Thread(target=self.accept_connections, daemon=True).start()
+        try:
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.server_socket.bind((self.host, self.port))
+            self.server_socket.listen(1)
+            self.is_running = True
+            threading.Thread(target=self.accept_connections, daemon=True).start()
+            logging.info("Server started on {}:{}".format(self.host, self.port))
+        except Exception as e:
+            logging.error("Failed to start server: {}".format(e))
 
     def accept_connections(self):
         while self.is_running:
@@ -255,10 +263,14 @@ class TCPServer:
 
     def stop_server(self):
         self.is_running = False
-        if self.client_socket:
-            self.client_socket.close()
-        if self.server_socket:
-            self.server_socket.close()
+        try:
+            if self.client_socket:
+                self.client_socket.close()
+            if self.server_socket:
+                self.server_socket.close()
+            logging.info("Server stopped")
+        except Exception as e:
+            logging.error("Error stopping server: {}".format(e))
 
 
 if __name__ == "__main__":

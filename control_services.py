@@ -177,7 +177,9 @@ class TCPService:
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
 
-    def close_tcp_socket(self):
+    def close_tcp_socket(self, ip_address, port):
+        self.ip_address = ip_address
+        self.port = port
         if self.socket:
             self.socket.close()
             self.socket = None
@@ -257,6 +259,8 @@ class TCPService:
 # TODO if macro is running, reset button is disabled
 # TODO if macro is running start button is disabled
 # TODO if macro is stopped stop button is disabled
+
+
 class MacroService:
     def __init__(self, dispatcher=None, serial_service=None, tcp_service=None):
         self.dispatcher = dispatcher
