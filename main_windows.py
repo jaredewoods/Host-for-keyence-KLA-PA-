@@ -90,7 +90,7 @@ class MainWindow(tk.Tk):
         print("Control Frames created.")
 
         macro_control_tab = ttk.Frame(self.ntb_control)
-        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher, total_cycles=self.total_cycles,
+        macro_control = MacroControlFrame(macro_control_tab, dispatcher=self.dispatcher,
                                           completed_cycles_value=self.completed_cycles_value)
         macro_control.pack(fill=tk.BOTH, expand=True)
         self.ntb_control.add(macro_control_tab, text="   Macro   ")

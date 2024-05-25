@@ -355,7 +355,7 @@ class MacroService:
                     except ValueError:
                         angle = "Invalid angle format"
                     log_message = f"{distance}mm {angle_sign}{angle}deg"
-                    self.dispatcher.emit('logToDisplay', log_message, "OFFSET:")
+                    self.dispatcher.emit('logToDisplay', log_message, "Offset:")
                     self.wait_3_seconds()
                 else:
                     alarm = pre_mtrs[:4]

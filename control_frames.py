@@ -67,27 +67,30 @@ class SerialControlFrame(ttk.Frame):
 
     # UI UPDATES
     def update_serial_connection_status(self, status):
-        print("debug this function from SeriaControlFrame")
+        print("debug this function from SeriaControlFrame0")
         self.serial_connected = status
         self.update_button_states()
 
-    def update_button_states(self):
-        print("debug this function from SeriaControlFrame")
-        if self.serial_connected:
-            self.btn_mtrs.config(state='normal')
-            self.btn_maln.config(state='normal')
-            self.btn_csol.config(state='normal')
-            self.btn_hrst.config(state='normal')
-            self.btn_custom_serial_send.config(state='normal')
-            self.ent_custom_serial.config(state='normal')
+    @staticmethod
+    def set_widget_states(widgets, state):
+        for widget in widgets:
+            widget.config(state=state)
 
+    def update_button_states(self):
+        print("debug this function from SerialControlFrame")
+        widgets = [
+            self.btn_mtrs,
+            self.btn_maln,
+            self.btn_csol,
+            self.btn_hrst,
+            self.btn_custom_serial_send,
+            self.ent_custom_serial
+        ]
+
+        if self.serial_connected:
+            self.set_widget_states(widgets, 'normal')
         else:
-            self.btn_mtrs.config(state='disabled')
-            self.btn_maln.config(state='disabled')
-            self.btn_csol.config(state='disabled')
-            self.btn_hrst.config(state='disabled')
-            self.btn_custom_serial_send.config(state='disabled')
-            self.ent_custom_serial.config(state='disabled')
+            self.set_widget_states(widgets, 'disabled')
 
 
 class TCPControlFrame(ttk.Frame):
@@ -154,12 +157,17 @@ class TCPControlFrame(ttk.Frame):
 
         # UI UPDATES
     def update_tcp_connection_status(self, status):
-        print("debug this function from TCPControlFrame")
+        print("debug this function from TCPControlFrame0")
         self.tcp_connected = status
         self.update_button_states()
 
+    @staticmethod
+    def set_widget_states(widgets, state):
+        for widget in widgets:
+            widget.config(state=state)
+
     def update_button_states(self):
-        print("debug this function from TCPControlFrame")
+        print("debug this function from TCPControlFrame1")
         if self.tcp_connected:
             self.btn_t1.config(state='normal')
             self.btn_t2.config(state='normal')
@@ -177,7 +185,7 @@ class TCPControlFrame(ttk.Frame):
 
 
 class MacroControlFrame(ttk.Frame):
-    def __init__(self, master=None, dispatcher=None, completed_cycles_value=None, total_cycles=None):
+    def __init__(self, master=None, dispatcher=None, completed_cycles_value=None):
         super().__init__(master)
         self.total_cycles = tk.StringVar(value="105")
 
