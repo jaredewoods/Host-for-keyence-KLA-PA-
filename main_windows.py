@@ -52,6 +52,7 @@ class MainWindow(tk.Tk):
             self.macro_service,
             self.log_to_display,
             self.clear_log_display,
+            self.export_log,
             self.scan_com_ports,
             self.quit_application,
             self.update_serial_connection_status,
@@ -101,6 +102,13 @@ class MainWindow(tk.Tk):
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#000040", fg="yellow", font=(fallback_fonts, 10))
 
+    def export_log(self):
+        print("export_log")
+        log_content = self.log_display.get("1.0", tk.END)
+        with open("log_output.txt", "w") as log_file:
+            log_file.write(log_content)
+        self.log_to_display("Log exported to log_output.txt","System")
+
     def clear_log_display(self):
         self.log_display.delete('1.0', tk.END)
         print("Log Display cleared")
@@ -118,22 +126,22 @@ class MainWindow(tk.Tk):
         self.log_display.see(tk.END)
 
     def update_serial_connection_status(self, status):
-        print("debug this function from MainWindow")
+        print("debug this function from MainWindow0")
         self.serial_connected = status
         self.dispatcher.emit('updateButtonStates')
 
     def update_tcp_connection_status(self, status):
-        print("debug this function from MainWindow")
+        print("debug this function from MainWindow1")
         self.tcp_connected = status
         self.dispatcher.emit('updateButtonStates')
 
     def update_macro_running_status(self, status):
-        print("debug this function from MainWindow")
+        print("debug this function from MainWindow2")
         self.macro_running = status
         print(f'macro running status: {status}')
 
     def update_completed_cycles_display(self, completed_cycles):
-        print("debug this function from MainWindow")
+        print("debug this function from MainWindow3")
         print(f"Updating completed cycles value: {completed_cycles}")
         self.completed_cycles_value.set(completed_cycles)
         print(f"New value in IntVar: {self.completed_cycles_value.get()}")

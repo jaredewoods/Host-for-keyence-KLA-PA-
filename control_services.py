@@ -414,10 +414,11 @@ class MacroService:
 
     def show_completion_messagebox(self):
         message = f"{self.completed_cycles} Alignments Completed\nExport Log?"
-        root = tk.Tk()
+        root = tk.Toplevel()
         root.withdraw()
-        messagebox.askokcancel("SEQUENCE COMPLETED", message)
-        root.destroy()
+        result = messagebox.askyesno("SEQUENCE COMPLETED", message)
+        if result:
+            self.dispatcher.emit('exportLog')
 
     def show_alarm_messagebox(self, alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
