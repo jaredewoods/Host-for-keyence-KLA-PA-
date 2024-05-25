@@ -32,7 +32,9 @@ class MainWindow(tk.Tk):
         self.dispatcher = EventDispatcher()
         self.serial_service = SerialService(dispatcher=self.dispatcher)
         self.tcp_service = TCPService(dispatcher=self.dispatcher)
-        self.macro_service = MacroService(dispatcher=self.dispatcher, serial_service=self.serial_service)
+        self.macro_service = MacroService(dispatcher=self.dispatcher,
+                                          serial_service=self.serial_service,
+                                          tcp_service=self.tcp_service)
         self.scan_com_ports()
         self.create_control_frames()
         self.create_log_frame()
@@ -94,7 +96,7 @@ class MainWindow(tk.Tk):
         self.ntb_control.add(macro_control_tab, text="   Macro   ")
 
     def create_log_frame(self):
-        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, height=22, width=60)
+        self.log_display = scrolledtext.ScrolledText(self, wrap=tk.WORD, height=22, width=62)
         self.log_display.grid(row=0, column=1, rowspan=2, sticky="", padx=5, pady=5)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#000040", fg="yellow", font=(fallback_fonts, 10))

@@ -258,30 +258,30 @@ class MacroControlFrame(ttk.Frame):
         self.update_elapsed_time()  # Start the timer
 
     def update_serial_connection_status(self, status):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame0")
         self.serial_connected = status
         self.update_button_states()
 
     def update_tcp_connection_status(self, status):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame1")
         self.tcp_connected = status
         self.update_button_states()
 
     def update_button_states(self):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame1.5")
         if self.serial_connected and self.tcp_connected:
             self.btn_start.config(state='normal')
         else:
             self.btn_start.config(state='disabled')
 
     def set_start_time(self):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame2")
         self.start_time = datetime.now()
         self.val_start_time.config(text=self.start_time.strftime("%H:%M:%S"))
         print(f"Start time set to: {self.start_time.strftime('%H:%M:%S')}")
 
     def set_stop_time(self):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame3")
         self.stop_time = datetime.now()
         self.val_stop_time.config(text=self.stop_time.strftime("%H:%M:%S"))
         print(f"Stop time set to: {self.stop_time.strftime('%H:%M:%S')}")
@@ -289,7 +289,6 @@ class MacroControlFrame(ttk.Frame):
         self.update_elapsed_time()
 
     def update_elapsed_time(self):
-        print("debug this function from MacroControlFrame")
         if self.start_time and self.macro_running:
             elapsed = datetime.now() - self.start_time
             self.elapsed_time.set(str(elapsed).split('.')[0])  # Format as HH:MM:SS
@@ -303,7 +302,7 @@ class MacroControlFrame(ttk.Frame):
             self.val_elapsed_time.config(text="--:--:--")
 
     def reset_sequence(self):
-        print("debug this function from MacroControlFrame")
+        print("debug this function from MacroControlFrame5")
         print("Sequence Reset")
         self.macro_running = False  # Ensure the flag is cleared
         self.start_time = None

@@ -8,6 +8,8 @@ import time
 from alarms import alarm_dict
 
 
+# TODO if serial is connected, connect button is disabled
+# TODO if serial is disconnected close button is disabled
 class SerialService:
     def __init__(self, dispatcher=None):
         self.dispatcher = dispatcher
@@ -143,14 +145,24 @@ class SerialService:
                         self.response_callback(line)
             except serial.SerialException as e:
                 print(f"Read failed: {str(e)}")
+            except Exception as e:
+                print(f"Unhandled exception: {str(e)}")
+                break  # Exit loop for any other exceptions
 
 
+# TODO if tcp is connected, connect button is disabled
+# TODO if tcp is disconnected close button is disabled
 class TCPService:
     def __init__(self, dispatcher=None):
+        self.port = None
+        self.ip_address = None
         self.dispatcher = dispatcher
         self.socket = None
 
     def connect_tcp_socket(self, ip_address, port, timeout=5.0):
+        self.ip_address = ip_address
+        self.port = port
+        
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
@@ -165,13 +177,13 @@ class TCPService:
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
 
-    def close_tcp_socket(self, ip_address, port):
+    def close_tcp_socket(self):
         if self.socket:
             self.socket.close()
             self.socket = None
-            self.dispatcher.emit('logToDisplay', f"Close {ip_address}:{port}", 'TCP', 'closed')
+            self.dispatcher.emit('logToDisplay', f"Close {self.ip_address}:{self.port}", 'TCP', 'closed')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
-            print(f"Disconnected from {ip_address}:{port}")
+            print(f"Disconnected from {self.ip_address}:{self.port}")
 
     def send_tcp_data(self, tcp_data):
         if self.socket:
@@ -242,10 +254,14 @@ class TCPService:
         self.handle_received_data()
 
 
+# TODO if macro is running, reset button is disabled
+# TODO if macro is running start button is disabled
+# TODO if macro is stopped stop button is disabled
 class MacroService:
-    def __init__(self, dispatcher=None, serial_service=None):
+    def __init__(self, dispatcher=None, serial_service=None, tcp_service=None):
         self.dispatcher = dispatcher
         self.serial_service = serial_service
+        self.tcp_service = tcp_service
         self.macro_running = False
         self.total_cycles = None
         self.completed_cycles = 0
@@ -258,12 +274,13 @@ class MacroService:
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.completed_cycles = 0
         self.total_cycles = int(total_cycles)
-        self.dispatcher.emit('logToDisplay', f"{total_cycles} CYCLES", 'STARTING SEQUENCE for')
+        self.dispatcher.emit('logToDisplay', f"{total_cycles} Cycles\n\n", 'Initializing Sequence for')
         self.run_sequence()
 
     def run_sequence(self):
         if self.macro_running and not self.stop_requested:
             print("Running sequence")
+            self.dispatcher.emit('logToDisplay', f"{self.total_cycles} ============ ", f' ================ Starting Cycle {self.completed_cycles + 1} of')
             self.send_command_mtrs()
 
     def stop_sequence(self):
@@ -364,10 +381,10 @@ class MacroService:
         self.dispatcher.emit('incrementCycleCount')
 
     def increment_cycle_count(self):
-        if self.stop_requested:
+        if self.stop_requested or self.total_cycles is None:
             return
         self.completed_cycles += 1
-        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} \n", "Completed Cycle:")
+        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} ============ \n\n", " ============== Completed Cycle:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
@@ -382,17 +399,20 @@ class MacroService:
 
     def emergency_stop_sequence(self):
         print("Emergency stop triggered")
-        self.macro_running = False
         self.stop_requested = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
         self.dispatcher.emit('logToDisplay', "Emergency stop activated", 'Macro', 'stopped')
+        # self.serial_service.close_serial_port(self.serial_service.serial_port_name)
+        # self.tcp_service.close_tcp_socket()
+        # self.dispatcher.emit('disconnectTCP')
+        self.macro_running = False
         self.show_emergency_stop_messagebox()
 
     def show_completion_messagebox(self):
         message = f"{self.completed_cycles} Alignments Completed\nExport Log?"
         root = tk.Tk()
         root.withdraw()
-        messagebox.showinfo("SEQUENCE COMPLETED", message)
+        messagebox.askokcancel("SEQUENCE COMPLETED", message)
         root.destroy()
 
     def show_alarm_messagebox(self, alarm, subcode):
