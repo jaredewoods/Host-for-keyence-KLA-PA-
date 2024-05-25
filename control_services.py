@@ -253,7 +253,7 @@ class TCPService:
         self.dispatcher.emit('logToDisplay', f"Sent: {command}", "TCP")
         self.handle_received_data()
 
-
+# TODO allow realtime updates of the alignments input value
 # TODO if macro is running, reset button is disabled
 # TODO if macro is running start button is disabled
 # TODO if macro is stopped stop button is disabled

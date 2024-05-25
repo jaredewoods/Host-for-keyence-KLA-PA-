@@ -2,16 +2,18 @@ connect serial
 MTRS, MALN, CSOL, HRST
 custom send,
 emergency stop
+connect serial - FAILED
 close
 connect serial
 quit
 
 connect TCP
-Trig1, Trig2, PrevCam, NextCam
-custom send
+Trig1, Trig2, PrevCam, NextCam (Funny logging format for T2 PC NC)
+commands trigger macro responses (need to add if macro= stopped)
+custom send - FAILED with data received error
 emergency stop
-close
-connect serial
+close - FAILED non responsive
+connect TCP
 quit
 
 change alignments

@@ -86,7 +86,7 @@ class MainWindow(tk.Tk):
         tcp_control = TCPControlFrame(tcp_control_tab, dispatcher=self.dispatcher)
         tcp_control.pack(fill=tk.BOTH, expand=True)
         self.ntb_control.add(tcp_control_tab, text="    TCP    ")
-        self.ntb_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
+        self.ntb_control.bind("<<NotebookTabChanged>>", lambda event: self.on_tab_change())
         print("Control Frames created.")
 
         macro_control_tab = ttk.Frame(self.ntb_control)
@@ -139,7 +139,7 @@ class MainWindow(tk.Tk):
         print(f"New value in IntVar: {self.completed_cycles_value.get()}")
         self.update_idletasks()
 
-    def on_tab_change(self, event):  # forces immediate update
+    def on_tab_change(self):  # forces immediate update
         self.ntb_control.update_idletasks()
 
     def create_menu_bar(self):
