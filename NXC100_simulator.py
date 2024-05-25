@@ -13,6 +13,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 class SerialSimulator:
     def __init__(self, master):
+        self.sim_separator0 = None
+        self.t1_delay_spinbox = None
+        self.t1_delay = None
+        self.t1_delay_label = None
         self.read_thread = None
         self.serial_port = None
         self.btn_maln_completed = None
@@ -89,6 +93,11 @@ class SerialSimulator:
         self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1,
                                              textvariable=self.maln_delay, justify='center')
 
+        # Spinbox for T1 delay
+        self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (sec):")
+        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1, 
+                                           textvariable=self.t1_delay, format="%.1f", justify='center')
+        
         # Buttons for predefined responses
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
         self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
@@ -98,7 +107,9 @@ class SerialSimulator:
         # Entry for custom commands
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
-        self.btn_send_error_command = ttk.Button(self.frame, text="Send Error Command", command=self.send_custom_command)
+        self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
+
+        self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", command=self.send_custom_command)
 
         # Log display
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=40, height=12)
@@ -111,17 +122,22 @@ class SerialSimulator:
         self.connect_button.grid(row=1, column=0, padx=5, pady=5)
         self.rad_auto_on.grid(row=0, column=1, sticky='', padx=(10, 0))
         self.rad_auto_off.grid(row=1, column=1, sticky='', padx=(10, 0))
-        self.mtrs_delay_label.grid(row=2, column=0, pady=5)
-        self.mtrs_delay_spinbox.grid(row=3, column=0, pady=5)
-        self.maln_delay_label.grid(row=2, column=1, pady=5)
-        self.maln_delay_spinbox.grid(row=3, column=1, pady=5)
-        self.btn_mtrs_response.grid(row=4, column=0, pady=5)
-        self.btn_maln_response.grid(row=4, column=1, pady=5)
-        self.btn_mtrs_completed.grid(row=5, column=0, pady=5)
-        self.btn_maln_completed.grid(row=5, column=1, pady=5)
-        self.custom_command_entry.grid(row=6, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
-        self.btn_send_error_command.grid(row=7, column=0, columnspan=2, pady=5, padx=5)
-        self.log_display.grid(row=0, column=2, rowspan=8, pady=5, padx=10, sticky='nsew')
+        self.sim_separator0 = ttk.Separator(orient='horizontal')
+        self.sim_separator0.grid(row=2, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.mtrs_delay_label.grid(row=3, column=0, pady=5)
+        self.mtrs_delay_spinbox.grid(row=3, column=1, pady=5)
+        self.maln_delay_label.grid(row=4, column=0, pady=5)
+        self.maln_delay_spinbox.grid(row=4, column=1, pady=5)
+        self.t1_delay_label.grid(row=5, column=0, pady=5)
+        self.t1_delay_spinbox.grid(row=5, column=1, pady=5)
+        self.btn_mtrs_response.grid(row=6, column=0, pady=5)
+        self.btn_maln_response.grid(row=6, column=1, pady=5)
+        self.btn_mtrs_completed.grid(row=7, column=0, pady=5)
+        self.btn_maln_completed.grid(row=7, column=1, pady=5)
+        self.custom_command_entry.grid(row=8, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
+        self.btn_send_error_command.grid(row=9, column=0, pady=5, padx=5)
+        self.btn_reset_server_command.grid(row=9, column=1, pady=5, padx=5)
+        self.log_display.grid(row=0, column=2, rowspan=9, pady=5, padx=10, sticky='nsew')
 
     @staticmethod
     def get_serial_ports():
@@ -265,7 +281,7 @@ class TCPServer:
     @staticmethod
     def process_command(command):
         if command.strip() == "T1":
-            time.sleep(0.5)
+            time.sleep(self.t1_delay.get())  # Use the value from the Spinbox
             return "T1"
         else:
             return command
