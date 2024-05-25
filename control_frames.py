@@ -119,7 +119,7 @@ class TCPControlFrame(ttk.Frame):
         self.btn_connect_socket = ttk.Button(self, text="Connect", command=lambda: dispatcher.emit('connectTCP', self.ent_ip_address.get(), self.ent_ip_port.get()))
         self.btn_connect_socket.grid(row=2, column=0, padx=5)
 
-        self.btn_disconnect_socket = ttk.Button(self, text="Close", command=lambda: dispatcher.emit('disconnectTCP', self.ent_ip_address.get(), self.ent_ip_port.get()))
+        self.btn_disconnect_socket = ttk.Button(self, text="Close", command=lambda: dispatcher.emit('disconnectTCP'))
         self.btn_disconnect_socket.grid(row=2, column=1, padx=5)
 
         self.tcp_separator0 = ttk.Separator(self, orient='horizontal')
@@ -207,6 +207,8 @@ class MacroControlFrame(ttk.Frame):
 
         self.ent_total_cycles = ttk.Entry(self, width=5, textvariable=self.total_cycles, justify='center')
         self.ent_total_cycles.grid(row=2, column=0, padx=5)
+        self.ent_total_cycles.bind("<FocusOut>", self.on_total_cycles_change)
+        self.ent_total_cycles.bind("<Return>", self.on_total_cycles_change)
 
         self.lbl_completed_cycles = ttk.Label(self, text="Completed")
         self.lbl_completed_cycles.grid(row=1, column=1, padx=5, pady=5)
@@ -263,11 +265,16 @@ class MacroControlFrame(ttk.Frame):
 
         self.update_button_states()
 
+    def on_total_cycles_change(self, event):
+        new_total = self.total_cycles.get()
+        self.dispatcher.emit('updateTotalCycles', new_total)
+
     def starting_sequence(self):
         self.set_start_time()
         self.dispatcher.emit('initializeSequence', self.ent_total_cycles.get())
         self.macro_running = True
         self.update_elapsed_time()
+        self.update_button_states()
 
     def update_serial_connection_status(self, status):
         print("debug this function from MacroControlFrame0")
@@ -329,12 +336,11 @@ class MacroControlFrame(ttk.Frame):
         self.val_stop_time.config(text="--:--:--")
         self.val_elapsed_time.config(text="--:--:--")
         self.elapsed_time.set("00:00:00")
-        self.completed_cycles_value.set(0)
         self.ent_total_cycles.delete(0, tk.END)
         self.ent_total_cycles.insert(0, "105")
-        print("Sequence reset")
+        self.ent_completed_cycles.delete(0, tk.END)
+        self.ent_completed_cycles.insert(0, "0")
         self.update_button_states()
-
 
 
 class StatusFrame(tk.Frame):

@@ -31,6 +31,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('handleResponseT1', macro_service.handle_response_t1)
     dispatcher.register_event('incrementCycleCount', macro_service.increment_cycle_count)
     dispatcher.register_event('emergencyStop', macro_service.emergency_stop_sequence)
+    dispatcher.register_event('updateTotalCycles', macro_service.update_total_cycles)
 
     dispatcher.register_event('logToDisplay', log_to_display)
     dispatcher.register_event('receivedData', log_to_display)

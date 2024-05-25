@@ -173,13 +173,11 @@ class TCPService:
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
 
-    def close_tcp_socket(self, ip_address, port):
-        self.ip_address = ip_address
-        self.port = port
+    def close_tcp_socket(self):
         if self.socket:
             self.socket.close()
             self.socket = None
-            self.dispatcher.emit('logToDisplay', f"Close {self.ip_address}:{self.port}", 'TCP')
+            self.dispatcher.emit('logToDisplay', f"Closed {self.ip_address}:{self.port}", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {self.ip_address}:{self.port}")
 
@@ -192,28 +190,29 @@ class TCPService:
                 print(f"Data sent: {tcp_data_with_terminator}")
                 self.handle_received_data()
             except socket.error as e:
-                self.dispatcher.emit('logToDisplay', f"Data send failed")
+                self.dispatcher.emit('logToDisplay', f"Data send failed: {e}", 'TCP')
                 print(f"Failed to send data: {e}")
                 self.dispatcher.emit('updateTCPConnectionStatus', False)
         else:
-            self.dispatcher.emit('logToDisplay', f"not connected", 'TCP')
+            self.dispatcher.emit('logToDisplay', f"Not connected", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             messagebox.showwarning('Warning', "No active TCP connection to send data.")
 
     def handle_received_data(self):
-        try:
-            data = self.socket.recv(1024).decode('utf-8')
-            self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP')
-            print(f"Data received: {data}")
-            self.handle_response(data)
-        except socket.timeout:
-            self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP')
-            print("Receive timeout")
-            self.dispatcher.emit('handleResponseT1')
-        except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Data receive failed: {e}", 'TCP')
-            print(f"Failed to receive data: {e}")
-            self.dispatcher.emit('handleResponseT1')
+        if self.socket:
+            try:
+                data = self.socket.recv(1024).decode('utf-8').strip()
+                self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP')
+                print(f"Data received: {data}")
+                self.handle_response(data)
+            except socket.timeout:
+                self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP')
+                print("Receive timeout")
+                self.dispatcher.emit('handleResponseT1')
+            except socket.error as e:
+                self.dispatcher.emit('logToDisplay', f"Data receive failed: {e}", 'TCP')
+                print(f"Failed to receive data: {e}")
+                self.dispatcher.emit('handleResponseT1')
 
     def handle_response(self, data):
         data = data.strip()
@@ -246,12 +245,9 @@ class TCPService:
         print("Next Camera View")
 
     def send_custom_tcp(self, custom_command):
-        command = custom_command
-        print(f"Sending tcp command: {command}")
-        self.dispatcher.emit('logToDisplay', f"Sent: {command}", "TCP")
-        self.handle_received_data()
-
-# TODO allow realtime updates of the alignments input value
+        self.send_tcp_data(custom_command)
+        print(f"Sending tcp command: {custom_command}")
+        self.dispatcher.emit('logToDisplay', f"Sent: {custom_command}", "TCP")
 
 
 class MacroService:
@@ -277,7 +273,7 @@ class MacroService:
     def run_sequence(self):
         if self.macro_running and not self.stop_requested:
             print("Running sequence")
-            self.dispatcher.emit('logToDisplay', f"{self.total_cycles} ============ ", f' ================ Starting Cycle {self.completed_cycles + 1} of')
+            self.dispatcher.emit('logToDisplay', f"{self.total_cycles} ============== ", f' ================ Starting Cycle {self.completed_cycles + 1} of')
             self.send_command_mtrs()
 
     def stop_sequence(self):
@@ -377,11 +373,23 @@ class MacroService:
         print("Acknowledgment received for T1")
         self.dispatcher.emit('incrementCycleCount')
 
+    def update_total_cycles(self, new_total):
+        try:
+            new_total_cycles = int(new_total)
+            if new_total_cycles < self.completed_cycles:
+                raise ValueError("Total cycles cannot be less than completed cycles.")
+            self.total_cycles = new_total_cycles
+            print(f"Total cycles updated to: {self.total_cycles}")
+            self.dispatcher.emit('logToDisplay', f"Total cycles updated to {self.total_cycles}", "MacroService")
+        except ValueError as e:
+            print(f"Error updating total cycles: {e}")
+            self.dispatcher.emit('logToDisplay', str(e), "MacroService")
+
     def increment_cycle_count(self):
         if self.stop_requested or self.total_cycles is None:
             return
         self.completed_cycles += 1
-        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} ============ \n\n", " ============== Completed Cycle:")
+        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} ============ \n\n", " =============== Completed Cycle:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")

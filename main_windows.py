@@ -1,7 +1,5 @@
 # main_windows.py
 
-# TODO make the custom serial service work
-
 import sys
 import tkinter as tk
 from datetime import datetime
