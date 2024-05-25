@@ -1,0 +1,27 @@
+connect serial
+MTRS, MALN, CSOL, HRST
+custom send,
+emergency stop
+close
+connect serial
+quit
+
+connect TCP
+Trig1, Trig2, PrevCam, NextCam
+custom send
+emergency stop
+close
+connect serial
+quit
+
+change alignments
+start wait a few cycles
+stop
+enter small value for change alignments
+start until completion
+reset
+clear
+start
+emergency stop
+
+test controller alarm

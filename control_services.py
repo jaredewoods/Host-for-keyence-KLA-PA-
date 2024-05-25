@@ -45,7 +45,7 @@ class SerialService:
             )
 
             print(f"Serial port {self.serial_port_name} opened at {self.baud_rate} baud.")
-            self.dispatcher.emit('logToDisplay', f"at {self.baud_rate} baud.", f"Opened {self.serial_port_name}",)
+            self.dispatcher.emit('logToDisplay', f"at {self.baud_rate} baud.", f"Opened {self.serial_port_name}")
             time.sleep(0.5)
             threading.Thread(target=self.read_from_port, args=(self.serial_port,), daemon=True).start()
             self.dispatcher.emit('updateSerialConnectionStatus', True)
@@ -70,7 +70,7 @@ class SerialService:
         if self.serial_port and self.serial_port.is_open:
             time.sleep(0.5)
             self.serial_port.close()
-            self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.", "closed")
+            self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.")
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
 
@@ -167,12 +167,12 @@ class TCPService:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(timeout)
             self.socket.connect((ip_address, int(port)))
-            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'TCP', 'opened')
+            self.dispatcher.emit('logToDisplay', f"Connected to {ip_address}:{port}", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', True)
             print(f"Connected to {ip_address}:{port}")
             return True
         except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', f"Connection timed out {ip_address}:{port}", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Connection failed to {ip_address}:{port}: {e}")
             return False
@@ -181,7 +181,7 @@ class TCPService:
         if self.socket:
             self.socket.close()
             self.socket = None
-            self.dispatcher.emit('logToDisplay', f"Close {self.ip_address}:{self.port}", 'TCP', 'closed')
+            self.dispatcher.emit('logToDisplay', f"Close {self.ip_address}:{self.port}", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             print(f"Disconnected from {self.ip_address}:{self.port}")
 
@@ -190,30 +190,30 @@ class TCPService:
             try:
                 tcp_data_with_terminator = tcp_data + '\r\n'
                 self.socket.sendall(tcp_data_with_terminator.encode('utf-8'))
-                self.dispatcher.emit('logToDisplay', f"Data sent: {tcp_data}", 'TCP', 'sent')
+                self.dispatcher.emit('logToDisplay', f"Data sent: {tcp_data}", 'TCP')
                 print(f"Data sent: {tcp_data_with_terminator}")
                 self.handle_received_data()
             except socket.error as e:
-                self.dispatcher.emit('logToDisplay', f"Data send failed", 'TCP', 'error')
+                self.dispatcher.emit('logToDisplay', f"Data send failed")
                 print(f"Failed to send data: {e}")
                 self.dispatcher.emit('updateTCPConnectionStatus', False)
         else:
-            self.dispatcher.emit('logToDisplay', f"not connected", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', f"not connected", 'TCP')
             self.dispatcher.emit('updateTCPConnectionStatus', False)
             messagebox.showwarning('Warning', "No active TCP connection to send data.")
 
     def handle_received_data(self):
         try:
             data = self.socket.recv(1024).decode('utf-8')
-            self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP', 'received')
+            self.dispatcher.emit('logToDisplay', f"Data received: {data}", 'TCP')
             print(f"Data received: {data}")
             self.handle_response(data)
         except socket.timeout:
-            self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', "Data receive timeout", 'TCP')
             print("Receive timeout")
             self.dispatcher.emit('handleResponseT1')
         except socket.error as e:
-            self.dispatcher.emit('logToDisplay', f"Data receive failed: {e}", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', f"Data receive failed: {e}", 'TCP')
             print(f"Failed to receive data: {e}")
             self.dispatcher.emit('handleResponseT1')
 
@@ -223,7 +223,7 @@ class TCPService:
             print("Received expected response: T1")
             self.dispatcher.emit('handleResponseT1')
         else:
-            self.dispatcher.emit('logToDisplay', f"Unexpected response: {data}", 'TCP', 'error')
+            self.dispatcher.emit('logToDisplay', f"Unexpected response: {data}", 'TCP')
             print(f"Unexpected response: {data}")
 
     # COMMANDS
@@ -401,7 +401,7 @@ class MacroService:
         print("Emergency stop triggered")
         self.stop_requested = True
         self.dispatcher.emit('updateMacroRunningStatus', self.macro_running)
-        self.dispatcher.emit('logToDisplay', "Emergency stop activated", 'Macro', 'stopped')
+        self.dispatcher.emit('logToDisplay', "Emergency stop activated", 'Macro')
         # self.serial_service.close_serial_port(self.serial_service.serial_port_name)
         # self.tcp_service.close_tcp_socket()
         # self.dispatcher.emit('disconnectTCP')

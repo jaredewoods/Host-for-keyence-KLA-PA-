@@ -111,7 +111,7 @@ class MainWindow(tk.Tk):
         self.status_frame.grid_propagate(False)
         self.status_frame.config(width=150, height=90)
 
-    def log_to_display(self, message, source, direction=None):
+    def log_to_display(self, message, source):
         timestamp = datetime.now().strftime("%H:%M:%S")
         log_message = f"[{timestamp}] {source} {message}"
         self.log_display.insert(tk.END, f"{log_message}\n")
