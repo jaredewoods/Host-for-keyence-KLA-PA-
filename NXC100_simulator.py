@@ -143,7 +143,7 @@ class SerialSimulator:
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
 
         # Reset Button
-        self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", command=self.reset_server_command)
+        self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
 
         # Log display
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
