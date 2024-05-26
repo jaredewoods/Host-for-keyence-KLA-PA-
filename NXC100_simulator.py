@@ -82,7 +82,7 @@ class SerialSimulator:
         formatted_message = f"{current_time} - {message}\n"
         self.log_display.insert(tk.END, formatted_message)
         self.log_display.see(tk.END)
-        print(f"Debug: {formatted_message}")
+        print(f"{formatted_message}")
 
     def start_tcp_server(self):
         self.tcp_server.start_server()
