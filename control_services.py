@@ -273,7 +273,7 @@ class MacroService:
     def run_sequence(self):
         if self.macro_running and not self.stop_requested:
             print("Running sequence")
-            self.dispatcher.emit('logToDisplay', f"{self.total_cycles} ============== ", f' ================ Starting Cycle {self.completed_cycles + 1} of')
+            self.dispatcher.emit('logToDisplay', f"{self.total_cycles}=======", f'=======Starting Cycle {self.completed_cycles + 1} of')
             self.send_command_mtrs()
 
     def stop_sequence(self):
@@ -389,7 +389,7 @@ class MacroService:
         if self.stop_requested or self.total_cycles is None:
             return
         self.completed_cycles += 1
-        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles} ============ \n\n", " =============== Completed Cycle:")
+        self.dispatcher.emit('logToDisplay', f"{self.completed_cycles} of {self.total_cycles}=======\n\n", "=======Completed Cycle:")
         print(f"Emitting updateCompletedCycles event with value: {self.completed_cycles}")
         self.dispatcher.emit("updateCompletedCycles", self.completed_cycles)
         print(f"New cycle count: {self.completed_cycles}")
