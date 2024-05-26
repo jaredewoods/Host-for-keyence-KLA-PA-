@@ -23,9 +23,11 @@ class GUIHandler(logging.Handler):
 
 class SerialSimulator:
     def __init__(self, master):
+        self.sim_separator0 = None
+        self.sim_separator1 = None
+        self.sim_separator2 = None
         self.read_thread = None
         self.serial_port = None
-        self.sim_separator0 = None
         self.log_display = None
         self.btn_reset_server_command = None
         self.btn_maln_completed = None
@@ -101,51 +103,41 @@ class SerialSimulator:
     def create_widgets(self):
         self.frame = ttk.Frame(self.master, padding="10")
 
-        # Dropdown for serial ports
         self.serial_port_var = tk.StringVar()
         self.serial_ports = self.get_serial_ports()
-        self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width - 3,
-                                                 textvariable=self.serial_port_var, values=self.serial_ports,
-                                                 state='readonly', justify='center')
+        self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width - 3, textvariable=self.serial_port_var, values=self.serial_ports, state='readonly', justify='center')
 
-        # Connect button
-        self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width,
-                                         command=self.connect_serial_port)
+        self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width, command=self.connect_serial_port)
 
-        # Radio buttons for auto/manual reply
         self.rad_auto_on = ttk.Radiobutton(self.frame, text=" Auto  ON", variable=self.auto_reply, value=True)
         self.rad_auto_off = ttk.Radiobutton(self.frame, text=" Auto OFF", variable=self.auto_reply, value=False)
 
-        # Spinbox for MTRS delay
+        self.sim_separator0 = ttk.Separator(self.frame, orient='horizontal')
+
         self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (sec):")
-        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1,
-                                             textvariable=self.mtrs_delay, format="%.1f", justify='center')
+        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1, textvariable=self.mtrs_delay, format="%.1f", justify='center')
 
-        # Spinbox for MALN delay
         self.maln_delay_label = ttk.Label(self.frame, text="MALN Delay (sec):")
-        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1,
-                                             textvariable=self.maln_delay, justify='center')
+        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1, textvariable=self.maln_delay, justify='center')
 
-        # Spinbox for T1 delay
         self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (sec):")
-        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=2.0, increment=0.1,
-                                           textvariable=self.t1_delay, format="%.1f", justify='center')
+        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=2.0, increment=0.1, textvariable=self.t1_delay, format="%.1f", justify='center')
 
-        # Buttons for predefined responses
+        self.sim_separator1 = ttk.Separator(self.frame, orient='horizontal')
+
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
         self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
         self.btn_mtrs_completed = ttk.Button(self.frame, width=self.std_width, text="MTRS Comp", command=self.send_mtrs_completed)
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
 
-        # Entry for custom commands
+        self.sim_separator2 = ttk.Separator(self.frame, orient='horizontal')
+
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
-        self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
 
-        # Reset Button
+        self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
 
-        # Log display
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
@@ -156,7 +148,6 @@ class SerialSimulator:
         self.connect_button.grid(row=1, column=0, padx=5, pady=5)
         self.rad_auto_on.grid(row=0, column=1, sticky='', padx=(10, 0))
         self.rad_auto_off.grid(row=1, column=1, sticky='', padx=(10, 0))
-        self.sim_separator0 = ttk.Separator(orient='horizontal')
         self.sim_separator0.grid(row=2, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
         self.mtrs_delay_label.grid(row=3, column=0, pady=5)
         self.mtrs_delay_spinbox.grid(row=3, column=1, pady=5)
@@ -164,14 +155,16 @@ class SerialSimulator:
         self.maln_delay_spinbox.grid(row=4, column=1, pady=5)
         self.t1_delay_label.grid(row=5, column=0, pady=5)
         self.t1_delay_spinbox.grid(row=5, column=1, pady=5)
-        self.btn_mtrs_response.grid(row=6, column=0, pady=5)
-        self.btn_maln_response.grid(row=6, column=1, pady=5)
-        self.btn_mtrs_completed.grid(row=7, column=0, pady=5)
-        self.btn_maln_completed.grid(row=7, column=1, pady=5)
-        self.custom_command_entry.grid(row=8, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
-        self.btn_send_error_command.grid(row=9, column=0, pady=5, padx=5)
-        self.btn_reset_server_command.grid(row=9, column=1, pady=5)
-        self.log_display.grid(row=0, column=2, rowspan=12, pady=5, padx=10, sticky='nsew')
+        self.sim_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.btn_mtrs_response.grid(row=7, column=0, pady=5)
+        self.btn_maln_response.grid(row=7, column=1, pady=5)
+        self.btn_mtrs_completed.grid(row=8, column=0, pady=5)
+        self.btn_maln_completed.grid(row=8, column=1, pady=5)
+        self.sim_separator2.grid(row=9, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
+        self.custom_command_entry.grid(row=10, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
+        self.btn_send_error_command.grid(row=11, column=0, pady=5, padx=5)
+        self.btn_reset_server_command.grid(row=11, column=1, pady=5)
+        self.log_display.grid(row=0, column=2, rowspan=13, pady=5, padx=10, sticky='nsew')
 
     @staticmethod
     def get_serial_ports():
