@@ -150,33 +150,31 @@ class MainWindow(tk.Tk):
 
         # Create the File menu
         file_menu = Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label="Preferences", command=self.show_about)
+        file_menu.add_command(label="Preferences", command=self.show_preferences_window)
+        file_menu.add_command(label="Export...", command=self.export_log)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.quit_application)
         menu_bar.add_cascade(label="File", menu=file_menu)
 
         # Create the Edit menu
         settings_menu = Menu(menu_bar, tearoff=0)
-        settings_menu.add_command(label="Serial Settings", command=self.show_about)
-        settings_menu.add_command(label="TCP Settings", command=self.show_about)
+        settings_menu.add_command(label="Serial Config", command=self.show_serial_config)
+        settings_menu.add_command(label="TCP Config", command=self.show_tcp_config)
+        settings_menu.add_command(label="Macro Settings", command=self.show_macro_config)
+        settings_menu.add_command(label="Simulator Settings", command=self.show_simulator_settings)
 
         menu_bar.add_cascade(label="Settings", menu=settings_menu)
 
         # Create the Windows menu
-        windows_menu = Menu(menu_bar, tearoff=0)
-        windows_menu.add_command(label="Macro Status", command=self.show_about)
-
-        menu_bar.add_cascade(label="Windows", menu=windows_menu)
-
-        # Create the Windows menu
-        simulator_menu = Menu(menu_bar, tearoff=0)
-        simulator_menu.add_command(label="Launch NXC100 Simulator", command=self.launch_simulator)
-
-        menu_bar.add_cascade(label="Simulator", menu=simulator_menu)
+        view_menu = Menu(menu_bar, tearoff=0)
+        view_menu.add_command(label="Macro Status", command=self.show_macro_status)
+        view_menu.add_command(label="NXC100 Simulator", command=self.launch_simulator)
+        menu_bar.add_cascade(label="View", menu=view_menu)
 
         # Create the Help menu
         help_menu = Menu(menu_bar, tearoff=0)
         help_menu.add_command(label="About", command=self.show_about)
+        help_menu.add_command(label="About Simulator", command=self.show_about_simulator)
         menu_bar.add_cascade(label="Help", menu=help_menu)
 
         # Set the menu bar
@@ -187,9 +185,37 @@ class MainWindow(tk.Tk):
         print("You selected an option reserved for future use")
 
     @staticmethod
+    def show_about_simulator():
+        print("You selected an option reserved for future use")
+
+    @staticmethod
+    def show_preferences_window():
+        subprocess.Popen(["python", "preferences_window.py"])
+
+    @staticmethod
     def quit_application():
         print("Quitting")
         sys.exit()
+
+    @staticmethod
+    def show_serial_config():
+        subprocess.Popen(["python", "serial_config.py"])
+
+    @staticmethod
+    def show_tcp_config():
+        subprocess.Popen(["python", "tcp_config.py"])
+
+    @staticmethod
+    def show_macro_config():
+        subprocess.Popen(["python", "macro_settings.py"])
+
+    @staticmethod
+    def show_simulator_settings():
+        subprocess.Popen(["python", "simulator_settings.py"])
+
+    @staticmethod
+    def show_macro_status():
+        subprocess.Popen(["python", "macro_status.py"])
 
     @staticmethod
     def launch_simulator():
