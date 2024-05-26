@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext
 import serial
 import serial.tools.list_ports
+
 import threading
 import time
 import socket
@@ -49,7 +50,7 @@ class SerialSimulator:
         self.serial_ports = None
         self.serial_port_var = None
         self.master = master
-        self.frame = ttk.Frame(self.master, padding="10")
+        self.frame = ttk.Frame(self.master, padding="5")
         self.master.title("NXC100 Simulator")
 
         self.auto_reply = tk.BooleanVar(value=True)
@@ -101,7 +102,7 @@ class SerialSimulator:
         self.master.destroy()
 
     def create_widgets(self):
-        self.frame = ttk.Frame(self.master, padding="10")
+        self.frame = ttk.Frame(self.master, padding="5")
 
         self.serial_port_var = tk.StringVar()
         self.serial_ports = self.get_serial_ports()
@@ -138,7 +139,7 @@ class SerialSimulator:
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
 
-        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
+        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=53, height=12)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 
