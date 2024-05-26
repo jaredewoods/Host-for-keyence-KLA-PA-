@@ -146,7 +146,7 @@ class SerialSimulator:
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
 
         # Log display
-        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=15)
+        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 
@@ -171,7 +171,7 @@ class SerialSimulator:
         self.custom_command_entry.grid(row=8, column=0, columnspan=2, pady=5, padx=5, sticky='ew')
         self.btn_send_error_command.grid(row=9, column=0, pady=5, padx=5)
         self.btn_reset_server_command.grid(row=9, column=1, pady=5)
-        self.log_display.grid(row=0, column=2, rowspan=9, pady=5, padx=10, sticky='nsew')
+        self.log_display.grid(row=0, column=2, rowspan=12, pady=5, padx=10, sticky='nsew')
 
     @staticmethod
     def get_serial_ports():
