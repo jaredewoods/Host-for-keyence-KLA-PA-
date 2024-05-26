@@ -1,4 +1,4 @@
-# main_windows.py
+# main_window.py
 
 import sys
 import tkinter as tk
@@ -8,8 +8,8 @@ import subprocess
 import serial
 import serial.tools.list_ports
 
-from control_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
-from control_services import SerialService, TCPService, MacroService
+from ui_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, StatusFrame
+from services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
 from event_dispatcher import register_events
 

@@ -1,4 +1,4 @@
-# control_services.py
+# services.py
 
 import socket
 import threading
