@@ -207,8 +207,8 @@ class MacroControlFrame(ttk.Frame):
 
         self.ent_total_cycles = ttk.Entry(self, width=5, textvariable=self.total_cycles, justify='center')
         self.ent_total_cycles.grid(row=2, column=0, padx=5)
-        self.ent_total_cycles.bind("<FocusOut>", self.on_total_cycles_change)
-        self.ent_total_cycles.bind("<Return>", self.on_total_cycles_change)
+        self.ent_total_cycles.bind("<FocusOut>", lambda event: self.on_total_cycles_change())
+        self.ent_total_cycles.bind("<Return>", lambda event: self.on_total_cycles_change())
 
         self.lbl_completed_cycles = ttk.Label(self, text="Completed")
         self.lbl_completed_cycles.grid(row=1, column=1, padx=5, pady=5)
@@ -265,7 +265,7 @@ class MacroControlFrame(ttk.Frame):
 
         self.update_button_states()
 
-    def on_total_cycles_change(self, event):
+    def on_total_cycles_change(self):
         new_total = self.total_cycles.get()
         self.dispatcher.emit('updateTotalCycles', new_total)
 
