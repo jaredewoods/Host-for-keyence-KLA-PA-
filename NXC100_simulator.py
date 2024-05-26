@@ -10,6 +10,7 @@ import time
 import socket
 import logging
 import datetime
+import random
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -180,7 +181,19 @@ class SerialSimulator:
         self.send_command(response)
 
     def send_maln_completed(self):
-        response = "$24200000000MALN001701085137"
+        # Randomize first 4 digits in the preferred range (0014 to 0021) with higher probability,
+        # and occasionally within the full range (0000 to 0499)
+        if random.random() < 0.8:
+            first_4_digits = random.randint(14, 21)
+        else:
+            first_4_digits = random.randint(0, 499)
+        first_4_digits_str = f"{first_4_digits:04}"
+
+        # Randomize next 6 digits in the range -18000 to 18000
+        next_6_digits = random.randint(-18000, 18000)
+        next_6_digits_str = f"{next_6_digits:+06}"
+
+        response = f"$24200000000MALN{first_4_digits_str}{next_6_digits_str}"
         self.send_command(response)
 
     def send_custom_command(self):
