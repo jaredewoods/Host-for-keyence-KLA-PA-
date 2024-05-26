@@ -1,6 +1,9 @@
 # event_dispatcher.py
-def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display, export_log, scan_com_ports, quit_application, update_serial_connection_status, update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
-    print("Registering Events")
+
+def register_events(dispatcher, serial_service, tcp_service, macro_service, log_to_display, clear_log_display,
+                    export_log, scan_com_ports, quit_application, update_serial_connection_status,
+                    update_tcp_connection_status, update_macro_running_status, update_completed_cycles_display):
+
     dispatcher.register_event('connectSerialPort', serial_service.connect_serial_port)
     dispatcher.register_event('closeSerialPort', serial_service.close_serial_port)
     dispatcher.register_event('moveToReadyStation', serial_service.move_to_ready_station)
@@ -53,7 +56,7 @@ class EventDispatcher:
         self.values = {}
 
     def register_event(self, event_name, handler):
-        print(f'Registered event: {event_name}')
+        # print(f'Registered event: {event_name}')
         if event_name not in self.handlers:
             self.handlers[event_name] = []
         self.handlers[event_name].append(handler)

@@ -1,3 +1,5 @@
+# NXC100_simulator.py
+
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import serial
@@ -107,39 +109,28 @@ class SerialSimulator:
         self.serial_port_var = tk.StringVar()
         self.serial_ports = self.get_serial_ports()
         self.serial_port_dropdown = ttk.Combobox(self.frame, width=self.std_width - 3, textvariable=self.serial_port_var, values=self.serial_ports, state='readonly', justify='center')
-
         self.connect_button = ttk.Button(self.frame, text="Connect", width=self.std_width, command=self.connect_serial_port)
-
         self.rad_auto_on = ttk.Radiobutton(self.frame, text=" Auto  ON", variable=self.auto_reply, value=True)
         self.rad_auto_off = ttk.Radiobutton(self.frame, text=" Auto OFF", variable=self.auto_reply, value=False)
-
         self.sim_separator0 = ttk.Separator(self.frame, orient='horizontal')
-
         self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (sec):")
         self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1, textvariable=self.mtrs_delay, format="%.1f", justify='center')
-
         self.maln_delay_label = ttk.Label(self.frame, text="MALN Delay (sec):")
         self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1, textvariable=self.maln_delay, justify='center')
-
         self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (sec):")
         self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=2.0, increment=0.1, textvariable=self.t1_delay, format="%.1f", justify='center')
-
         self.sim_separator1 = ttk.Separator(self.frame, orient='horizontal')
-
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
         self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
         self.btn_mtrs_completed = ttk.Button(self.frame, width=self.std_width, text="MTRS Comp", command=self.send_mtrs_completed)
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
-
         self.sim_separator2 = ttk.Separator(self.frame, orient='horizontal')
-
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
         self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
-
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
-
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=53, height=12)
+
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 

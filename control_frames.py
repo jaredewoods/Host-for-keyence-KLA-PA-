@@ -287,7 +287,6 @@ class MacroControlFrame(ttk.Frame):
         self.update_button_states()
 
     def update_button_states(self):
-        print("debug this function from MacroControlFrame1.5")
         if self.serial_connected:
             self.btn_start.config(state='normal')
         else:

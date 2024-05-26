@@ -25,7 +25,6 @@ class MainWindow(tk.Tk):
         self.tcp_connected = False
         self.macro_running = False
         self.completed_cycles_value = tk.IntVar(value=0)
-        print("Initializing MainWindow")
         self.title("KLA Prealigner Vision Repeatability (Keyence)")
         self.ntb_control = None
         self.available_ports = []
@@ -42,7 +41,7 @@ class MainWindow(tk.Tk):
         self.create_menu_bar()
         self.register_events()
         self.configure_grid()
-        print("MainWindow initialized")
+        print("MainWindow initialized.")
 
     def register_events(self):
         register_events(
@@ -62,7 +61,6 @@ class MainWindow(tk.Tk):
         )
 
     def scan_com_ports(self):
-        print("Scanning Ports")
         ports = [port.device for port in serial.tools.list_ports.comports()]
         print(f"Available Ports: {ports}")
         self.available_ports = ports
@@ -74,7 +72,6 @@ class MainWindow(tk.Tk):
         self.grid_rowconfigure(0, weight=1)
 
     def create_control_frames(self):
-        print("Creating Control Frames")
         self.ntb_control = ttk.Notebook(self)
         self.ntb_control.grid(row=0, column=0, sticky="", padx=10, pady=(10, 0))
 

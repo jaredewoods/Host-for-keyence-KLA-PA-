@@ -1,4 +1,5 @@
 # control_services.py
+
 import socket
 import threading
 import tkinter as tk
@@ -26,7 +27,6 @@ class SerialService:
 
     def connect_serial_port(self, serial_port):
         self.serial_port_name = serial_port
-        print(f"Connecting to serial port: {self.serial_port_name}")
 
         if self.serial_port and self.serial_port.is_open:
             self.close_serial_port(self.serial_port_name)
@@ -131,7 +131,6 @@ class SerialService:
     def read_from_port(self, serial_port):
         self.serial_port = serial_port
         print(f"Reading from {self.serial_port}.")
-        print(f"Started thread for reading from port.")
 
         while self.serial_port and self.serial_port.is_open:
             try:
