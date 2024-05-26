@@ -347,15 +347,16 @@ class StatusFrame(tk.Frame):
     def __init__(self, master=None, dispatcher=None):
         super().__init__(master)
         self.dispatcher = dispatcher
+        self.status_label_width = 16
 
-        self.lbl_serial_status = ttk.Label(self, text="Serial: Disconnected", foreground="dark grey")
-        self.lbl_serial_status.grid(row=0, column=0, padx=20, pady=5)
+        self.lbl_serial_status = tk.Label(self, text="Serial: Disconnected", width=self.status_label_width, foreground="dark grey")
+        self.lbl_serial_status.grid(row=0, column=0, padx=0, pady=5, sticky='ew')
 
-        self.lbl_tcp_status = ttk.Label(self, text="TCP: Disconnected", foreground="dark grey")
-        self.lbl_tcp_status.grid(row=1, column=0, padx=20, pady=0)
+        self.lbl_tcp_status = tk.Label(self, text="TCP: Disconnected", width=self.status_label_width, foreground="dark grey")
+        self.lbl_tcp_status.grid(row=1, column=0, padx=0, pady=0, sticky='ew')
 
-        self.lbl_macro_status = ttk.Label(self, text="Macro: Stopped", foreground="dark grey")
-        self.lbl_macro_status.grid(row=2, column=0, padx=20, pady=5)
+        self.lbl_macro_status = tk.Label(self, text="Macro: Stopped", width=self.status_label_width, foreground="dark grey")
+        self.lbl_macro_status.grid(row=2, column=0, padx=0, pady=5, sticky='ew')
         """TODO: move these out of here"""
         self.dispatcher.register_event('updateSerialConnectionStatus', self.update_serial_status)
         self.dispatcher.register_event('updateTCPConnectionStatus', self.update_tcp_status)
@@ -364,18 +365,18 @@ class StatusFrame(tk.Frame):
     # UI UPDATES
     def update_serial_status(self, status):
         if status:
-            self.lbl_serial_status.config(text="SERIAL: Connected", foreground="green")
+            self.lbl_serial_status.config(text="SERIAL: Connected", foreground="white", background='green')
         else:
-            self.lbl_serial_status.config(text="SERIAL: Closed   ", foreground="red")
+            self.lbl_serial_status.config(text="SERIAL: Closed", foreground="white", background='red')
 
     def update_tcp_status(self, status):
         if status:
-            self.lbl_tcp_status.config(text="TCP: Connected   ", foreground="green")
+            self.lbl_tcp_status.config(text="TCP: Connected", foreground="white", background='green')
         else:
-            self.lbl_tcp_status.config(text="TCP: Disconnected", foreground="red")
+            self.lbl_tcp_status.config(text="TCP: Closed", foreground="white", background='red')
 
     def update_macro_status(self, status):
         if status:
-            self.lbl_macro_status.config(text="MACRO: Running", foreground="green")
+            self.lbl_macro_status.config(text="MACRO: Running", foreground="white", background='green')
         else:
-            self.lbl_macro_status.config(text="MACRO: Stopped", foreground="red")
+            self.lbl_macro_status.config(text="MACRO: Stopped", foreground="white", background='red')

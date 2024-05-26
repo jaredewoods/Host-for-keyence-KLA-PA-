@@ -71,6 +71,7 @@ class SerialService:
             self.dispatcher.emit('logToDisplay', self.serial_port_name, f"Closed {serial_port} at {self.baud_rate} baud.")
             self.dispatcher.emit('updateSerialConnectionStatus', False)
             print(f"Disconnected from {serial_port}")
+            self.stop_reading()
 
     def stop_reading(self):
         if self.read_thread and self.read_thread.is_alive():
