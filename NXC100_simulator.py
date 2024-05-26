@@ -146,7 +146,7 @@ class SerialSimulator:
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
 
         # Log display
-        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=12)
+        self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=46, height=15)
         fallback_fonts = ("Consolas", "Courier New", "Lucida Console", "monospace")
         self.log_display.configure(bg="#004000", fg="orange", font=(fallback_fonts, 10))
 
