@@ -102,7 +102,7 @@ class MainWindow(tk.Tk):
     def export_log(self):
         print("export_log")
         log_content = self.log_display.get("1.0", tk.END)
-        with open("log_output.txt", "w") as log_file:
+        with open("LOGS/log_output.txt", "w") as log_file:
             log_file.write(log_content)
         self.log_to_display("Log exported to log_output.txt", "System")
 
