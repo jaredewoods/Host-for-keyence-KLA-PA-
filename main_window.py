@@ -182,15 +182,15 @@ class MainWindow(tk.Tk):
 
     @staticmethod
     def show_about():
-        print("You selected an option reserved for future use")
+        subprocess.Popen(["python", "menu_bar/about_window.py"])
 
     @staticmethod
     def show_about_simulator():
-        print("You selected an option reserved for future use")
+        subprocess.Popen(["python", "menu_bar/about_simulator_window.py"])
 
     @staticmethod
     def show_preferences_window():
-        subprocess.Popen(["python", "preferences_window.py"])
+        subprocess.Popen(["python", "menu_bar/preferences_window.py"])
 
     @staticmethod
     def quit_application():
@@ -199,19 +199,19 @@ class MainWindow(tk.Tk):
 
     @staticmethod
     def show_serial_config():
-        subprocess.Popen(["python", "serial_config.py"])
+        subprocess.Popen(["python", "menu_bar/serial_config.py"])
 
     @staticmethod
     def show_tcp_config():
-        subprocess.Popen(["python", "tcp_config.py"])
+        subprocess.Popen(["python", "menu_bar/tcp_config.py"])
 
     @staticmethod
     def show_macro_config():
-        subprocess.Popen(["python", "macro_settings.py"])
+        subprocess.Popen(["python", "menu_bar/macro_settings.py"])
 
     @staticmethod
     def show_simulator_settings():
-        subprocess.Popen(["python", "simulator_settings.py"])
+        subprocess.Popen(["python", "menu_bar/simulator_settings.py"])
 
     @staticmethod
     def show_macro_status():
