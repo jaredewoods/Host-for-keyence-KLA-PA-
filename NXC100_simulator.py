@@ -54,12 +54,12 @@ class SerialSimulator:
         self.serial_port_var = None
         self.master = master
         self.frame = ttk.Frame(self.master, padding="5")
-        self.master.title("NXC100 Simulator")
+        self.master.title("Simulator: NXC100 / Keyence XG-X")
 
         self.auto_reply = tk.BooleanVar(value=True)
-        self.mtrs_delay = tk.DoubleVar(value=0.5)
-        self.maln_delay = tk.DoubleVar(value=1.0)
-        self.t1_delay = tk.DoubleVar(value=0.0)
+        self.mtrs_delay = tk.IntVar(value=500)  # Default to 500 ms
+        self.maln_delay = tk.IntVar(value=1000)  # Default to 1000 ms
+        self.t1_delay = tk.IntVar(value=0)  # Default to 0 ms
         self.std_width = 16
 
         self.create_widgets()
@@ -114,12 +114,12 @@ class SerialSimulator:
         self.rad_auto_on = ttk.Radiobutton(self.frame, text=" Auto  ON", variable=self.auto_reply, value=True)
         self.rad_auto_off = ttk.Radiobutton(self.frame, text=" Auto OFF", variable=self.auto_reply, value=False)
         self.sim_separator0 = ttk.Separator(self.frame, orient='horizontal')
-        self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (sec):")
-        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=1.0, increment=0.1, textvariable=self.mtrs_delay, format="%.1f", justify='center')
-        self.maln_delay_label = ttk.Label(self.frame, text="MALN Delay (sec):")
-        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=9, increment=1, textvariable=self.maln_delay, justify='center')
-        self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (sec):")
-        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0.0, to=2.0, increment=0.1, textvariable=self.t1_delay, format="%.1f", justify='center')
+        self.mtrs_delay_label = ttk.Label(self.frame, text="MTRS Delay (ms):")
+        self.mtrs_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=10000, increment=10, textvariable=self.mtrs_delay, justify='center')
+        self.maln_delay_label = ttk.Label(self.frame, text="MALN Delay (ms):")
+        self.maln_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=10000, increment=10, textvariable=self.maln_delay, justify='center')
+        self.t1_delay_label = ttk.Label(self.frame, text="T1 Delay (ms):")
+        self.t1_delay_spinbox = tk.Spinbox(self.frame, width=self.std_width - 10, from_=0, to=10000, increment=10, textvariable=self.t1_delay, justify='center')
         self.sim_separator1 = ttk.Separator(self.frame, orient='horizontal')
         self.btn_mtrs_response = ttk.Button(self.frame, width=self.std_width, text="MTRS Resp", command=self.send_mtrs_received)
         self.btn_maln_response = ttk.Button(self.frame, width=self.std_width, text="MALN Resp", command=self.send_maln_received)
@@ -204,12 +204,12 @@ class SerialSimulator:
         print(f"received: {command}")
         if command.strip() == "$2MTRSG100ALDD":
             self.send_command("@2300000000015")
-            time.sleep(self.mtrs_delay.get())
+            time.sleep(self.mtrs_delay.get() / 1000.0)
             self.send_command("$23200000000MTRS5D")
         elif command.strip() == "$2MALN1009000B4":
             self.send_command("@2100000000013")
             print("Starting timer for MALN completed response")
-            threading.Timer(self.maln_delay.get(), self.send_maln_completed).start()
+            threading.Timer(self.maln_delay.get() / 1000.0, self.send_maln_completed).start()
         else:
             print(f"No auto-response match for command: {command}")
 
@@ -269,7 +269,7 @@ class SerialSimulator:
 
 
 class TCPServer:
-    def __init__(self, host='127.0.0.1', port=8500, log_callback=None, t1_delay=0.0):
+    def __init__(self, host='127.0.0.1', port=8500, log_callback=None, t1_delay=None):
         self.host = host
         self.port = port
         self.t1_delay = t1_delay
@@ -321,9 +321,9 @@ class TCPServer:
             self.log_callback(f"Processing command: {command}")
             if command.strip() == "T1":
                 if self.t1_delay:
-                    self.log_callback(f"Applying T1 delay: {self.t1_delay.get()} seconds")
-                    time.sleep(self.t1_delay.get())
-                    self.log_callback(f"T1 delay applied: {self.t1_delay.get()} seconds")
+                    self.log_callback(f"Applying T1 delay: {self.t1_delay.get() / 1000.0} seconds")
+                    time.sleep(self.t1_delay.get() / 1000.0)
+                    self.log_callback(f"T1 delay applied: {self.t1_delay.get() / 1000.0} seconds")
                 response = "T1"
             else:
                 response = command
