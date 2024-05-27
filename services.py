@@ -356,7 +356,7 @@ class MacroService:
                     self.send_command_maln()
                 else:
                     print("MTRS alarm received")
-                    pass  # pause the macro
+                    pass
 
     def send_command_maln(self):
         if self.stop_requested:
