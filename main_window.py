@@ -148,7 +148,6 @@ class MainWindow(tk.Tk):
     def create_menu_bar(self):
         menu_bar = Menu(self)
 
-        # Create the File menu
         file_menu = Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="Preferences", command=self.show_preferences_window)
         file_menu.add_command(label="Export...", command=self.export_log)
@@ -156,7 +155,6 @@ class MainWindow(tk.Tk):
         file_menu.add_command(label="Exit", command=self.quit_application)
         menu_bar.add_cascade(label="File", menu=file_menu)
 
-        # Create the Edit menu
         settings_menu = Menu(menu_bar, tearoff=0)
         settings_menu.add_command(label="Serial Config", command=self.show_serial_config)
         settings_menu.add_command(label="TCP Config", command=self.show_tcp_config)
@@ -165,19 +163,16 @@ class MainWindow(tk.Tk):
 
         menu_bar.add_cascade(label="Settings", menu=settings_menu)
 
-        # Create the Windows menu
         windows_menu = Menu(menu_bar, tearoff=0)
         windows_menu.add_command(label="Macro Status", command=self.show_macro_status)
         windows_menu.add_command(label="NXC100 Simulator", command=self.launch_simulator)
         menu_bar.add_cascade(label="Windows", menu=windows_menu)
 
-        # Create the Help menu
         help_menu = Menu(menu_bar, tearoff=0)
         help_menu.add_command(label="About", command=self.show_about)
         help_menu.add_command(label="About Simulator", command=self.show_about_simulator)
         menu_bar.add_cascade(label="Help", menu=help_menu)
 
-        # Set the menu bar
         self.config(menu=menu_bar)
 
     @staticmethod
