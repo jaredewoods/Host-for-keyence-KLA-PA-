@@ -138,14 +138,60 @@ class SerialService:
                 if line:
                     line = line.decode('utf-8').strip()
                     print(f"Complete message received: {line}")
-                    self.dispatcher.emit('receivedData', f'Received: {line}', self.serial_port_name)
-                    if self.response_callback:
-                        self.response_callback(line)
+                    if '$' in line and len(line) >= 12:
+                        error_code = line[4:12]
+                        print(error_code)
+                        if error_code != "00000000":
+                            alarm_code = line[4:8]
+                            print(alarm_code)
+                            subcode = line[8:12]
+                            print(subcode)
+                            print(f"Error detected in response. Alarm: {alarm_code}, Subcode: {subcode}")
+                            self.show_alarm_messagebox(alarm_code, subcode)
+                            # self.dispatcher.emit('emergencyStop')
+                        else:
+                            print("Valid response, no errors detected.")
+                            self.dispatcher.emit('receivedData', f'Received: {line}', self.serial_port_name)
+                            if self.response_callback:
+                                self.response_callback(line)
+                    else:
+                        print("Message format incorrect or too short.")
             except serial.SerialException as e:
                 print(f"Read failed: {str(e)}")
             except Exception as e:
                 print(f"Unhandled exception: {str(e)}")
                 break
+
+    def show_alarm_messagebox(self, alarm, subcode):
+        alarm_data = alarm_dict.get(alarm, None)
+
+        if alarm_data is None:
+            alarm_info = {
+                "Message": "Unknown message",
+            }
+        else:
+            alarm_info = next(iter(alarm_data.values()), {
+                "Message": "Unknown message",
+                "Cause": "Unknown cause",
+                "Potential Causes": ["Unknown potential causes"]
+            })
+
+        message = alarm_info.get("Message", "Unknown message")
+        cause = alarm_info.get("Cause", "Unknown cause")
+        potential_causes = alarm_info.get("Potential Causes", ["Unknown potential causes"])
+        potential_causes_formatted = "\n".join([f"• {cause}" for cause in potential_causes])
+        formatted_message = (
+            f"Alarm: {alarm}\n\n"
+            f"{message}\n\n"
+            f"{cause}\n\n"
+            f"Potential Causes:\n{potential_causes_formatted}\n\n"
+            f"Subcode: {subcode}"
+        )
+
+        root = tk.Toplevel()
+        root.withdraw()
+        messagebox.showerror("Alarm", formatted_message)
+        root.destroy()
 
 
 class TCPService:
@@ -309,10 +355,8 @@ class MacroService:
                     print("MTRS positive completion received")
                     self.send_command_maln()
                 else:
-                    alarm = pre_mtrs[:4]
-                    subcode = pre_mtrs[4:]
-                    self.show_alarm_messagebox(alarm, subcode)
                     print("MTRS alarm received")
+                    pass  # pause the macro
 
     def send_command_maln(self):
         if self.stop_requested:
@@ -355,6 +399,7 @@ class MacroService:
                     subcode = pre_mtrs[4:]
                     self.show_alarm_messagebox(alarm, subcode)
                     print("MALN alarm received")
+                    pass  # pause the macro
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
@@ -417,38 +462,6 @@ class MacroService:
         result = messagebox.askyesno("SEQUENCE COMPLETED", message)
         if result:
             self.dispatcher.emit('exportLog')
-
-    def show_alarm_messagebox(self, alarm, subcode):
-        alarm_data = alarm_dict.get(alarm, None)
-
-        if alarm_data is None:
-            alarm_info = {
-                "Message": "Unknown message",
-            }
-        else:
-            alarm_info = next(iter(alarm_data.values()), {
-                "Message": "Unknown message",
-                "Cause": "Unknown cause",
-                "Potential Causes": ["Unknown potential causes"]
-            })
-
-        message = alarm_info.get("Message", "Unknown message")
-        cause = alarm_info.get("Cause", "Unknown cause")
-        potential_causes = alarm_info.get("Potential Causes", ["Unknown potential causes"])
-        potential_causes_formatted = "\n".join([f"• {cause}" for cause in potential_causes])
-        formatted_message = (
-            f"Alarm: {alarm}\n\n"
-            f"{message}\n\n"
-            f"{cause}\n\n"
-            f"Potential Causes:\n{potential_causes_formatted}\n\n"
-            f"Subcode: {subcode}"
-        )
-
-        root = tk.Toplevel()
-        root.withdraw()
-        messagebox.showerror("Alarm", formatted_message)
-        self.dispatcher.emit('emergencyStop')
-        root.destroy()
 
     def show_emergency_stop_messagebox(self):
         root = tk.Tk()

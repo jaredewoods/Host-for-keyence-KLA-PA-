@@ -93,7 +93,7 @@ class SerialSimulator:
 
     def start_tcp_server(self):
         self.tcp_server.start_server()
-        self.log_display.insert(tk.END, "Server started at 127.0.0.1:8500\n")
+        # self.log_display.insert(tk.END, "Server started at 127.0.0.1:8500\n")
 
     def stop_tcp_server(self):
         self.tcp_server.stop_server()
@@ -128,7 +128,7 @@ class SerialSimulator:
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
         self.sim_separator2 = ttk.Separator(self.frame, orient='horizontal')
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
-        self.custom_command_entry.insert(0, self.generate_random_alarm_command())  # Pre-load a random alarm command
+        self.custom_command_entry.insert(0, self.generate_random_alarm_command())  # Preload a random alarm command
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=53, height=12)

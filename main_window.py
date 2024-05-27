@@ -166,10 +166,10 @@ class MainWindow(tk.Tk):
         menu_bar.add_cascade(label="Settings", menu=settings_menu)
 
         # Create the Windows menu
-        view_menu = Menu(menu_bar, tearoff=0)
-        view_menu.add_command(label="Macro Status", command=self.show_macro_status)
-        view_menu.add_command(label="NXC100 Simulator", command=self.launch_simulator)
-        menu_bar.add_cascade(label="View", menu=view_menu)
+        windows_menu = Menu(menu_bar, tearoff=0)
+        windows_menu.add_command(label="Macro Status", command=self.show_macro_status)
+        windows_menu.add_command(label="NXC100 Simulator", command=self.launch_simulator)
+        menu_bar.add_cascade(label="Windows", menu=windows_menu)
 
         # Create the Help menu
         help_menu = Menu(menu_bar, tearoff=0)
