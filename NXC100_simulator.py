@@ -11,6 +11,7 @@ import socket
 import logging
 import datetime
 import random
+from alarms import alarm_dict  # Import the alarm dictionary
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -127,7 +128,7 @@ class SerialSimulator:
         self.btn_maln_completed = ttk.Button(self.frame, width=self.std_width, text="MALN Comp", command=self.send_maln_completed)
         self.sim_separator2 = ttk.Separator(self.frame, orient='horizontal')
         self.custom_command_entry = ttk.Entry(self.frame, width=self.std_width, justify='center')
-        self.custom_command_entry.insert(0, '$24290970000MALN001701085137')
+        self.custom_command_entry.insert(0, self.generate_random_alarm_command())  # Pre-load a random alarm command
         self.btn_send_error_command = ttk.Button(self.frame, text="Send Error", command=self.send_custom_command)
         self.btn_reset_server_command = ttk.Button(self.frame, text="Reset Server", state='disabled', command=self.reset_server_command)
         self.log_display = scrolledtext.ScrolledText(self.frame, wrap=tk.WORD, width=53, height=12)
@@ -199,6 +200,9 @@ class SerialSimulator:
     def send_custom_command(self):
         command = self.custom_command_entry.get()
         self.send_command(command)
+        # Generate a new random command and replace the existing one in the entry box
+        self.custom_command_entry.delete(0, tk.END)
+        self.custom_command_entry.insert(0, self.generate_random_alarm_command())
 
     def get_auto_response(self, command):
         print(f"received: {command}")
@@ -266,6 +270,10 @@ class SerialSimulator:
 
     def reset_server_command(self):
         self.close_serial_port()
+
+    def generate_random_alarm_command(self):
+        major_code = random.choice(list(alarm_dict.keys()))
+        return f"$242{major_code}0000MALN001701085137"  # Embed the alarm code here
 
 
 class TCPServer:
