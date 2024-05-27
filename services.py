@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox
 import serial
 import time
-from alarms import alarm_dict
+from resources.alarms import alarm_dict
 
 
 class SerialService:

@@ -11,7 +11,7 @@ import socket
 import logging
 import datetime
 import random
-from alarms import alarm_dict  # Import the alarm dictionary
+from resources.alarms import alarm_dict  # Import the alarm dictionary
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
