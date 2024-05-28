@@ -19,7 +19,10 @@ class SerialService:
         self.commands = {
             'MTRS': '$2MTRSG100ALDD',
             'MALN': '$2MALN1009000B4',
-            'CSOL': '$2CSOLA0D4',
+            'CSOL0': '$2CSOLA0D4',
+            'CSOL1': '$2CSOLA1D5',
+            'CCHK0': '$2CCHKA0BC',
+            'CCHK1': '$2CCHKA1BD',
             'HRST': '$1HRST72',
             'CCLR': '$2CCLRE9B',
         }
@@ -98,7 +101,22 @@ class SerialService:
         self.send_serial_command(command)
 
     def chuck_hold(self):
-        command = self.commands['CSOL']
+        command = self.commands['CSOL1']
+        print(f"Sending: {command}")
+        self.send_serial_command(command)
+
+    def chuck_release(self):
+        command = self.commands['CSOL0']
+        print(f"Sending: {command}")
+        self.send_serial_command(command)
+
+    def solenoid_on(self):
+        command = self.commands['CCHK1']
+        print(f"Sending: {command}")
+        self.send_serial_command(command)
+
+    def solenoid_off(self):
+        command = self.commands['CCHK2']
         print(f"Sending: {command}")
         self.send_serial_command(command)
 

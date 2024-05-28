@@ -39,11 +39,14 @@ class SerialControlFrame(ttk.Frame):
         self.btn_maln = ttk.Button(self, text="MALN", state='disabled', command=lambda: dispatcher.emit('alignWafer'))
         self.btn_maln.grid(row=4, column=1, padx=5, pady=0)
 
-        self.btn_csol = ttk.Button(self, text="CSOL", state='disabled', command=lambda: dispatcher.emit('chuckHold'))
-        self.btn_csol.grid(row=5, column=0, padx=5)
+        self.btn_chuck_on = ttk.Button(self, text="ChkON", state='disabled', command=lambda: dispatcher.emit('chuckHold'))
+        self.btn_chuck_on.grid(row=5, column=0, padx=5)
 
-        self.btn_hrst = ttk.Button(self, text="HRST", state='disabled', command=lambda: dispatcher.emit('hardwareReset'))
-        self.btn_hrst.grid(row=5, column=1, padx=5)
+        self.btn_csol_off = ttk.Button(self, text="ChkOFF", state='disabled', command=lambda: dispatcher.emit('chuckRelease'))
+        self.btn_csol_off.grid(row=5, column=1, padx=5)
+
+        # self.btn_hrst = ttk.Button(self, text="HRST", state='disabled', command=lambda: dispatcher.emit('hardwareReset'))
+        # self.btn_hrst.grid(row=5, column=1, padx=5)
 
         self.serial_separator1 = ttk.Separator(self, orient='horizontal')
         self.serial_separator1.grid(row=6, column=0, columnspan=2, sticky='ew', pady=5, padx=5)
@@ -81,7 +84,7 @@ class SerialControlFrame(ttk.Frame):
         widgets = [
             self.btn_mtrs,
             self.btn_maln,
-            self.btn_csol,
+            self.btn_chuck_on,
             self.btn_hrst,
             self.btn_custom_serial_send,
             self.ent_custom_serial

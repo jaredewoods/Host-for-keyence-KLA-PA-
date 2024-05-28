@@ -9,6 +9,7 @@ def register_events(dispatcher, serial_service, tcp_service, macro_service, log_
     dispatcher.register_event('moveToReadyStation', serial_service.move_to_ready_station)
     dispatcher.register_event('alignWafer', serial_service.align_wafer)
     dispatcher.register_event('chuckHold', serial_service.chuck_hold)
+    dispatcher.register_event('chuckRelease', serial_service.chuck_release)
     dispatcher.register_event('hardwareReset', serial_service.hardware_reset)
     dispatcher.register_event('sendCustomSerial', serial_service.send_custom_serial)
     dispatcher.register_event('emergencyStop', serial_service.emergency_stop)
