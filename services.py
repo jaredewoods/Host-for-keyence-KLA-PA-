@@ -138,7 +138,7 @@ class SerialService:
                 if line:
                     line = line.decode('utf-8').strip()
                     print(f"Complete message received: {line}")
-                    if '$' in line and len(line) >= 12:
+                    if '@' or '$' in line and len(line) >= 12:
                         error_code = line[4:12]
                         print(error_code)
                         if error_code != "00000000":
