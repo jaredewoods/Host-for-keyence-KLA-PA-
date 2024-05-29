@@ -1,3 +1,5 @@
+# macro_monitor_window.py
+
 import tkinter as tk
 from tkinter import ttk
 import event_dispatcher

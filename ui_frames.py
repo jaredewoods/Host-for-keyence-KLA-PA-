@@ -1,4 +1,4 @@
-# control_frame.py
+# ui_frames.py
 
 import tkinter as tk
 from datetime import datetime
