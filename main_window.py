@@ -12,6 +12,7 @@ from ui_frames import SerialControlFrame, TCPControlFrame, MacroControlFrame, St
 from services import SerialService, TCPService, MacroService
 from event_dispatcher import EventDispatcher
 from event_dispatcher import register_events
+from macro_monitor_window import MacroMonitorWindow
 
 
 class MainWindow(tk.Tk):
@@ -34,6 +35,7 @@ class MainWindow(tk.Tk):
         self.macro_service = MacroService(dispatcher=self.dispatcher,
                                           serial_service=self.serial_service,
                                           tcp_service=self.tcp_service)
+        self.macro_monitor_window = MacroMonitorWindow(dispatcher1=self.dispatcher)
         self.scan_com_ports()
         self.create_control_frames()
         self.create_log_frame()
