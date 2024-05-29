@@ -142,7 +142,10 @@ class MainWindow(tk.Tk):
         print(f"Updating completed cycles value: {completed_cycles}")
         self.completed_cycles_value.set(completed_cycles)
         print(f"New value in IntVar: {self.completed_cycles_value.get()}")
-        self.update_idletasks()
+        try:
+            self.update_idletasks()
+        except Exception as e:
+            print(f"Caught an exception: {e}")
 
     def on_tab_change(self):  # forces immediate update
         self.ntb_control.update_idletasks()
