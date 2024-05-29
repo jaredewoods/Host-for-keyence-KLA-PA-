@@ -1,6 +1,7 @@
 # main_window.py
 
 import sys
+import os
 import tkinter as tk
 from datetime import datetime
 from tkinter import ttk, scrolledtext, Menu
@@ -104,8 +105,17 @@ class MainWindow(tk.Tk):
     def export_log(self):
         print("export_log")
         log_content = self.log_display.get("1.0", tk.END)
-        with open("LOGS/log_output.txt", "w") as log_file:
+
+        # Ensure the directory exists
+        log_dir = "LOGS"
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+
+        # Write the log content to a file
+        log_file_path = os.path.join(log_dir, "log_output.txt")
+        with open(log_file_path, "w") as log_file:
             log_file.write(log_content)
+
         self.log_to_display("Log exported to log_output.txt", "System")
 
     def clear_log_display(self):

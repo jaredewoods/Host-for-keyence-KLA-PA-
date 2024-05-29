@@ -192,7 +192,13 @@ class SerialSimulator:
 
         # Randomize next 6 digits in the range -18000 to 18000
         next_6_digits = random.randint(-18000, 18000)
-        next_6_digits_str = f"{next_6_digits:+06}"
+        if next_6_digits >= 0:
+            next_6_digits_str = f"{next_6_digits:06}"
+        else:
+            next_6_digits_str = f"{next_6_digits:+06}"
+
+        if next_6_digits_str[0] == '+':
+            next_6_digits_str = next_6_digits_str[1:]
 
         response = f"$24200000000MALN{first_4_digits_str}{next_6_digits_str}"
         self.send_command(response)
@@ -271,7 +277,8 @@ class SerialSimulator:
     def reset_server_command(self):
         self.close_serial_port()
 
-    def generate_random_alarm_command(self):
+    @staticmethod
+    def generate_random_alarm_command():
         major_code = random.choice(list(alarm_dict.keys()))
         return f"$242{major_code}0000MALN001701085137"  # Embed the alarm code here
 
