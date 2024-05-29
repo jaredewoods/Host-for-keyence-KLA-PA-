@@ -444,6 +444,7 @@ class MacroService:
             self.total_cycles = new_total_cycles
             print(f"Total cycles updated to: {self.total_cycles}")
             self.dispatcher.emit('logToDisplay', f"Total cycles updated to {self.total_cycles}", "MacroService")
+            self.dispatcher.emit('logToDisplay', f"Total")
         except ValueError as e:
             print(f"Error updating total cycles: {e}")
             self.dispatcher.emit('logToDisplay', str(e), "MacroService")

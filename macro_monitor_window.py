@@ -10,7 +10,6 @@ class MacroMonitorWindow(tk.Tk):
         self.dispatcher = dispatcher1
         self.title("Macro Monitor")
 
-        # Define the font style
         self.custom_font = ('Arial', 18)
 
         self.style = ttk.Style()
@@ -82,15 +81,21 @@ class MacroMonitorWindow(tk.Tk):
         self.emergency_stop_button = ttk.Button(self, text="Emergency Stop", command=self.handle_emergency_stop)
         self.emergency_stop_button.grid(row=2, column=0, columnspan=2, pady=10)
 
+        # Button to manually update total cycles for testing
+        self.test_button = ttk.Button(self, text="Test Update Total Cycles", command=lambda: self.update_total_cycles(20))
+        self.test_button.grid(row=3, column=0, columnspan=2, pady=10)
+
         # Configuring grid
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
 
         self.dispatcher.register_event("macro_update", self.update_status)
         self.dispatcher.register_event("cycle_update", self.update_cycle_info)
         self.dispatcher.register_event("offset_update", self.update_offsets)
+        self.dispatcher.register_event("total_cycles_update", self.update_total_cycles)
 
     def apply_status_colors(self):
         for idx, step in enumerate(self.steps_data):
@@ -130,6 +135,9 @@ class MacroMonitorWindow(tk.Tk):
         for idx, offset in enumerate(offsets_data):
             item_id = self.offsets_table.get_children()[idx]
             self.offsets_table.item(item_id, values=offset)
+
+    def update_total_cycles(self, new_total):
+        self.cycle_frame.config(text=f"Total Cycles: {new_total}")
 
 
 if __name__ == "__main__":

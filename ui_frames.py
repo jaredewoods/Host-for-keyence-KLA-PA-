@@ -271,6 +271,7 @@ class MacroControlFrame(ttk.Frame):
     def on_total_cycles_change(self):
         new_total = self.total_cycles.get()
         self.dispatcher.emit('updateTotalCycles', new_total)
+        self.dispatcher.emit('total_cycles_update', new_total)
 
     def starting_sequence(self):
         self.set_start_time()
