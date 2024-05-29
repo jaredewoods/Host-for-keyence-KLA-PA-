@@ -7,19 +7,52 @@ class MacroMonitorWindow(tk.Tk):
     def __init__(self, dispatcher1):
         super().__init__()
 
+        self.offsets_frame = None
+        self.offsets_table = None
+        self.cycle_table = None
+        self.cycle_frame = None
+        self.status_colors = None
+        self.steps_data = None
+        self.sequence_status_table = None
         self.dispatcher = dispatcher1
         self.title("Macro Monitor")
 
-        self.custom_font = ('Arial', 18)
+        self.custom_font = ('Arial', 12)
 
         self.style = ttk.Style()
         self.style.configure("Treeview.Heading", font=self.custom_font)
         self.style.configure("Treeview", rowheight=30, font=self.custom_font)
 
+        # Calls the separated table creation functions
+        self.create_sequence_status_table()
+        self.create_cycle_table()
+        self.create_offsets_table()
+
+        # Emergency Stop Button
+        self.emergency_stop_button = ttk.Button(self, text="Emergency Stop", command=self.handle_emergency_stop)
+        self.emergency_stop_button.grid(row=2, column=0, columnspan=2, pady=10, padx=5, sticky='ew')
+
+        # Configuring grid
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=1)
+
+        # Dispatcher register events
+        self.dispatcher.register_event("macro_update", self.update_status)
+        self.dispatcher.register_event("cycle_update", self.update_cycle_info)
+        self.dispatcher.register_event("offset_update", self.update_offsets)
+        self.dispatcher.register_event("total_cycles_update", self.update_total_cycles)
+
+    def create_sequence_status_table(self):
         self.sequence_status_table = ttk.Treeview(self, columns=("Description", "Status"), show='headings', style="Treeview", height=6)
+        self.sequence_status_table.column("Description", width=140, anchor="center")  # adjust as needed
+        self.sequence_status_table.column("Status", width=80, anchor="center")  # adjust as needed
         self.sequence_status_table.heading("Description", text="Description")
         self.sequence_status_table.heading("Status", text="Status")
-        self.sequence_status_table.grid(row=0, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        self.sequence_status_table.grid(row=0, column=0, columnspan=2, padx=10, pady=(10, 5), sticky="nsew")
 
         self.steps_data = [
             ("Sequence Initialized", "Inactive"),
@@ -43,14 +76,14 @@ class MacroMonitorWindow(tk.Tk):
 
         self.apply_status_colors()
 
-        # Cycle Information
-        self.cycle_frame = ttk.LabelFrame(self, text="Cycles")
-        self.cycle_frame.grid(row=1, column=0, padx=(5, 0), pady=(0, 10), sticky="")
+    def create_cycle_table(self):
+        self.cycle_frame = ttk.LabelFrame(self, text='Cycle')
+        self.cycle_frame.grid(row=1, column=0, padx=(10, 5), pady=5)
 
         self.cycle_table = ttk.Treeview(self.cycle_frame, columns=("Parameter", "Value"), show='', height=2)
-        self.cycle_table.column("Parameter", anchor="e", width=120)
-        self.cycle_table.column("Value", anchor="w", width=50)
-        self.cycle_table.grid(row=0, column=0, sticky="nsew")
+        self.cycle_table.column("Parameter", anchor="e", width=90)
+        self.cycle_table.column("Value", anchor="w", width=30)
+        self.cycle_table.grid(row=0, column=0)
 
         cycle_data = [
             ("Current:", "0"),
@@ -60,13 +93,13 @@ class MacroMonitorWindow(tk.Tk):
         for cycle in cycle_data:
             self.cycle_table.insert("", "end", values=cycle)
 
-        # Offsets Display
-        self.offsets_frame = ttk.LabelFrame(self, text="Offsets")
-        self.offsets_frame.grid(row=1, column=1, padx=(5, 20), pady=(0, 10), sticky="")
+    def create_offsets_table(self):
+        self.offsets_frame = ttk.LabelFrame(self, text='Offsets')
+        self.offsets_frame.grid(row=1, column=1, padx=(0, 10), pady=5)
 
         self.offsets_table = ttk.Treeview(self.offsets_frame, columns=("Parameter", "Value"), show='', height=2)
-        self.offsets_table.column("Parameter", anchor="e", width=120)
-        self.offsets_table.column("Value", anchor="w", width=50)
+        self.offsets_table.column("Parameter", anchor="e", width=60)
+        self.offsets_table.column("Value", anchor="w", width=40)
         self.offsets_table.grid(row=0, column=0, sticky="nsew")
 
         offsets_data = [
@@ -79,14 +112,11 @@ class MacroMonitorWindow(tk.Tk):
 
         # Emergency Stop Button
         self.emergency_stop_button = ttk.Button(self, text="Emergency Stop", command=self.handle_emergency_stop)
-        self.emergency_stop_button.grid(row=2, column=0, columnspan=2, pady=10)
-
-        # Button to manually update total cycles for testing
-        self.test_button = ttk.Button(self, text="Test Update Total Cycles", command=lambda: self.update_total_cycles(20))
-        self.test_button.grid(row=3, column=0, columnspan=2, pady=10)
+        self.emergency_stop_button.grid(row=2, column=0, columnspan=2, pady=10, padx=5, sticky='ew')
 
         # Configuring grid
         self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
