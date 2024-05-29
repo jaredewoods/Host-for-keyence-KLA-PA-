@@ -54,7 +54,7 @@ class MacroMonitorWindow(tk.Tk):
 
         cycle_data = [
             ("Current:", "0"),
-            ("Pending:", "0")
+            ("Remaining:", "0")
         ]
 
         for cycle in cycle_data:
