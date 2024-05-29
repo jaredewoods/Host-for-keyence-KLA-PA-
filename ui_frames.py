@@ -42,8 +42,8 @@ class SerialControlFrame(ttk.Frame):
         self.btn_chuck_on = ttk.Button(self, text="ChkON", state='disabled', command=lambda: dispatcher.emit('chuckHold'))
         self.btn_chuck_on.grid(row=5, column=0, padx=5)
 
-        self.btn_csol_off = ttk.Button(self, text="ChkOFF", state='disabled', command=lambda: dispatcher.emit('chuckRelease'))
-        self.btn_csol_off.grid(row=5, column=1, padx=5)
+        self.btn_chuck_off = ttk.Button(self, text="ChkOFF", state='disabled', command=lambda: dispatcher.emit('chuckRelease'))
+        self.btn_chuck_off.grid(row=5, column=1, padx=5)
 
         # self.btn_hrst = ttk.Button(self, text="HRST", state='disabled', command=lambda: dispatcher.emit('hardwareReset'))
         # self.btn_hrst.grid(row=5, column=1, padx=5)
@@ -85,7 +85,7 @@ class SerialControlFrame(ttk.Frame):
             self.btn_mtrs,
             self.btn_maln,
             self.btn_chuck_on,
-            self.btn_hrst,
+            self.btn_chuck_off,
             self.btn_custom_serial_send,
             self.ent_custom_serial
         ]
