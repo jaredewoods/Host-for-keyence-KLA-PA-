@@ -298,8 +298,10 @@ class MacroControlFrame(ttk.Frame):
 
         if self.macro_running:
             self.btn_reset.config(state='disabled')
+            self.btn_start.config(state='disabled')
         else:
             self.btn_reset.config(state='normal')
+            self.btn_start.config(state='normal')
 
     def set_start_time(self):
         print("debug this function from MacroControlFrame2")

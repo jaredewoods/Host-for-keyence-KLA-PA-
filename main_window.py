@@ -19,6 +19,7 @@ from macro_monitor_window import MacroMonitorWindow
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.macro_monitor_window = None
         self.completed_cycles = None
         self.total_cycles = None
         self.status_frame = None
@@ -36,7 +37,6 @@ class MainWindow(tk.Tk):
         self.macro_service = MacroService(dispatcher=self.dispatcher,
                                           serial_service=self.serial_service,
                                           tcp_service=self.tcp_service)
-        self.macro_monitor_window = MacroMonitorWindow(dispatcher1=self.dispatcher)
         self.scan_com_ports()
         self.create_control_frames()
         self.create_log_frame()
@@ -223,9 +223,8 @@ class MainWindow(tk.Tk):
     def show_simulator_settings():
         subprocess.Popen(["python", "menu_bar/simulator_settings.py"])
 
-    @staticmethod
-    def show_macro_status():
-        subprocess.Popen(["python", "macro_status.py"])
+    def show_macro_status(self):
+        self.macro_monitor_window = MacroMonitorWindow(dispatcher1=self.dispatcher)
 
     @staticmethod
     def launch_simulator():

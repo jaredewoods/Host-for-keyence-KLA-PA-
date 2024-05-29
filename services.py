@@ -180,7 +180,8 @@ class SerialService:
                 print(f"Unhandled exception: {str(e)}")
                 break
 
-    def show_alarm_messagebox(self, alarm, subcode):
+    @staticmethod
+    def show_alarm_messagebox(alarm, subcode):
         alarm_data = alarm_dict.get(alarm, None)
 
         if alarm_data is None:
@@ -413,11 +414,7 @@ class MacroService:
                     self.dispatcher.emit('logToDisplay', log_message, "Offset:")
                     self.wait_3_seconds()
                 else:
-                    alarm = pre_mtrs[:4]
-                    subcode = pre_mtrs[4:]
-                    self.show_alarm_messagebox(alarm, subcode)
-                    print("MALN alarm received")
-                    pass  # pause the macro
+                    pass
 
     def wait_3_seconds(self):
         print("Waiting for 3 seconds")
